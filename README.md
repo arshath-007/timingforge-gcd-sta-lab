@@ -193,7 +193,7 @@ The intended project contribution is a **reproducible fault-injection benchmark 
 
 ## Contributing and citation
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [CITATION.cff](CITATION.cff), [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), and [docs/FAULT_CATALOG.md](docs/FAULT_CATALOG.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md), [CITATION.cff](CITATION.cff), [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), [docs/FAULT_CATALOG.md](docs/FAULT_CATALOG.md), and the [technical interview walkthrough](docs/INTERVIEW_GUIDE.md).
 
 ## Author
 
