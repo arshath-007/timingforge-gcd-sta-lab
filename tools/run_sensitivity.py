@@ -74,7 +74,7 @@ def main() -> int:
                "parasitics": "Pre-layout; no SPEF; ideal clock network with explicit source-latency sensitivity variants.",
                "records": records}
     target = ROOT / "build/sensitivity/sensitivity_summary.json"
-    target.write_text(json.dumps(summary, indent=2) + "\\n", encoding="utf-8")
+    target.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print(f"Wrote {target} ({len(records)} experiments)")
     return 0
 
