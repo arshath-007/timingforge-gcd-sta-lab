@@ -3,7 +3,7 @@
 module gcd_equiv_formal;
     localparam integer WIDTH = 4;
 
-    (* gclk *) reg clk;
+    (* gclk *) reg clk = 0;
     (* anyconst *) reg [WIDTH-1:0] a_in;
     (* anyconst *) reg [WIDTH-1:0] b_in;
 
