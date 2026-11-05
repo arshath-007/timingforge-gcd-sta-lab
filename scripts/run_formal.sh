@@ -4,7 +4,7 @@ set -euo pipefail
 mkdir -p build/formal
 command -v yosys >/dev/null
 command -v yosys-smtbmc >/dev/null
-FORMAL_SOLVER="${FORMAL_SOLVER:-z3}"
+FORMAL_SOLVER="${FORMAL_SOLVER:-cvc5}"
 command -v "$FORMAL_SOLVER" >/dev/null
 
 {
