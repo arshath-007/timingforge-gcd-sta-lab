@@ -2,7 +2,7 @@
 
 This directory is the local destination for generated Yosys/OpenSTA logs and parsed measurements. CI-generated evidence is uploaded as workflow artifacts rather than committed to the repository.
 
-The v0.2 baseline measurements are documented in [docs/INITIAL_RESULTS.md](../docs/INITIAL_RESULTS.md). Download the corresponding raw STA logs, parsed matrix, and static benchmark scorecard from the linked successful [baseline CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060).
+The v0.2 baseline measurements are documented in [docs/INITIAL_RESULTS.md](../docs/INITIAL_RESULTS.md). Download the raw STA logs, parsed matrix, and static benchmark scorecard from baseline measurement run ID `41999231060` (workflow run #69): [baseline CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060). The latest CI validation is run ID `42007925745` (workflow run #82): [latest validation](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007925745). The latest run validates the repository revision; it is not the source of the published numerical baseline.
 
 For every new or updated published result, record:
 - Tool name and version.
