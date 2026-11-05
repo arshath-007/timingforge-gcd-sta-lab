@@ -8,7 +8,7 @@ from tools.physical_metrics import compare, parse_postroute_log
 
 LOG = """=== POST-ROUTE PARASITICS LOADED ===
 SPEF=final.spef
-=== POST-ROUTE CLOCK PERIOD ===
+=== POST-ROUTE ALL-PATH CLOCK PERIOD ===
 core_clk period_min = 3.500 fmax = 285.714
 === POST-ROUTE SETUP SUMMARY ===
 worst slack max 6.100
