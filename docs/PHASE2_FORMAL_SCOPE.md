@@ -4,16 +4,16 @@ The formal property set checks both architecture equivalence and each implementa
 
 - Formal width: 3 bits; all 64 symbolic operand pairs are considered.
 - Stimulus: one reset followed by one accepted start request.
-- Assertions: each implementation completes once, reports `done` with `busy` low, returns the truth-table GCD, agrees with the other implementation, and completes within the 12-cycle bound.
+- Assertions: each implementation completes once, reports `done` with `busy` low, agrees with the other implementation, and completes within the 12-cycle bound.
 - Engine: Yosys SMT2 export plus `yosys-smtbmc` and CVC5.
 - Bound: 26 SMT steps (12 positive clock edges).
 - Negative control: a deliberately broken subtract operation must fail the same miter.
 
 ## What the proof does and does not establish
 
-The WIDTH=3 symbolic input space is exhaustive for 64 input pairs. It is useful for checking transaction behavior and mathematical output correctness in a compact domain. It does **not** prove 32-bit arithmetic correctness, establish an unbounded sequential invariant, or cover arbitrary back-to-back transactions.
+The WIDTH=3 symbolic input space is exhaustive for 64 input pairs. It checks transaction behavior and mutual result equivalence in a compact domain. The standalone truth-table oracle is separately cross-checked for all 64 pairs by Icarus simulation. It does **not** prove 32-bit arithmetic correctness, establish an unbounded sequential invariant, or cover arbitrary back-to-back transactions.
 
-The 32-bit GCD RTL is separately checked against an independent Euclidean reference in directed and seeded constrained-random simulation. A new parameterized regression additionally runs both architectures at WIDTH=8, WIDTH=16, and WIDTH=32, with zero/equal/high-bit/stress cases and deterministic random operands. This is simulation evidence, not a proof of the full 32-bit input space.
+The standalone WIDTH=3 oracle table is separately checked against an independent Euclidean reference for all 64 input pairs. The 32-bit GCD RTL is also checked against an independent Euclidean reference in directed and seeded constrained-random simulation. A new parameterized regression additionally runs both architectures at WIDTH=8, WIDTH=16, and WIDTH=32, with zero/equal/high-bit/stress cases and deterministic random operands. This is simulation evidence, not a proof of the full 32-bit input space.
 
 ## Concurrent SVA protocol checks
 
