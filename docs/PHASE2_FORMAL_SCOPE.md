@@ -23,4 +23,4 @@ The property set is deliberately written in the immediate-assertion subset suppo
 
 ## Clock and bound semantics
 
-The formal harness uses a `(* gclk *)` clock initialized low and preserves native positive-edge sequential semantics. Do not apply `clk2fflogic` to this harness: lowering the clock to a global-step FF model changes the sampling relationship between the DUT's registered `done` pulse and the miter's `seen` flags. The 34-step SMT bound provides at least 16 positive clock edges, which is sufficient for the explicit 12-cycle completion assertion at WIDTH=3.
+The formal harness uses a `(* gclk *)` clock initialized low and preserves native positive-edge sequential semantics. Do not apply `clk2fflogic` to this harness: lowering the clock to a global-step FF model changes the sampling relationship between the DUT's registered `done` pulse and the miter's `seen` flags. The 26-step SMT bound covers the harness through its explicit 12-cycle completion assertion at WIDTH=3. The proof remains bounded and does not establish equivalence for 32-bit inputs or arbitrary transaction sequences.
