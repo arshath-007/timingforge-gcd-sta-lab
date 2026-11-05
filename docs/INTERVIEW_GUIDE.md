@@ -10,7 +10,7 @@ I use two synthesizable 32-bit binary-GCD architectures as a controlled RTL benc
 
 The flow synthesises both architectures and analyses eight constraint scenarios per design, so there are 16 timing runs. It reports cell area, minimum clock period, Fmax, setup and hold slack, missing I/O delay coverage, unconstrained endpoints, and register-to-register path presence.
 
-One finding is that a broad false-path exception removes the register-to-register paths from the dedicated report. Another is that removing the input delay on a 32-bit bus changes the reported critical path and makes the timing result look better. The project reports all-path timing metrics, cell area, and RTL operation cycle counts separately. Because the reported minimum period includes port paths, it does not claim a register-to-register-only architecture speedup.
+One finding is that a broad false-path exception removes the register-to-register paths from the dedicated report. Another is that removing the input delay on a 32-bit bus changes the reported critical path and makes the timing result look better. The project also reports max-slew/max-capacitance violation records, runs 18 controlled clock-constraint sensitivity experiments, and scores mutation impact as matched/mismatched/inconclusive. Across two CI runs the mutation summary was 12 matched, 0 mismatched and 2 inconclusive. The baseline still has DRV warnings and a -0.002 ns hold slack; the combined register-only minimum-period metric remains unavailable. The project reports all-path timing metrics, cell area, and RTL operation cycle counts separately. Because the reported minimum period includes port paths, it does not claim a register-to-register-only architecture speedup.
 
 The results are educational pre-layout Nangate45 measurements—not production signoff. The next step is multi-corner and physical implementation with realistic clock and parasitic assumptions."
 
@@ -69,8 +69,17 @@ The input path no longer receives the intended external arrival budget. The repo
 **What does the Nangate45 result prove?**  
 It proves that this RTL and this illustrative SDC were synthesised and analysed in a reproducible educational library-backed flow. It does not prove production process timing, extracted interconnect timing, power, or signoff closure.
 
+**What did the DRV reports reveal?**  
+The golden combined architecture produced 10 max-slew and 15 max-capacitance violation records; the split architecture produced 9 and 15 respectively. The violator-only report emitted no max-fanout violation records, but it does not enumerate total applicable checks. I report these as review findings, not as signoff conclusions.
+
+**How did you validate constraint sensitivity?**  
+I changed one parameter family at a time from an immutable golden SDC: setup uncertainty (0.100/0.150/0.200 ns), hold uncertainty (0.025/0.050/0.075 ns), and source latency with early fixed at 0 and late at 0/0.050/0.100 ns. Nine variants per architecture produced 18 runs with explicit setup/hold slack deltas and source/tool/library/SDC identity.
+
+**Why are two mutation results inconclusive?**  
+M06 removes hold uncertainty, but the current parsed report does not directly expose whether that command was applied. A change in hold slack is evidence of sensitivity, not proof that the uncertainty command was present or absent. The tool therefore records M06 as inconclusive rather than overstating detection.
+
 **What would you do next?**  
-Add generated-clock, clock-group and carefully justified multicycle/false-path cases; measure latency over more workloads; and extend the library-backed STA matrix to the existing FIFO and MAC blocks only after defining suitable constraints and comparable measurement boundaries. Then investigate floorplanning, clock-tree synthesis, routing and extracted-parasitic timing, followed by multiple process corners and variation assumptions.
+Phase 2: add formal properties/equivalence, constrained-random coverage, and environment-safe QoR history. Phase 3: establish floorplanning, placement, CTS, routing, extracted-parasitic STA, and verified multi-corner/second-library experiments. Do not describe either phase as complete yet.
 
 ## Evidence to open during a walkthrough
 
@@ -79,7 +88,10 @@ Add generated-clock, clock-group and carefully justified multicycle/false-path c
 - [Fault catalog](FAULT_CATALOG.md)
 - [RTL architectures](../rtl/)
 - [Golden SDC](../constraints/gcd_baseline.sdc)
-- [Validated CI run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699)
+- [Phase 1 CI run #257](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42046659049)
+- [Post-merge main CI run #258](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600)
+- [Phase 1 STA artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600/artifacts/13425391627)
+- [Validated baseline CI run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699)
 - [Downloadable corrected-load STA matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408368824)
 - [Downloadable static benchmark](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408887449)
 
