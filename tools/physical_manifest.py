@@ -34,11 +34,15 @@ def build_manifest(root: Path) -> dict:
         results = work / "results" / "nangate45" / top / "base"
         reports = work / "reports" / "nangate45" / top / "base"
         logs = work / "logs" / "nangate45" / top / "base"
-        missing = [name for name in REQUIRED if not (results / name).is_file() or (results / name).stat().st_size == 0]
+        missing = [
+            name for name in REQUIRED
+            if not (results / name).is_file() or (results / name).stat().st_size == 0
+        ]
         if missing:
             raise FileNotFoundError(f"{top}: missing required physical artifacts: {missing}")
-        postroute = root / top / "postroute_sta.log"
-        if not postroute.is_file() or "POST-ROUTE PARASITICS LOADED" not in postroute.read_text(encoding="utf-8", errors="replace"):
+        postroute = work / "postroute_sta.log"
+        postroute_text = postroute.read_text(encoding="utf-8", errors="replace") if postroute.is_file() else ""
+        if "POST-ROUTE PARASITICS LOADED" not in postroute_text or "SPEF=" not in postroute_text:
             raise FileNotFoundError(f"{top}: extracted-parasitic post-route STA log missing or incomplete")
         artifacts = []
         for path in sorted(p for p in work.rglob("*") if p.is_file()):
@@ -56,6 +60,7 @@ def build_manifest(root: Path) -> dict:
             "final_odb": str((results / "6_final.odb").relative_to(root)),
             "final_gds": str((results / "6_final.gds").relative_to(root)),
             "final_spef": str((results / "6_final.spef").relative_to(root)),
+            "final_sdc_sha256": sha256(results / "6_final.sdc"),
             "postroute_sta_log": str(postroute.relative_to(root)),
             "artifact_count": len(artifacts),
             "artifacts": artifacts,
@@ -63,12 +68,16 @@ def build_manifest(root: Path) -> dict:
     versions = root / "tool_versions.txt"
     if not versions.is_file():
         raise FileNotFoundError("build/physical/tool_versions.txt is required")
+    source_sdc = root.parent.parent / "constraints" / "gcd_baseline.sdc"
+    if not source_sdc.is_file():
+        raise FileNotFoundError("Repository baseline SDC is missing")
     return {
         "schema_version": "1.0",
         "flow": "OpenROAD Flow Scripts",
         "platform": "Nangate45",
         "corner": "typical",
-        "timing_stage": "post-route with propagated clocks and extracted SPEF",\n        "source_sdc_sha256": sha256(root.parent.parent / "constraints/gcd_baseline.sdc") if (root.parent.parent / "constraints/gcd_baseline.sdc").is_file() else None,
+        "timing_stage": "post-route with propagated clocks and extracted SPEF",
+        "source_sdc_sha256": sha256(source_sdc),
         "signoff_claim": False,
         "tool_versions_file": str(versions.relative_to(root)),
         "designs": designs,
