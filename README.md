@@ -146,6 +146,8 @@ The corrected-load baseline is reproducible from [GitHub Actions run #116](https
 
 Download the [corrected-load raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266/artifacts/13407377245) and the [static benchmark scorecard](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266/artifacts/13406973684). See [corrected initial results](docs/INITIAL_RESULTS.md) and [CI run #116](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266).
 
+The testbench uses a finite set of directed cases and 250 randomized pairs per run. The random stimulus is not explicitly seeded, so exact corpus averages and maxima may vary by simulator/run; they are observations, not worst-case bounds.
+
 ## Research questions
 
 - Does the checker detect each mutation that it is designed to recognise?
