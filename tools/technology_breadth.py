@@ -16,7 +16,7 @@ ASAP7_SCENES = {
 }
 REQUIRED = (
     "2_floorplan.odb", "3_place.odb", "4_cts.odb", "5_route.odb",
-    "6_final.odb", "6_final.gds", "6_final.spef", "6_final.sdc",
+    "6_final.odb", "6_final.v", "6_final.gds", "6_final.spef", "6_final.sdc",
 )
 
 
@@ -105,6 +105,11 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
             key, value = line.split(":", 1)
             versions[key.strip().lower().replace(" ", "_")] = value.strip()
 
+    filtered_manifest_path = root / "asap7/filtered_libs_manifest.json"
+    if not filtered_manifest_path.is_file():
+        raise FileNotFoundError(filtered_manifest_path)
+    filtered_manifest = json.loads(filtered_manifest_path.read_text(encoding="utf-8"))
+
     platforms = {}
     for platform in ("asap7", "sky130hd"):
         designs = {}
@@ -135,6 +140,8 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
                         for scene in ASAP7_SCENES
                     ],
                     "shared_spef_sha256": sha256(results / "6_final.spef"),
+                    "filtered_simple_libraries": filtered_manifest["corners"],
+                    "excluded_cell_patterns": filtered_manifest["excluded_patterns"],
                     "rc_assumption": (
                         "The single TC-extracted SPEF is reused unchanged in BC, TC and WC scenes; "
                         "no corner-specific RC scaling or extraction is applied."
@@ -193,6 +200,12 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
         "orfs_container_image_digest": versions.get("orfs_container_image_digest", "unknown"),
         "experiments": platforms,
         "asap7_liberty_sha256": library_hashes,
+        "asap7_filtered_simple_manifest": filtered_manifest,
+        "asap7_mcmm_cell_policy": (
+            "XOR, XNOR and HAxp5 cells are excluded from the ASAP7 physical mapping and "
+            "filtered from each SIMPLE corner Liberty because the pinned platform's "
+            "FF/TT/SS models do not provide consistent timing groups for those cells."
+        ),
         "asap7_pvt": ASAP7_SCENES,
         "platform_licenses": {
             "asap7": {
