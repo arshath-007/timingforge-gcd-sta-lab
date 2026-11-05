@@ -71,7 +71,21 @@ def parse_log(path):
         raise ValueError(f"Unrecognised STA log: {path.name}")
     scenario = path.stem[len("sta_" + top + "_"):]
     setup = section(text, "=== SETUP / MAX PATH DETAILS ===", "=== REGISTER-TO-REGISTER SETUP PATHS ===")
-    reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== HOLD / MIN PATH DETAILS ===")
+    reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===")
+    if not reg2reg:
+        reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== HOLD / MIN PATH DETAILS ===")
+    rising_reg2reg = section(text, "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===", "=== CLOCK PROPERTIES ===")
+    rising_slacks = [
+        float(value) for value in re.findall(r"([-+]?(?:\d+\.?\d*|\.\d+))\s+slack\s+\((?:MET|VIOLATED)\)", rising_reg2reg)
+    ]
+    clock_section = section(text, "=== CLOCK PROPERTIES ===", "=== HOLD / MIN PATH DETAILS ===")
+    clock_period_match = re.search(r"^\s*core_clk\s+([-+]?(?:\d+\.?\d*|\.\d+))\s+", clock_section, re.MULTILINE)
+    clock_period = float(clock_period_match.group(1)) if clock_period_match else None
+    derived_reg_period = (
+        round(clock_period - min(rising_slacks), 6)
+        if clock_period is not None and clock_period > 0 and rising_slacks else None
+    )
+    derived_reg_fmax = round(1000.0 / derived_reg_period, 3) if derived_reg_period and derived_reg_period > 0 else None
     unconstrained = section(text, "=== UNCONSTRAINED PATH DETAILS ===")
     start = re.search(r"^Startpoint:\s*(.+)$", setup, re.MULTILINE)
     end = re.search(r"^Endpoint:\s*(.+)$", setup, re.MULTILINE)
@@ -102,6 +116,11 @@ def parse_log(path):
         "worst_setup_startpoint": start.group(1).strip() if start else None,
         "worst_setup_endpoint": end.group(1).strip() if end else None,
         "register_to_register_path_found": bool(rr_start and rr_end),
+        "register_to_register_rising_paths_reported": len(rising_slacks),
+        "register_to_register_rising_worst_slack_ns": min(rising_slacks) if rising_slacks else None,
+        "clock_period_ns": clock_period,
+        "register_to_register_derived_min_period_ns": derived_reg_period,
+        "register_to_register_derived_fmax_mhz": derived_reg_fmax,
         "register_to_register_startpoint": rr_start.group(1).strip() if rr_start else None,
         "register_to_register_endpoint": rr_end.group(1).strip() if rr_end else None,
         "unconstrained_endpoints_reported": int(warning.group(1)) if warning else (0 if "=== TIMINGFORGE SETUP CHECK ===" in text else None),
@@ -139,7 +158,7 @@ def summarise(report_dir=REPORT_DIR):
         "- Library: " + output["platform"],
         "- Parasitics: " + output["parasitics"],
         "- Logs parsed: " + str(len(records)), "",
-        "| Architecture | SDC scenario | Cell area | Reg-to-reg min period (ns) | Reg-to-reg Fmax (MHz) | All-path min period (ns) | All-path Fmax (MHz) | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
+        "| Architecture | SDC scenario | Cell area | Native reg-to-reg period (ns) | Native reg-to-reg Fmax (MHz) | Derived reg-to-reg period (ns) | Derived reg-to-reg Fmax (MHz) | All-path min period (ns) | All-path Fmax (MHz) | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
     fmt = lambda value: "n/a" if value is None else f"{value:.3f}"
@@ -147,6 +166,7 @@ def summarise(report_dir=REPORT_DIR):
         rows.append(
             f"| {row['top']} | {row['scenario']} | {fmt(row['yosys_cell_area'])} | "
             f"{fmt(row['register_to_register_min_period_ns'])} | {fmt(row['register_to_register_fmax_mhz'])} | "
+            f"{fmt(row['register_to_register_derived_min_period_ns'])} | {fmt(row['register_to_register_derived_fmax_mhz'])} | "
             f"{fmt(row['all_path_min_period_ns'])} | {fmt(row['all_path_fmax_mhz'])} | "
             f"{fmt(row['worst_setup_slack_ns'])} | {fmt(row['worst_hold_slack_ns'])} | "
             f"{'found' if row['register_to_register_path_found'] else 'none reported'} | "
@@ -154,7 +174,7 @@ def summarise(report_dir=REPORT_DIR):
         )
     rows.extend([
         "",
-        "The register-to-register clock-period command is reported separately. OpenSTA may return 0.00 / inf when no eligible path exists; this is recorded as n/a, not as infinite-frequency performance. All-path period includes port paths. Neither metric is post-route or signoff timing.",
+        "The native register-to-register clock-period command is reported separately. When it returns 0.00 / inf despite detailed same-clock rising-edge paths, the parser also reports a derived single-cycle period: clock period minus the worst slack in the explicit rising-edge path report. This derived estimate is separate from the native command and depends on the reported path inventory. All-path period includes port paths. Neither metric is post-route or signoff timing.",
         "WNS may be zero when slack is positive; worst slack retains the margin. Missing metrics require raw-log investigation.",
         "",
     ])
