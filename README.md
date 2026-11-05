@@ -5,7 +5,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.4.0 candidate · **License:** MIT
+**Status:** Research prototype · **Version:** 0.4.0 candidate · **Latest published release:** v0.2.0 · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -183,6 +183,7 @@ See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report
 The current [formal workflow run #49](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430) passed the positive CVC5 proof and the deliberate subtract-mutant negative control; download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430/artifacts/13439043462). The [regression and library-backed STA run #336](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502) passed the 32-bit RTL regression, FIFO/MAC tests, Python checks, SDC lint, fault-injection benchmark and library-backed STA matrix. Its [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502/artifacts/13439247462) records 7/7 controlled static fault patterns detected; this is not a general SDC correctness score.
 
 - Bounded transaction-level equivalence checks all symbolic 3-bit input pairs, including zero/equal operands, with independent completion timing; CVC5 1.1.2 and Yosys 0.33, 26 SMT steps / 12 positive clock edges.
+- The formal miter checks mutual result equivalence between the two architectures; it does not compare either against an independent mathematical GCD specification. The 32-bit simulation testbench supplies a separate Euclidean-reference check over its finite directed/seeded corpus. See [formal proof scope and rationale](docs/PHASE2_FORMAL_SCOPE.md).
 - The negative control deliberately corrupts the combined subtract operation and is rejected by the same property set.
 - The 32-bit simulation includes directed cases and 250 deterministic constrained-random cases using seed `0x54462026`; 259 cases were checked on each architecture, with parity, zero/equal, high-bit, GCD-class and latency-bin coverage.
 - QoR snapshots record source SHA, tool versions, platform/corner, Liberty hash, scenario and SDC hashes. The comparator rejects environment or scenario mismatches. Snapshots are artifact-backed, not a persistent database/dashboard.
