@@ -4,7 +4,7 @@
 
 Phase 3 adds a reproducible educational RTL-to-GDS flow for the two GCD architectures using the same pinned OpenROAD Flow Scripts Nangate45 platform as the pre-layout STA matrix.
 
-The intended stages are floorplanning, global placement, clock-tree synthesis, global/detail routing, final database generation, OpenRCX parasitic extraction, KLayout GDS generation, and post-route STA with propagated clocks. In ORFS, GDS generation is a separate `gds` target after `all`.
+The intended stages are floorplanning, global placement, clock-tree synthesis, global/detail routing, final database generation, OpenRCX parasitic extraction, KLayout GDS generation, and post-route STA with propagated clocks. The physical CI pins an ORFS container image digest so the source flow, platform files, and tool binaries remain a matched set. The pre-layout matrix is regenerated inside that same job from the exact bundled Nangate45 Liberty/LEF files before physical implementation.
 
 ## Run
 
@@ -15,7 +15,7 @@ source /OpenROAD-flow-scripts/env.sh
 bash scripts/run_physical.sh
 ```
 
-The script builds both `gcd_binary_combined` and `gcd_binary_split` with matched floorplan and baseline SDC settings. It records tool versions, platform revision, Liberty hash, and SDC hash under `build/physical/`.
+The script builds both `gcd_binary_combined` and `gcd_binary_split` with matched floorplan and baseline SDC settings. It records tool versions, pinned container digest, ORFS source revision when available, Liberty/LEF hashes, and SDC hash under `build/physical/`.
 
 ## Required evidence
 
