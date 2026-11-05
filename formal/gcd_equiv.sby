@@ -8,6 +8,7 @@ smtbmc z3
 [script]
 read -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv
 prep -top gcd_equiv_formal
+clk2fflogic
 
 [files]
 rtl/gcd_binary_combined.sv
