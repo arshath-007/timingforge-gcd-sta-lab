@@ -47,17 +47,13 @@ The checker is interface-specific and uses simple line-oriented pattern checks. 
 6. Record tool versions, Liberty/platform, top module, SDC hash, commands, and logs.
 7. Compare path coverage and timing results only when the same netlist, Liberty, tool options, and corner assumptions are used.
 
-## Evidence table (fill only from actual runs)
+## Published evidence
 
-| Scenario | Checker result | Setup WNS | Hold WNS | Unconstrained paths | Tool/platform |
-|---|---|---:|---:|---:|---|
-| Golden | Pending | Pending | Pending | Pending | Pending |
-| M01 | Pending | Pending | Pending | Pending | Pending |
-| M02 | Pending | Pending | Pending | Pending | Pending |
-| M03 | Pending | Pending | Pending | Pending | Pending |
-| M04 | Pending | Pending | Pending | Pending | Pending |
-| M05 | Pending | Pending | Pending | Pending | Pending |
-| M06 | Pending | Pending | Pending | Pending | Pending |
-| M07 | Pending | Pending | Pending | Pending | Pending |
+The v0.2 baseline and all seven controlled mutations have been evaluated in the successful library-backed CI run:
 
-Do not replace Pending with estimated or fabricated numbers.
+- [GitHub Actions run #41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060) — both the RTL/Python regression job and the Nangate45 library-backed STA job completed successfully.
+- [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413) — raw timing logs and parsed matrix evidence for both architectures and eight SDC scenarios each.
+- [Static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334) — generated static SDC fault-injection scorecard.
+- [Measured results and scenario interpretations](INITIAL_RESULTS.md).
+
+Keep scenario-level values sourced from the generated artifacts and measured-results report. Do not fill gaps with estimates or infer unreported WNS, hold, or unconstrained-path values.
