@@ -5,7 +5,7 @@ VVP ?= vvp
 .PHONY: help rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity formal physical width-sweep sva-test clean
 
 help:
-	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity formal physical clean"
+	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity formal physical width-sweep sva-test clean"
 
 ip-block-test:
 	mkdir -p build
@@ -45,6 +45,12 @@ formal:
 
 physical:
 	bash scripts/run_physical.sh
+
+width-sweep:
+	bash scripts/run_width_sweep.sh
+
+sva-test:
+	bash scripts/run_sva.sh
 
 sta-quality: sta-matrix
 	$(PYTHON) -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
