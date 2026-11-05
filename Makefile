@@ -2,10 +2,10 @@ PYTHON ?= python3
 IVERILOG ?= iverilog
 VVP ?= vvp
 
-.PHONY: help rtl-test mutants lint-sdc python-test benchmark synth sta clean
+.PHONY: help rtl-test mutants lint-sdc python-test benchmark synth sta sta-matrix clean
 
 help:
-	@echo "Targets: rtl-test mutants lint-sdc python-test benchmark synth sta clean"
+	@echo "Targets: rtl-test mutants lint-sdc python-test benchmark synth sta sta-matrix clean"
 
 rtl-test:
 	mkdir -p build
@@ -29,6 +29,9 @@ synth:
 
 sta:
 	bash scripts/run_sta.sh
+
+sta-matrix:
+	bash scripts/run_nangate_sta.sh
 
 clean:
 	rm -rf build
