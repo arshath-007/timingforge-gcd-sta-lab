@@ -52,6 +52,16 @@ def section(text, heading, next_heading=None):
     return text[start:end] if end >= 0 else text[start:]
 
 
+def parse_drv_check(text, heading, next_heading):
+    if heading not in text:
+        return {'supported': False, 'violation_count': None, 'reported_lines': []}
+    body = section(text, heading, next_heading)
+    unsupported = re.search(r'TIMINGFORGE_DRV_UNSUPPORTED:.*', body, re.IGNORECASE)
+    if unsupported:
+        return {'supported': False, 'violation_count': None, 'reported_lines': [unsupported.group(0).strip()]}
+    violations = [line.strip() for line in body.splitlines() if re.search(r'\\bVIOLATED\\b', line, re.IGNORECASE)]
+    return {'supported': True, 'violation_count': len(violations), 'reported_lines': violations}
+
 def cell_area(top, report_path):
     candidates = (report_path.parent.parent / f"yosys_{top}.log", ROOT / "build" / f"yosys_{top}.log")
     for candidate in candidates:
@@ -117,6 +127,9 @@ def parse_log(path):
     end = re.search(r"^Endpoint:\s*(.+)$", setup, re.MULTILINE)
     rr_start = re.search(r"^Startpoint:\s*(.+)$", reg2reg, re.MULTILINE)
     rr_end = re.search(r"^Endpoint:\s*(.+)$", reg2reg, re.MULTILINE)
+    drv_slew = parse_drv_check(text, "=== DRV MAX SLEW ===", "=== DRV MAX CAPACITANCE ===")
+    drv_cap = parse_drv_check(text, "=== DRV MAX CAPACITANCE ===", "=== DRV MAX FANOUT ===")
+    drv_fanout = parse_drv_check(text, "=== DRV MAX FANOUT ===", "=== UNCONSTRAINED PATH DETAILS ===")
     warning = re.search(r"There are\s+(\d+)\s+unconstrained endpoints", text, re.IGNORECASE)
     input_missing = re.search(r"There are\s+(\d+)\s+input ports missing set_input_delay", text, re.IGNORECASE)
     output_missing = re.search(r"There are\s+(\d+)\s+output ports missing set_output_delay", text, re.IGNORECASE)
@@ -153,7 +166,15 @@ def parse_log(path):
         "unconstrained_endpoints_reported": int(warning.group(1)) if warning else (0 if "=== TIMINGFORGE SETUP CHECK ===" in text else None),
         "missing_input_delay_ports": int(input_missing.group(1)) if input_missing else 0,
         "missing_output_delay_ports": int(output_missing.group(1)) if output_missing else 0,
-        "unconstrained_paths_listed": len(re.findall(r"^Startpoint:", unconstrained, re.MULTILINE)),
+        "unconstrained_paths_listed": len(re.findall(r"^Startpoint:", unconstrained, re.MULTILINE)),        "drv_max_slew_supported": drv_slew["supported"],
+        "drv_max_slew_violation_count": drv_slew["violation_count"],
+        "drv_max_slew_violation_lines": drv_slew["reported_lines"],
+        "drv_max_capacitance_supported": drv_cap["supported"],
+        "drv_max_capacitance_violation_count": drv_cap["violation_count"],
+        "drv_max_capacitance_violation_lines": drv_cap["reported_lines"],
+        "drv_max_fanout_supported": drv_fanout["supported"],
+        "drv_max_fanout_violation_count": drv_fanout["violation_count"],
+        "drv_max_fanout_violation_lines": drv_fanout["reported_lines"],
     }
 
 
