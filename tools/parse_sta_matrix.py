@@ -211,8 +211,8 @@ def summarise(report_dir=REPORT_DIR):
         "- Library: " + output["platform"],
         "- Parasitics: " + output["parasitics"],
         "- Logs parsed: " + str(len(records)), "",
-        "| Architecture | SDC scenario | Cell area | Native reg-to-reg period (ns) | Native reg-to-reg Fmax (MHz) | Rising-edge reg-to-reg paths reported | Worst slack in explicit reg-to-reg report (ns) | All-path min period (ns) | All-path Fmax (MHz) | Critical path class | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
+        "| Architecture | SDC scenario | Cell area | Native reg-to-reg period (ns) | Native reg-to-reg Fmax (MHz) | Rising-edge reg-to-reg paths reported | Worst slack in explicit reg-to-reg report (ns) | All-path min period (ns) | All-path Fmax (MHz) | Critical path class | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints | Slew checks | Slew violations | Cap checks | Cap violations | Fanout checks | Fanout violations |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     fmt = lambda value: "n/a" if value is None else f"{value:.3f}"
     for row in records:
@@ -223,7 +223,10 @@ def summarise(report_dir=REPORT_DIR):
             f"{fmt(row['all_path_min_period_ns'])} | {fmt(row['all_path_fmax_mhz'])} | "
             f"{row['critical_path_class']} | {fmt(row['worst_setup_slack_ns'])} | {fmt(row['worst_hold_slack_ns'])} | "
             f"{'found' if row['register_to_register_path_found'] else 'none reported'} | "
-            f"{fmt(row['unconstrained_endpoints_reported'])} |"
+            f"{fmt(row['unconstrained_endpoints_reported'])} | "
+            f"{fmt(row['drv_max_slew_check_count'])} | {fmt(row['drv_max_slew_violation_count'])} | "
+            f"{fmt(row['drv_max_capacitance_check_count'])} | {fmt(row['drv_max_capacitance_violation_count'])} | "
+            f"{fmt(row['drv_max_fanout_check_count'])} | {fmt(row['drv_max_fanout_violation_count'])} |"
         )
     rows.extend([
         "",
