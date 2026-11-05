@@ -4,11 +4,11 @@ set -euo pipefail
 mkdir -p build/formal
 command -v yosys >/dev/null
 command -v yosys-smtbmc >/dev/null
-command -v z3 >/dev/null
+FORMAL_SOLVER="${FORMAL_SOLVER:-boolector}"\ncommand -v "$FORMAL_SOLVER" >/dev/null
 
 {
   echo "Yosys: $(yosys -V)"
-  echo "Solver: $(z3 --version 2>&1 | head -n 1)"
+  echo "Solver: $FORMAL_SOLVER ($("$FORMAL_SOLVER" --version 2>&1 | head -n 1))"
   echo "Proof: bounded transaction-level equivalence, WIDTH=6, depth=26"
 } | tee build/formal/tool_versions.txt
 
@@ -16,7 +16,7 @@ yosys -p "read_verilog -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_spl
   | tee build/formal/yosys.log
 
 # Prove assertions in the miter; --dump-vcd only selects the trace output file.
-yosys-smtbmc -s z3 -t 26 --dump-vcd build/formal/gcd_equiv.vcd build/formal/gcd_equiv.smt2 \
+yosys-smtbmc -s "$FORMAL_SOLVER" -t 26 --dump-vcd build/formal/gcd_equiv.vcd build/formal/gcd_equiv.smt2 \
   | tee build/formal/smtbmc.log
 
 grep -q "Status: PASSED" build/formal/smtbmc.log
