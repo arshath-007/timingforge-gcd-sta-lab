@@ -61,8 +61,8 @@ class StaMatrixParserTests(unittest.TestCase):
         self.assertEqual(classify_critical_path("state_reg/Q", "result_reg/D"), "register_to_register")
         self.assertEqual(classify_critical_path("result_reg/Q", "gcd_out[0]"), "register_to_output")
         self.assertEqual(classify_critical_path("a_in[0]", "gcd_out[0]"), "input_to_output")
-        self.assertEqual(classify_critical_path("a_in[3] (input port)", "state_reg/D (rising edge-triggered flip-flop)"), "input_to_register")
-        self.assertEqual(classify_critical_path("state_reg/Q (rising edge-triggered flip-flop)", "gcd_out[0] (output port)"), "register_to_output")
+        self.assertEqual(classify_critical_path("a_in[0] (input port clocked by core_clk)", "_2247_ (rising edge-triggered flip-flop clocked by core_clk)"), "input_to_register")
+        self.assertEqual(classify_critical_path("_2247_ (rising edge-triggered flip-flop clocked by core_clk)", "gcd_out[0] (output port)"), "register_to_output")
         self.assertEqual(classify_critical_path("unknown_start", "unknown_end"), "unknown")
 
     def test_derives_single_cycle_period_from_explicit_rising_edge_paths(self):
