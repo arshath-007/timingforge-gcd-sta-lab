@@ -68,3 +68,10 @@ make sta-matrix
 ```
 
 Inspect `build/reports/sta_matrix_summary.md` and the raw `build/reports/sta_*.log` files. Always retain the exact source commit and tool versions alongside the results.
+
+## 6. Further reading
+
+- [Setup and Hold Time — Analysing the Timing Reports](https://vorasaumil.wixsite.com/pdinsight/post/setup-and-hold-time-part-2-analysing-the-timing-reports) — a walkthrough of timing-report sections, path types, arrival/required time and slack.
+- [OpenLane 2 Newcomers documentation](https://openlane2.readthedocs.io/en/latest/getting_started/newcomers/index.html) — explains the broader RTL-to-GDS flow and where STA reports fit. TimingForge itself uses Yosys and OpenROAD-integrated OpenSTA directly; it does not run OpenLane.
+- [OpenSTA command reference](https://opensta.readthedocs.io/en/latest/Commands/) — authoritative command semantics, including `report_clock_min_period`.
+- [OpenSTA debugging guide](https://opensta.readthedocs.io/en/latest/Debugging/) — a practical guide for tracing missing timing paths and clock propagation.
