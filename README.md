@@ -132,19 +132,19 @@ Review the raw Yosys/OpenSTA logs and tool versions. A successful script exit al
 
 ## Verified evidence
 
-The baseline numerical measurements and raw matrix artifacts originate from run ID `41999231060` (workflow run #69, source commit `bd29bcd96914f0415771aa5aa76949cf7163b66e`). The latest CI validation is run ID `42007925745` (workflow run #82, source commit `18121a4848825c23a878702712e1bf6b86099cf3`); both regression and library-backed STA jobs passed. The latter validates the documentation revision and workflow execution; it does not replace the original baseline measurements.
+The corrected-load baseline is reproducible from [GitHub Actions run #116](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266), source commit `e3d529618c80a59123bb16a2271289d41ce1b961`. Both the RTL/Python regression and the 16-run Nangate45 library-backed STA matrix passed.
 
-- 258 directed/random GCD input pairs checked on **each** RTL architecture.
+- 258 directed/random GCD input pairs checked on each RTL architecture by the functional testbench.
 - 20 Python unit tests passed in the expanded regression suite.
-- Seven controlled static SDC fault patterns detected by the prototype.
+- Seven controlled static SDC fault patterns detected (7/7) with the golden SDC passing. This is a score for the defined patterns only, not general SDC correctness.
 - Both architectures synthesized against the pinned Nangate45 typical Liberty file.
-- Eight SDC scenarios analysed for each architecture (16 STA log files).
-- RTL operation latency measured on the original 258-case corpus: combined average 63.63 cycles (maximum observed 93); split average 84.17 cycles (maximum observed 124). These are corpus maxima, not proven worst-case bounds; the randomized workload is not seeded for cross-simulator reproducibility.
-- Raw logs and parsed timing matrix uploaded as [STA evidence](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413); static benchmark scorecard uploaded [here](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334).
+- Eight SDC scenarios analysed for each architecture (16 raw STA log files).
+- Corrected golden output loads: 20 fF on scalar outputs and 30 fF on the GCD output bus.
+- Corrected-load baseline measurements: combined 1657.180 area units, 2.940 ns all-path period / 340.67 MHz, +7.065 ns worst setup slack, and -0.002 ns worst hold slack; split 1681.918 area units, 2.350 ns all-path period / 425.57 MHz, +7.650 ns worst setup slack, and +0.005 ns worst hold slack.
+- The split architecture reports a 0.740 ns register-to-register minimum period / 1353.86 MHz. The equivalent combined-design query returned 0.00 ns / infinity, so the parser correctly records it as n/a; a separate path-presence report still finds register-to-register paths.
+- Historical finite-corpus latency observations (63.63 average / 93 max observed combined; 84.17 average / 124 max observed split) are not proven worst-case bounds and are not newly remeasured by the STA matrix.
 
-**Measured first baseline results:** the combined architecture reported 1657.180 Yosys Liberty area units, 2.94 ns all-path minimum period (including port paths), 340.67 MHz corresponding all-path Fmax, +7.065 ns worst setup slack, and -0.002 ns worst hold slack. The split architecture reported 1681.918 area units, 2.35 ns all-path minimum period, 425.57 MHz corresponding all-path Fmax, +7.650 ns worst setup slack, and +0.005 ns worst hold slack. These minimum-period/Fmax values come from `report_clock_min_period -include_port_paths`; they are not register-to-register-only architecture metrics. The dedicated register-to-register report records path presence but this release does not publish a separate register-to-register minimum period. In the same 258-case RTL test corpus, average operation latency was 63.63 cycles combined versus 84.17 cycles split (maximum 93 vs 124). Do not interpret the all-path Fmax comparison as a pure internal-logic comparison or as measured application throughput. These are not production or post-route PPA figures.
-
-See [Initial measured results](docs/INITIAL_RESULTS.md), [baseline measurement run ID 41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060), and [latest CI validation run ID 42007925745](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007925745).
+Download the [corrected-load raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266/artifacts/13407377245) and the [static benchmark scorecard](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266/artifacts/13406973684). See [corrected initial results](docs/INITIAL_RESULTS.md) and [CI run #116](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266).
 
 ## Research questions
 
