@@ -32,7 +32,10 @@ export FLOW_HOME="$FLOW_ROOT"
 # The source-only checkout does not include the prebuilt tools; use the binaries from the pinned container.
 export YOSYS_EXE="$(command -v yosys)"
 export OPENROAD_EXE="$(command -v openroad)"
-[[ -x "$YOSYS_EXE" && -x "$OPENROAD_EXE" ]] || { echo "Yosys/OpenROAD executable missing from PATH" >&2; exit 2; }
+export OPENSTA_EXE="$(command -v sta || true)"
+export PYTHON_EXE="$(command -v python3)"
+export KLAYOUT_CMD="$(command -v klayout)"
+[[ -x "$YOSYS_EXE" && -x "$OPENROAD_EXE" && -x "$PYTHON_EXE" && -x "$KLAYOUT_CMD" ]] || { echo "Yosys/OpenROAD executable missing from PATH" >&2; exit 2; }
 [[ -f "$FLOW_ROOT/Makefile" ]] || { echo "ORFS flow Makefile missing: $FLOW_ROOT" >&2; exit 2; }
 
 PLATFORM_DIR="$FLOW_ROOT/platforms/nangate45"
