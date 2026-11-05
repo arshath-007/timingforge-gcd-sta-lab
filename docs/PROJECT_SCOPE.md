@@ -4,7 +4,7 @@
 
 Test whether a timing-constraint review flow identifies a small, explicitly defined set of SDC defects on the GCD benchmark. Keep the golden SDC, mutated SDC, expected finding, and observed tool result separate.
 
-## In scope for v0.2
+## In scope for v0.3 Phase 1
 
 - Positive primary-clock period and expected clock-port presence.
 - Minimum and maximum input-delay coverage for each top-level input group.
@@ -14,6 +14,9 @@ Test whether a timing-constraint review flow identifies a small, explicitly defi
 - Exact/simple wildcard port-name matching to avoid substring false matches.
 - Functional equivalence of two GCD architectures.
 - Reproducible synthesis and STA entry points.
+- Conservative golden-row quality findings and OpenSTA DRV violator reports.
+- Clock setup/hold uncertainty and source-latency sensitivity experiments with immutable baseline constraints and explicit deltas.
+- Expected-versus-observed SDC mutation impact scoring with inconclusive states preserved.
 
 ## Functional extension blocks
 
@@ -54,6 +57,9 @@ The checker is interface-specific and uses simple line-oriented pattern checks. 
 7. Compare path coverage and timing results only when the same netlist, Liberty, tool options, and corner assumptions are used.
 
 ## Published evidence
+
+Phase 1 diagnostics are validated in [run #257](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42046659049) and [post-merge main run #258](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600). The [run #258 artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600/artifacts/13425391627) includes the raw logs, DRV findings, mutation impact summary, and 18 clock-sensitivity experiments.
+
 
 The corrected-load v0.2.0 baseline is sourced from [GitHub Actions run #160 (ID 42015328699)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699), source commit `bdd42621749035fa088e326c766f3af8031af337`. Both regression and library-backed STA jobs passed.
 
