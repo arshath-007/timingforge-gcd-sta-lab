@@ -114,7 +114,7 @@ The script downloads the Nangate45 typical Liberty and two LEF files from a pinn
 - Raw STA logs in `build/reports/`
 - Yosys synthesis logs in `build/`
 
-The summary includes Yosys cell area, minimum period, corresponding Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, missing I/O-delay warnings, and unconstrained endpoints. Set `STA=sta` to use a standalone OpenSTA executable instead of the default `openroad` command where a compatible standalone binary and LEF-independent setup are available.
+The summary separates register-to-register minimum period/Fmax from all-path minimum period/Fmax (which includes I/O port paths), and includes Yosys cell area, worst setup/hold slack, WNS/TNS, path presence, missing I/O-delay warnings, and unconstrained endpoints. The supported matrix flow uses the OpenROAD-integrated OpenSTA executable (`openroad`) and its LEF-aware setup.
 
 ### 4. Manual synthesis and STA
 
@@ -139,7 +139,7 @@ The baseline numerical measurements and raw matrix artifacts originate from run 
 - Seven controlled static SDC fault patterns detected by the prototype.
 - Both architectures synthesized against the pinned Nangate45 typical Liberty file.
 - Eight SDC scenarios analysed for each architecture (16 STA log files).
-- RTL operation latency measured: combined average 63.63 cycles (maximum 93); split average 84.17 cycles (maximum 124).
+- RTL operation latency measured on the original 258-case corpus: combined average 63.63 cycles (maximum observed 93); split average 84.17 cycles (maximum observed 124). These are corpus maxima, not proven worst-case bounds; the randomized workload is not seeded for cross-simulator reproducibility.
 - Raw logs and parsed timing matrix uploaded as [STA evidence](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413); static benchmark scorecard uploaded [here](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334).
 
 **Measured first baseline results:** the combined architecture reported 1657.180 Yosys Liberty area units, 2.94 ns all-path minimum period (including port paths), 340.67 MHz corresponding all-path Fmax, +7.065 ns worst setup slack, and -0.002 ns worst hold slack. The split architecture reported 1681.918 area units, 2.35 ns all-path minimum period, 425.57 MHz corresponding all-path Fmax, +7.650 ns worst setup slack, and +0.005 ns worst hold slack. These minimum-period/Fmax values come from `report_clock_min_period -include_port_paths`; they are not register-to-register-only architecture metrics. The dedicated register-to-register report records path presence but this release does not publish a separate register-to-register minimum period. In the same 258-case RTL test corpus, average operation latency was 63.63 cycles combined versus 84.17 cycles split (maximum 93 vs 124). Do not interpret the all-path Fmax comparison as a pure internal-logic comparison or as measured application throughput. These are not production or post-route PPA figures.
@@ -159,7 +159,7 @@ See [Initial measured results](docs/INITIAL_RESULTS.md), [baseline measurement r
 
 - The Python linter is a first-pass line/pattern-based checker, not a full SDC parser or proof of constraint correctness.
 - A false-path statement is flagged for review; a broad false-path test is only a controlled negative experiment. The tool does not decide whether a real exception is valid without design intent.
-- The first SDC is an illustrative block-level budget, not a product specification.
+- The first SDC is an illustrative block-level budget, not a product specification. Output loads are expressed in the Liberty capacitance unit (fF); the current SDC uses 20 fF for scalar control outputs and 30 fF for the GCD bus. Changing these loads requires regenerating the baseline timing evidence.
 - The current library-backed result uses one typical Nangate45 corner, ideal clocks, and no SPEF/extracted interconnect parasitics. It is pre-layout and not signoff.
 - No full physical implementation, CTS, route, MMMC/PVT, OCV/AOCV/POCV, crosstalk/SI, or timing ECO closure is claimed yet.
 - The educational Nangate45 platform is not a modern production process or signoff reference.
