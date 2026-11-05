@@ -34,7 +34,7 @@ module gcd_equiv_formal;
     initial cycle = 0;
 
     always @(posedge clk) begin
-        if (cycle < 7'd80)
+        if (cycle < 7'd34)
             cycle <= cycle + 1'b1;
     end
 
@@ -59,7 +59,7 @@ module gcd_equiv_formal;
             end
             if (combined_seen && split_seen)
                 assert(combined_result == split_result);
-            if (cycle == 7'd80) begin
+            if (cycle == 7'd34) begin
                 assert(combined_seen);
                 assert(split_seen);
             end
