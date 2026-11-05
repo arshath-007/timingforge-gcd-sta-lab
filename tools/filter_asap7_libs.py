@@ -84,8 +84,6 @@ def filter_liberty(text: str) -> tuple[str, list[str]]:
             output.append(text[match.start():end + 1])
         cursor = end + 1
         search_at = end + 1
-    if not removed:
-        raise ValueError("no excluded XOR/XNOR/HA cells found in SIMPLE Liberty")
     return "".join(output), sorted(removed)
 
 
@@ -112,6 +110,8 @@ def build_filtered_libraries(lib_dir: Path, output_dir: Path) -> dict:
             "filtered_sha256": sha256(destination),
             "removed_cells": removed,
         }
+    if not any(record["removed_cells"] for record in records.values()):
+        raise ValueError("no excluded XOR/XNOR/HA cells found in any SIMPLE Liberty corner")
     return {
         "schema_version": "1.0",
         "excluded_patterns": list(EXCLUDED_PATTERNS),
