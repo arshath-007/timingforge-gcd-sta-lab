@@ -47,10 +47,14 @@ def parse_log(path):
     setup_start = re.search(r"^Startpoint:\s*(.+)$", setup_section, re.MULTILINE)
     setup_end = re.search(r"^Endpoint:\s*(.+)$", setup_section, re.MULTILINE)
     unconstrained_count = len(re.findall(r"^Startpoint:", unconstrained_section, re.MULTILINE))
+    try:
+        log_name = str(path.relative_to(ROOT))
+    except ValueError:
+        log_name = str(path)
     return {
         "top": top,
         "scenario": scenario,
-        "log_file": str(path.relative_to(ROOT)),
+        "log_file": log_name,
         "setup_wns": _metric(text, "wns", "max"),
         "setup_tns": _metric(text, "tns", "max"),
         "hold_wns": _metric(text, "wns", "min"),
