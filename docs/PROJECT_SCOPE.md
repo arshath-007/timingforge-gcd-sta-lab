@@ -43,7 +43,7 @@ The checker is interface-specific and uses simple line-oriented pattern checks. 
 2. Run the Python unit tests.
 3. Generate each mutation from the golden SDC.
 4. Run the static checker on the golden and mutated inputs.
-5. If a Liberty library is configured, synthesise the selected top and run OpenSTA on golden/mutated constraints.
+5. If a Liberty library is configured, synthesise the selected top and run OpenSTA on golden/mutated constraints; the Nangate45 matrix script runs both GCD architectures and generates a summary from setup/hold reports.
 6. Record tool versions, Liberty/platform, top module, SDC hash, commands, and logs.
 7. Compare path coverage and timing results only when the same netlist, Liberty, tool options, and corner assumptions are used.
 
