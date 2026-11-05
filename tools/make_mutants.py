@@ -34,8 +34,8 @@ MUTATIONS = {
         "remove_contains": [],
         "replace": [],
         "append": [
-            "# MUTATION ONLY: broad exception for a controlled negative test",
-            "set_false_path -from [all_inputs]",
+            "# MUTATION ONLY: deliberately suppress register-to-register timing paths",
+            "set_false_path -from [all_registers] -to [all_registers]",
         ],
         "description": "Add a broad false-path exception for review",
     },
