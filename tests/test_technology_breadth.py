@@ -55,17 +55,18 @@ tns min 0.000
 TIMINGFORGE_SCENE_BEGIN ASAP7_BC
 TIMINGFORGE_SETUP_BEGIN ASAP7_BC
 slack (MET) 12.500
-slack (VIOLATED) -3.250
+-3.250 slack (VIOLATED)
+12.250 slack (MET)
 TIMINGFORGE_SETUP_END ASAP7_BC
 TIMINGFORGE_HOLD_BEGIN ASAP7_BC
-slack (MET) 4.500
+4.500 slack (MET)
 TIMINGFORGE_HOLD_END ASAP7_BC
 TIMINGFORGE_DRV_BEGIN ASAP7_BC
 TIMINGFORGE_DRV_END ASAP7_BC
 TIMINGFORGE_SCENE_END ASAP7_BC
 """
         result = parse_scene_report(log, "ASAP7_BC")
-        self.assertEqual(result["setup_reported_path_count"], 2)
+        self.assertEqual(result["setup_reported_path_count"], 3)
         self.assertEqual(result["setup_worst_reported_slack_ps"], -3.25)
         self.assertEqual(result["hold_worst_reported_slack_ps"], 4.5)
         self.assertTrue(result["drv_report_present"])
