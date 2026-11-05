@@ -18,6 +18,18 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y iverilog
       - name: Run RTL self-check
         run: make rtl-test
+      - name: Verify RTL regression rejects a deliberately broken design
+        shell: bash
+        run: |
+          mkdir -p build
+          sed 's/x <= x - y;/x <= x - y + 1;/' rtl/gcd_binary_combined.sv > build/gcd_binary_combined_broken.sv
+          iverilog -g2012 -s tb_gcd_compare -o build/tb_gcd_negative.vvp build/gcd_binary_combined_broken.sv rtl/gcd_binary_split.sv tb/tb_gcd_compare.sv
+          if vvp build/tb_gcd_negative.vvp; then
+            echo "ERROR: deliberately broken RTL unexpectedly passed the self-check"
+            exit 1
+          else
+            echo "PASS: self-check rejected deliberately broken RTL"
+          fi
       - name: Run Python regression
         run: make python-test
       - name: Run golden SDC lint
@@ -53,6 +65,8 @@ jobs:
           source /OpenROAD-flow-scripts/env.sh
           echo "Yosys: $(yosys -V)"
           echo "OpenROAD: $(openroad -version)"
+          mkdir -p build
+          { echo "Yosys: $(yosys -V)"; echo "OpenROAD: $(openroad -version)"; } | tee build/tool_versions.txt
           make sta-matrix
       - name: Upload library-backed STA evidence
         if: always()
@@ -64,4 +78,5 @@ jobs:
             build/reports/sta_matrix_summary.json
             build/reports/sta_*.log
             build/yosys_*.log
-          retention-days: 30
+            build/tool_versions.txt
+          retention-days: 90
