@@ -144,7 +144,7 @@ The repository has a successful GitHub Actions regression and a successful libra
 
 **Measured first baseline results:** the combined architecture reported 1657.180 Yosys Liberty area units, 2.94 ns minimum period, 340.67 MHz corresponding Fmax, +7.065 ns worst setup slack, and -0.002 ns worst hold slack. The split architecture reported 1681.918 area units, 2.35 ns minimum period, 425.57 MHz Fmax, +7.650 ns worst setup slack, and +0.005 ns worst hold slack. In the same 258-case RTL test corpus, average operation latency was 63.63 cycles combined versus 84.17 cycles split (maximum 93 vs 124). This makes the trade-off visible: split improves the reported pre-layout clock limit, but the extra processing state means more cycles per operation. These are not production or post-route PPA figures.
 
-See [Initial measured results](docs/INITIAL_RESULTS.md) and the [successful library-backed CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060).
+See [Initial measured results](docs/INITIAL_RESULTS.md) and the [baseline measurement run #41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060). The later [run #78](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42006568892) passed regression and library-backed STA after documentation-only updates; it validates the final documentation revision but does not replace the original measurement artifacts or numerical results.
 
 ## Research questions
 
