@@ -2,7 +2,7 @@ PYTHON ?= python3
 IVERILOG ?= iverilog
 VVP ?= vvp
 
-.PHONY: help rtl-test mutants lint-sdc python-test synth sta clean
+.PHONY: help rtl-test mutants lint-sdc python-test benchmark synth sta clean
 
 help:
 	@echo "Targets: rtl-test mutants lint-sdc python-test synth sta clean"
