@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module tb_gcd_oracle3;
-    reg [2:0] a = 0;
-    reg [2:0] b = 0;
+    reg [2:0] a;
+    reg [2:0] b;
     wire [2:0] expected_gcd;
     integer ai, bi;
 
