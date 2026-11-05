@@ -168,7 +168,7 @@ def parse_log(path):
         "unconstrained_endpoints_reported": int(warning.group(1)) if warning else (0 if "=== TIMINGFORGE SETUP CHECK ===" in text else None),
         "missing_input_delay_ports": int(input_missing.group(1)) if input_missing else 0,
         "missing_output_delay_ports": int(output_missing.group(1)) if output_missing else 0,
-        "unconstrained_paths_listed": len(re.findall(r"^Startpoint:", unconstrained, re.MULTILINE)),: drv_slew["supported"],
+        "unconstrained_paths_listed": len(re.findall(r"^Startpoint:", unconstrained, re.MULTILINE)),
         "drv_max_slew_supported": drv_slew["supported"],
         "drv_max_slew_violation_count": drv_slew["violation_count"],
         "drv_max_slew_violation_lines": drv_slew["reported_lines"],
@@ -177,8 +177,6 @@ def parse_log(path):
         "drv_max_capacitance_violation_lines": drv_cap["reported_lines"],
         "drv_max_fanout_supported": drv_fanout["supported"],
         "drv_max_fanout_violation_count": drv_fanout["violation_count"],
-        )
-    rows.extend([
         "drv_max_fanout_violation_lines": drv_fanout["reported_lines"],
     }
 
@@ -227,8 +225,11 @@ def summarise(report_dir=REPORT_DIR):
             f"{fmt(row['drv_max_slew_violation_count'])} | "
             f"{fmt(row['drv_max_capacitance_violation_count'])} | "
             f"{fmt(row['drv_max_fanout_violation_count'])} |"
+        )
+    rows.extend([
         "The native register-to-register clock-period command is reported separately from the explicit same-clock rising-edge path inventory. Do not derive an internal Fmax from the path-report slack unless its relationship to the native command has been validated for the tool and design. The explicit inventory is capped at 1000 paths per group; a count below the cap indicates the report did not hit that limit. All-path period includes port paths. Neither metric is post-route or signoff timing.",
         "WNS may be zero when slack is positive; worst slack retains the margin. Missing metrics require raw-log investigation.",
+        "DRV columns count only violation records returned by OpenSTA's violator-only reports. They do not enumerate the total number of applicable design-rule checks.",
         "",
     ])
     (report_dir / "sta_matrix_summary.md").write_text("\n".join(rows), encoding="utf-8")
