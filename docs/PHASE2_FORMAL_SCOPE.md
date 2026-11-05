@@ -1,5 +1,7 @@
 # Phase 2 formal and assertion evidence — scope and interpretation
 
+**Latest PR validation:** the updated oracle-backed miter passed in [formal workflow run #42098727465](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465); download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465/artifacts/13449462598). The positive CVC5 proof passed at 26 SMT steps / 12 positive clock edges (11:08 solver time). The intentionally broken subtract mutant was rejected at step 5 for operands a=5, b=3. Main-branch validation remains part of the v0.4.0 release gate.
+
 The bounded formal miter now checks each GCD architecture against an independent WIDTH=3 mathematical truth-table oracle, checks mutual architecture-result equivalence, verifies one completion per implementation, checks `done` with `busy` low, and requires completion within 12 positive clock edges. The 64-entry oracle is independently cross-checked against Python's Euclidean `math.gcd` and an Icarus simulation. The two `done` pulses are not required to occur on the same cycle because the split architecture intentionally has additional processing latency.
 
 - Formal width: 3 bits; all 64 symbolic operand pairs are considered.
