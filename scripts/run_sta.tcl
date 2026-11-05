@@ -37,8 +37,10 @@ puts "=== SETUP / MAX PATH DETAILS ==="
 report_checks -path_delay max -format full_clock_expanded -digits 3
 puts "=== REGISTER-TO-REGISTER SETUP PATHS ==="
 report_checks -from [all_registers -output_pins] -to [all_registers -data_pins] -path_delay max -format full_clock_expanded -group_path_count 10 -digits 3
-puts "=== REGISTER-TO-REGISTER SETUP CHECK INVENTORY ==="
-report_check_types -max_delay -format end -max_count 50 -digits 3
+puts "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ==="
+report_checks -from [all_registers -clock core_clk -rise_clock -output_pins] -to [all_registers -clock core_clk -rise_clock -data_pins] -path_delay max -format full_clock_expanded -group_path_count 100 -digits 3
+puts "=== FALLING-EDGE REGISTER-TO-REGISTER SETUP PATHS ==="
+report_checks -from [all_registers -clock core_clk -fall_clock -output_pins] -to [all_registers -clock core_clk -fall_clock -data_pins] -path_delay max -format full_clock_expanded -group_path_count 100 -digits 3
 puts "=== CLOCK PROPERTIES ==="
 report_clock_properties
 puts "=== HOLD / MIN PATH DETAILS ==="
