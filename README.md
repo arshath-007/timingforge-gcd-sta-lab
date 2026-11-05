@@ -132,7 +132,7 @@ Review the raw Yosys/OpenSTA logs and tool versions. A successful script exit al
 
 ## Verified evidence
 
-The repository has a successful GitHub Actions regression and a successful library-backed timing matrix in [run #41999002017](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999002017):
+The repository has a successful GitHub Actions regression and a successful library-backed timing matrix in [run #41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060):
 
 - 258 directed/random GCD input pairs checked on **each** RTL architecture.
 - 13 Python unit tests passed.
@@ -140,11 +140,11 @@ The repository has a successful GitHub Actions regression and a successful libra
 - Both architectures synthesized against the pinned Nangate45 typical Liberty file.
 - Eight SDC scenarios analysed for each architecture (16 STA log files).
 - RTL operation latency measured: combined average 63.63 cycles (maximum 93); split average 84.17 cycles (maximum 124).
-- Raw logs and parsed timing matrix uploaded as [STA evidence](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999002017/artifacts/13401941145); static benchmark scorecard uploaded [here](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999002017/artifacts/13401089041).
+- Raw logs and parsed timing matrix uploaded as [STA evidence](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413); static benchmark scorecard uploaded [here](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334).
 
 **Measured first baseline results:** the combined architecture reported 1657.180 Yosys Liberty area units, 2.94 ns minimum period, 340.67 MHz corresponding Fmax, +7.065 ns worst setup slack, and -0.002 ns worst hold slack. The split architecture reported 1681.918 area units, 2.35 ns minimum period, 425.57 MHz Fmax, +7.650 ns worst setup slack, and +0.005 ns worst hold slack. In the same 258-case RTL test corpus, average operation latency was 63.63 cycles combined versus 84.17 cycles split (maximum 93 vs 124). This makes the trade-off visible: split improves the reported pre-layout clock limit, but the extra processing state means more cycles per operation. These are not production or post-route PPA figures.
 
-See [Initial measured results](docs/INITIAL_RESULTS.md) and the [successful library-backed CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999002017).
+See [Initial measured results](docs/INITIAL_RESULTS.md) and the [successful library-backed CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060).
 
 ## Research questions
 
