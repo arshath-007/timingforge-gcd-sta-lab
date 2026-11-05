@@ -4,7 +4,7 @@
 
 Phase 3 adds a reproducible educational RTL-to-GDS flow for the two GCD architectures using the same pinned OpenROAD Flow Scripts Nangate45 platform as the pre-layout STA matrix.
 
-The intended stages are floorplanning, global placement, clock-tree synthesis, global/detail routing, final database/GDS generation, parasitic extraction, and post-route STA with propagated clocks.
+The intended stages are floorplanning, global placement, clock-tree synthesis, global/detail routing, final database generation, OpenRCX parasitic extraction, KLayout GDS generation, and post-route STA with propagated clocks. In ORFS, GDS generation is a separate `gds` target after `all`.
 
 ## Run
 
