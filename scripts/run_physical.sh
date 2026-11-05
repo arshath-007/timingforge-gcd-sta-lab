@@ -29,6 +29,10 @@ ACTUAL_REV="$(git -C "$ORFS_SOURCE" rev-parse HEAD)"
 }
 FLOW_ROOT="$ORFS_SOURCE/flow"
 export FLOW_HOME="$FLOW_ROOT"
+# The source-only checkout does not include the prebuilt tools; use the binaries from the pinned container.
+export YOSYS_EXE="$(command -v yosys)"
+export OPENROAD_EXE="$(command -v openroad)"
+[[ -x "$YOSYS_EXE" && -x "$OPENROAD_EXE" ]] || { echo "Yosys/OpenROAD executable missing from PATH" >&2; exit 2; }
 [[ -f "$FLOW_ROOT/Makefile" ]] || { echo "ORFS flow Makefile missing: $FLOW_ROOT" >&2; exit 2; }
 
 PLATFORM_DIR="$FLOW_ROOT/platforms/nangate45"
