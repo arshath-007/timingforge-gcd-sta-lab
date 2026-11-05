@@ -6,9 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   regression:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Install Icarus Verilog
@@ -22,6 +25,7 @@ jobs:
       - name: Run static fault-injection benchmark
         run: make benchmark
       - name: Upload benchmark scorecard
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: timingforge-static-benchmark
@@ -30,7 +34,7 @@ jobs:
             build/benchmark_report.md
 
   library-backed-sta:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: openroad/orfs:latest
     steps:
@@ -51,6 +55,7 @@ jobs:
           echo "OpenROAD: $(openroad -version)"
           make sta-matrix
       - name: Upload library-backed STA evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: timingforge-nangate45-sta-matrix
