@@ -85,7 +85,19 @@ make benchmark
 
 Generated SDC files are written under `build/mutants/`. The linter reports missing clocks, missing I/O delay coverage, and timing exceptions that require human justification. This initial checker is intentionally conservative and interface-specific to the GCD example. The benchmark writes JSON and Markdown scorecards in build/; the score covers four controlled static text-pattern mutations only, not general SDC correctness or STA signoff. The benchmark target also writes `build/benchmark_report.json` and `build/benchmark_report.md`; its score covers only four controlled static text-pattern mutations, not general SDC correctness or STA signoff.
 
-### 3. Synthesis and STA (optional)
+### 3. Library-backed synthesis and timing matrix
+
+For a reproducible educational run using the Nangate45 typical Liberty library and an OpenROAD Flow Scripts environment with Yosys/OpenROAD available:
+
+```bash
+source /OpenROAD-flow-scripts/env.sh
+make sta-matrix
+```
+
+The script downloads the Nangate45 typical Liberty file from the OpenROAD Flow Scripts platform repository when it is not already present, synthesises both GCD architectures, and runs the baseline plus each generated SDC mutation through the OpenROAD-integrated STA engine. Set `STA=sta` to use a standalone OpenSTA executable instead of the default `openroad` command. Nangate45 is an educational platform; results are not portable to a production process or signoff flow.
+
+### 4. Manual synthesis and STA
+
 
 Requirements: Yosys, OpenSTA, and a compatible standard-cell Liberty file.
 
@@ -103,9 +115,9 @@ The synthesis script is a starting point, not a guarantee that every Liberty lib
 
 Latest successful GitHub Actions run:
 - 258 directed/random test cases checked on both GCD architectures.
-- 6 Python unit tests passed.
-- Golden SDC pattern lint passed.
-- 4 of 4 controlled static mutation patterns were detected by the prototype.
+- 10 Python unit tests passed.
+- Golden SDC clock, uncertainty, and min/max I/O pattern checks passed.
+- 7 of 7 controlled static mutation patterns were detected by the prototype.
 - JSON and Markdown benchmark scorecards were uploaded as a workflow artifact.
 
 These results do **not** mean arbitrary SDC defects are detected or that STA signoff has been completed. No Yosys/OpenSTA PPA measurements are published yet.
