@@ -1,0 +1,51 @@
+name: TimingForge physical design
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "rtl/gcd_binary_*.sv"
+      - "constraints/gcd_baseline.sdc"
+      - "physical/**"
+      - "scripts/run_physical.sh"
+      - "scripts/postroute_sta.tcl"
+      - "tools/physical_manifest.py"
+      - ".github/workflows/physical-design.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nangate45-physical:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    container:
+      image: openroad/orfs@sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
+    steps:
+      - name: Checkout source
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Run both Nangate45 physical implementations
+        shell: bash
+        run: |
+          source /OpenROAD-flow-scripts/env.sh
+          bash scripts/run_physical.sh
+      - name: Upload physical design evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timingforge-nangate45-physical
+          path: |
+            build/physical/**
+          retention-days: 90
