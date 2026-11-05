@@ -27,8 +27,8 @@ Endpoint: data_reg/D
 Startpoint: in_port
 Endpoint: output_port
 Warning: There are 3 unconstrained endpoints.
-Warning: There are 2 input ports with no input delay.
-Warning: There are 1 output ports with no output delay.
+Warning: There are 2 input ports missing set_input_delay.
+Warning: There are 1 output ports missing set_output_delay.
 """
 
 
@@ -46,8 +46,8 @@ class StaMatrixParserTests(unittest.TestCase):
             self.assertEqual(row["clock_period_min_ns"], 2.500)
             self.assertEqual(row["clock_fmax_mhz"], 400.00)
             self.assertEqual(row["unconstrained_endpoints_reported"], 3)
-            self.assertEqual(len(row["missing_input_delay_warnings"]), 1)
-            self.assertEqual(len(row["missing_output_delay_warnings"]), 1)
+            self.assertEqual(row["missing_input_delay_ports"], 2)
+            self.assertEqual(row["missing_output_delay_ports"], 1)
             self.assertTrue(row["register_to_register_path_found"])
             self.assertEqual(row["register_to_register_startpoint"], "input_reg/Q")
 
