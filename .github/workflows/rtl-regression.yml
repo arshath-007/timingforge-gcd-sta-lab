@@ -19,5 +19,12 @@ jobs:
         run: make python-test
       - name: Run golden SDC lint
         run: make lint-sdc
-      - name: Generate mutation SDC files
-        run: make mutants
+      - name: Run static fault-injection benchmark
+        run: make benchmark
+      - name: Upload benchmark scorecard
+        uses: actions/upload-artifact@v4
+        with:
+          name: timingforge-static-benchmark
+          path: |
+            build/benchmark_report.json
+            build/benchmark_report.md
