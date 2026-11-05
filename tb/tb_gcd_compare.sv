@@ -14,6 +14,21 @@ module tb_gcd_compare;
     integer max_combined_cycles = 0;
     integer max_split_cycles = 0;
     integer seed = 32'h5446_2026;
+    reg previous_done_combined = 1'b0;
+    reg previous_done_split = 1'b0;
+
+    // done must be a one-cycle pulse in each architecture.
+    always @(posedge clk) begin
+        if (rst) begin
+            previous_done_combined <= 1'b0;
+            previous_done_split <= 1'b0;
+        end else begin
+            if (done_combined && previous_done_combined) $fatal(1, "combined done wider than one cycle");
+            if (done_split && previous_done_split) $fatal(1, "split done wider than one cycle");
+            previous_done_combined <= done_combined;
+            previous_done_split <= done_split;
+        end
+    end
 
     always #5 clk = ~clk;
 
@@ -60,6 +75,11 @@ module tb_gcd_compare;
             start = 1'b1;
             @(negedge clk);
             start = 1'b0;
+            if (a != 0 && b != 0) begin
+                if (!busy_combined || !busy_split) $fatal(1, "busy did not assert after accepted nonzero request");
+            end else begin
+                if (busy_combined || busy_split) $fatal(1, "zero-input request should complete without iterative busy");
+            end
 
             // Count clock edges from accepted start until each done pulse.
             // An input containing zero can complete on the acceptance edge (0 cycles).
@@ -91,6 +111,8 @@ module tb_gcd_compare;
                 $fatal(1);
             end
 
+            if (busy_combined || busy_split) $fatal(1, "busy remained asserted after done");
+            if (!done_combined || !done_split) $fatal(1, "done pulse was not present at completion");
             total_combined_cycles = total_combined_cycles + combined_latency;
             total_split_cycles = total_split_cycles + split_latency;
             if (combined_latency > max_combined_cycles) max_combined_cycles = combined_latency;
