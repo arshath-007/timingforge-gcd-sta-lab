@@ -7,9 +7,9 @@ LIB_DIR="build/platform/nangate45"
 LIBERTY="${LIBERTY:-$LIB_DIR/NangateOpenCellLibrary_typical.lib}"
 TECH_LEF="${TECH_LEF:-$LIB_DIR/NangateOpenCellLibrary.tech.lef}"
 SC_LEF="${SC_LEF:-$LIB_DIR/NangateOpenCellLibrary.macro.mod.lef}"
-LIBERTY_URL="https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/master/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib"
-TECH_LEF_URL="https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/master/flow/platforms/nangate45/lef/NangateOpenCellLibrary.tech.lef"
-SC_LEF_URL="https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/master/flow/platforms/nangate45/lef/NangateOpenCellLibrary.macro.mod.lef"
+LIBERTY_URL="https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/11aa833a11488c3a540a1d8eb4caa23fd22df703/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib"
+TECH_LEF_URL="https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/11aa833a11488c3a540a1d8eb4caa23fd22df703/flow/platforms/nangate45/lef/NangateOpenCellLibrary.tech.lef"
+SC_LEF_URL="https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/11aa833a11488c3a540a1d8eb4caa23fd22df703/flow/platforms/nangate45/lef/NangateOpenCellLibrary.macro.mod.lef"
 STA="${STA:-openroad}"
 
 if ! command -v yosys >/dev/null 2>&1; then
