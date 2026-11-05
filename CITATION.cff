@@ -6,6 +6,5 @@ authors:
   - name: "arshath-007"
 repository-code: "https://github.com/arshath-007/timingforge-gcd-sta-lab"
 license: MIT
-version: "0.3.0"
-date-released: "2026-11-05"
+version: "0.4.0"
 abstract: "An educational, reproducible RTL and SDC fault-injection benchmark that explores static timing constraint coverage using Yosys and the OpenROAD-integrated OpenSTA engine."
