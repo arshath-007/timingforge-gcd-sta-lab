@@ -36,8 +36,8 @@ def parse_liberty_pvt(path: Path) -> dict:
     opener = gzip.open if path.suffix == ".gz" else open
     with opener(path, "rt", encoding="utf-8", errors="replace") as stream:
         text = stream.read()
-    voltage = re.search(r"(?m)^\\s*nom_voltage\\s*:\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*;", text)
-    temperature = re.search(r"(?m)^\\s*nom_temperature\\s*:\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*;", text)
+    voltage = re.search(r"(?m)^\s*nom_voltage\s*:\s*([-+]?(?:\d+\.?\d*|\.\d+))\s*;", text)
+    temperature = re.search(r"(?m)^\s*nom_temperature\s*:\s*([-+]?(?:\d+\.?\d*|\.\d+))\s*;", text)
     if not voltage or not temperature:
         raise ValueError(f"Liberty nominal PVT metadata missing in {path}")
     return {
