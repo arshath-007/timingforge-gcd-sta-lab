@@ -111,8 +111,9 @@ module tb_gcd_compare;
                 $fatal(1);
             end
 
+            // Completion was sampled while done was high in the loop above.
+            // At task exit it may already have deasserted on the next clock.
             if (busy_combined || busy_split) $fatal(1, "busy remained asserted after done");
-            if (!done_combined || !done_split) $fatal(1, "done pulse was not present at completion");
             total_combined_cycles = total_combined_cycles + combined_latency;
             total_split_cycles = total_split_cycles + split_latency;
             if (combined_latency > max_combined_cycles) max_combined_cycles = combined_latency;
