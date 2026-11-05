@@ -98,7 +98,7 @@ class SdcLintTests(unittest.TestCase):
             ("set_case_analysis 0 [get_ports test_mode]", "TF305 REVIEW"),
         ):
             with self.subTest(command=command):
-                findings = lint_sdc(GOLDEN + command + "\\n")
+                findings = lint_sdc(GOLDEN + command + "\n")
                 self.assertTrue(any(rule in item for item in findings))
 
 
