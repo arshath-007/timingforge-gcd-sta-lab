@@ -19,15 +19,15 @@ class TechnologyBreadthTests(unittest.TestCase):
 
     def test_platform_liberty_units_are_explicit(self):
         self.assertEqual(
-            parse_units("time 1ps\\ncapacitance 1fF\\n", "ps", "fF"),
+            parse_units("""time 1ps\ncapacitance 1fF\n""", "ps", "fF"),
             {"time": "ps", "capacitance": "ff"},
         )
         self.assertEqual(
-            parse_units("time 1ns\\ncapacitance 1pF\\n", "ns", "pF"),
+            parse_units("""time 1ns\ncapacitance 1pF\n""", "ns", "pF"),
             {"time": "ns", "capacitance": "pf"},
         )
         with self.assertRaisesRegex(ValueError, "units mismatch"):
-            parse_units("time 1ns\\ncapacitance 1pF\\n", "ps", "fF")
+            parse_units("""time 1ns\ncapacitance 1pF\n""", "ps", "fF")
 
     def test_parses_sky130_postroute_metrics(self):
         log = """
