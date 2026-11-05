@@ -41,11 +41,13 @@ def parse_scene_report(text: str, scene: str) -> dict:
         if section_begin not in body or section_end not in body:
             raise ValueError(f"missing {kind.lower()} report for {scene}")
         section = body.split(section_begin, 1)[1].split(section_end, 1)[0]
+        slack_pattern = (
+            r"(?:slack\s+\((?:MET|VIOLATED)\)\s+([-+]?(?:\d+\.?\d*|\.\d+))"
+            r"|([-+]?(?:\d+\.?\d*|\.\d+))\s+slack\s+\((?:MET|VIOLATED)\))"
+        )
         slacks = [
-            float(value) for value in re.findall(
-                r"slack\s+\((?:MET|VIOLATED)\)\s+([-+]?(?:\d+\.?\d*|\.\d+))",
-                section, re.IGNORECASE,
-            )
+            float(first or second)
+            for first, second in re.findall(slack_pattern, section, re.IGNORECASE)
         ]
         if not slacks:
             raise ValueError(f"no {kind.lower()} path slack rows reported for {scene}")
