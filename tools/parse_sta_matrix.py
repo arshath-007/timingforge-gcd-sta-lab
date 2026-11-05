@@ -71,8 +71,9 @@ def parse_log(path):
         raise ValueError(f"Unrecognised STA log: {path.name}")
     scenario = path.stem[len("sta_" + top + "_"):]
     setup = section(text, "=== SETUP / MAX PATH DETAILS ===", "=== REGISTER-TO-REGISTER SETUP PATHS ===")
-    reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===")
-    if not reg2reg:
+    if "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===" in text:
+        reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===")
+    else:
         reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== HOLD / MIN PATH DETAILS ===")
     rising_reg2reg = section(text, "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===", "=== CLOCK PROPERTIES ===")
     rising_slacks = [
