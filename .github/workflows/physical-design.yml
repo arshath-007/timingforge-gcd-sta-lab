@@ -1,0 +1,75 @@
+name: TimingForge physical design
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "rtl/gcd_binary_*.sv"
+      - "constraints/gcd_baseline.sdc"
+      - "physical/**"
+      - "scripts/run_physical.sh"
+      - "scripts/postroute_sta.tcl"
+      - "tools/physical_manifest.py"
+      - "tools/physical_metrics.py"
+      - ".github/workflows/physical-design.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nangate45-physical:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    container:
+      image: openroad/orfs@sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
+    steps:
+      - name: Checkout source
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Run Python regression
+        run: python3 -m unittest discover -s tests -v
+      - name: Ensure KLayout is available
+        shell: bash
+        run: |
+          if ! command -v klayout >/dev/null 2>&1; then
+            apt-get update
+            apt-get install -y klayout
+          fi
+          command -v klayout
+      - name: Run both Nangate45 physical implementations
+        shell: bash
+        run: |
+          source /OpenROAD-flow-scripts/env.sh
+          mkdir -p build/physical
+          if ! bash scripts/run_physical.sh > build/physical/physical_flow_console.log 2>&1; then
+            echo "Physical flow failed. Last 250 console lines:"
+            tail -n 250 build/physical/physical_flow_console.log
+            echo "Latest stage logs:"
+            find build/physical -type f -name "*.log" -printf "%T@ %p\\n" | sort -nr | head -n 20
+            exit 1
+          fi
+          tail -n 100 build/physical/physical_flow_console.log
+          python3 -m tools.physical_metrics build/reports/sta_matrix_summary.json build/physical --output build/physical/physical_comparison.json
+      - name: Upload physical design evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timingforge-nangate45-physical
+          path: |
+            build/physical/**
+            build/reports/sta_matrix_summary.json
+            build/reports/sta_matrix_summary.md
+            build/reports/sta_*.log
+            build/yosys_*.log
+          retention-days: 90

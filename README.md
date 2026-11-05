@@ -3,7 +3,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.3.0 candidate · **License:** MIT
+**Status:** Research prototype · **Version:** 0.4.0 candidate · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -70,10 +70,12 @@ The static checker is a conservative, interface-specific prototype—not a full 
 rtl/             synthesizable GCD architectures plus FIFO/MAC extension blocks
 tb/              self-checking GCD, FIFO and MAC SystemVerilog testbenches
 constraints/     golden SDC
-tools/           fault injector, SDC linter, benchmark and STA parser
-tests/           Python unit tests
-scripts/         Yosys synthesis and OpenSTA/OpenROAD entry points
-docs/            scope, fault catalog, learning path and measured results
+tools/           fault injector, SDC linter, STA/QoR and physical-evidence parsers
+tests/           Python unit tests for STA, QoR, and physical evidence
+scripts/         synthesis, formal, OpenSTA and OpenROAD entry points
+formal/          bounded transaction-equivalence miter and SymbiYosys config
+physical/        matched Nangate45 ORFS design configurations
+docs/            scope, fault catalog, verification and physical results
 reports/         generated reports (not committed by default)
 .github/         automated RTL/Python and library-backed STA workflows
 ```
@@ -173,6 +175,35 @@ The current main-branch extension and diagnostic changes passed both CI jobs in 
 
 See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report walkthrough](docs/ARCHITECTURE_AND_STA_WALKTHROUGH.md), the [portfolio and interview guide](docs/PORTFOLIO_AND_INTERVIEW.md), and [advanced SDC exercises](docs/ADVANCED_SDC_EXERCISES.md).
 
+
+## Phase 2 verification evidence — bounded formal + reproducible simulation
+
+The current [formal workflow run #49](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430) passed the positive CVC5 proof and the deliberate subtract-mutant negative control; download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430/artifacts/13439043462). The [regression and library-backed STA run #336](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502) passed the 32-bit RTL regression, FIFO/MAC tests, Python checks, SDC lint, fault-injection benchmark and library-backed STA matrix. Its [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502/artifacts/13439247462) records 7/7 controlled static fault patterns detected; this is not a general SDC correctness score.
+
+- Bounded transaction-level equivalence checks all symbolic 3-bit input pairs, including zero/equal operands, with independent completion timing; CVC5 1.1.2 and Yosys 0.33, 26 SMT steps / 12 positive clock edges.
+- The negative control deliberately corrupts the combined subtract operation and is rejected by the same property set.
+- The 32-bit simulation includes directed cases and 250 deterministic constrained-random cases using seed `0x54462026`; 259 cases were checked on each architecture, with parity, zero/equal, high-bit, GCD-class and latency-bin coverage.
+- QoR snapshots record source SHA, tool versions, platform/corner, Liberty hash, scenario and SDC hashes. The comparator rejects environment or scenario mismatches. Snapshots are artifact-backed, not a persistent database/dashboard.
+- The proof is bounded at WIDTH=3, not a 32-bit or unbounded proof. The flow uses immediate assertions; concurrent `assert property` SVA syntax is not supported by this selected frontend path.
+- The OpenSTA mutation-impact report has 12 matched and 2 inconclusive cases; both inconclusive observations are hold-uncertainty cases. No aggregate accuracy score is claimed.
+
+## Phase 3 physical-design evidence — Nangate45 typical
+
+The current [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) passed for both architectures. Download the [complete physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211), which includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA logs, comparison JSON and SHA-256 manifest. Detailed interpretation is in [Phase 3 measured results](docs/PHASE3_RESULTS.md).
+
+| Post-route metric | Combined GCD | Split GCD |
+|---|---:|---:|
+| Register-to-register minimum period | 0.95 ns | 1.02 ns |
+| Register-to-register Fmax | 1048.98 MHz | 984.86 MHz |
+| All-path minimum period | 2.13 ns | 2.26 ns |
+| All-path Fmax | 469.98 MHz | 442.15 MHz |
+| Worst setup slack | +7.872 ns | +7.738 ns |
+| Worst hold slack | +0.031 ns | +0.018 ns |
+| Reported setup skew (worst reported path) | +0.16 ns | +0.16 ns |
+| Reported hold skew (worst reported path) | -0.06 ns | -0.06 ns |
+
+The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are typical-corner educational results, not signoff. Multi-corner analysis is deferred because a second, independently verified Liberty PVT model is not part of the selected platform. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
+
 ## Research questions
 
 - Does the checker detect each mutation that it is designed to recognise?
@@ -187,8 +218,9 @@ See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report
 - The Python linter is a first-pass line/pattern-based checker, not a full SDC parser or proof of constraint correctness. It recognises the project's canonical option ordering and simple `get_ports` forms; alternative but valid Tcl/SDC command orderings may be rejected. It checks presence and positivity of uncertainty, not whether an I/O delay is realistic for a product. False paths, multicycle paths, clock groups, disabled timing arcs and case analysis are flagged for human review.
 - A false-path statement is flagged for review; a broad false-path test is only a controlled negative experiment. The tool does not decide whether a real exception is valid without design intent.
 - The first SDC is an illustrative block-level budget, not a product specification. Output loads are expressed in the Liberty capacitance unit (fF); the current SDC uses 20 fF for scalar control outputs and 30 fF for the GCD bus. Changing these loads requires regenerating the baseline timing evidence.
-- The current library-backed result uses one typical Nangate45 corner, ideal clocks, and no SPEF/extracted interconnect parasitics. It is pre-layout and not signoff.
-- No full physical implementation, CTS, route, MMMC/PVT, OCV/AOCV/POCV, crosstalk/SI, or timing ECO closure is claimed yet.
+- The pre-layout matrix uses one Nangate45 typical corner, ideal clocks, and no SPEF. A separate reproducible ORFS flow now produces placed, CTS, routed and extracted-SPEF post-route results for both GCD architectures at that same typical corner.
+- No multi-corner/MMMC, OCV/AOCV/POCV, crosstalk/SI, timing ECO closure, or netlist-to-netlist LEC across ORFS optimization stages is claimed. The optional ORFS Kepler LEC subprocess is disabled in this container; Phase 2 supplies a separate bounded RTL transaction-equivalence proof.
+- The physical run is an educational flow, not foundry signoff. DRC/LVS signoff, IR-drop/EM qualification, and manufacturing readiness are not claimed.
 - The educational Nangate45 platform is not a modern production process or signoff reference.
 - No power measurement is claimed.
 
@@ -217,8 +249,9 @@ The intended project contribution is a **reproducible fault-injection benchmark 
 - [x] Add reproducible setup/hold uncertainty and source-latency sensitivity experiments.
 - [x] Add expected-versus-observed SDC mutation impact scoring with inconclusive outcomes preserved.
 - [ ] Add generated-clock, multicycle, clock-group, and justified false-path scenarios.
-- [ ] Add additional corners and variation-aware experiments.
-- [ ] Add OpenROAD floorplanning, placement, CTS, routing, and parasitic-aware reports.
+- [x] Add OpenROAD floorplanning, placement, CTS, routing, GDS generation, and SPEF-based post-route STA for both architectures at Nangate45 typical.
+- [x] Compare pre-layout and post-route metrics using the same baseline SDC and typical Liberty; archive raw logs and SHA-256 manifests.
+- [ ] Add additional corners and variation-aware experiments only after distinct Liberty PVT models are verified.
 - [ ] Validate findings with external contributors and maintainers.
 
 ## Contributing and citation
