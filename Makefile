@@ -43,5 +43,8 @@ sta-matrix:
 sta-quality: sta-matrix
 	$(PYTHON) -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
 
+sensitivity: sta-matrix
+	$(PYTHON) -m tools.run_sensitivity
+
 clean:
 	rm -rf build
