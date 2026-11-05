@@ -34,6 +34,13 @@ fi
 
 OUT="$ROOT/build/technology_breadth"
 mkdir -p "$OUT"
+ASAP7_LIB_DIR="$FLOW_ROOT/platforms/asap7/lib/NLDM"
+ASAP7_FILTERED_LIB_DIR="$OUT/asap7/filtered_libs"
+python3 "$ROOT/tools/filter_asap7_libs.py" \
+  --lib-dir "$ASAP7_LIB_DIR" \
+  --output-dir "$ASAP7_FILTERED_LIB_DIR" \
+  --manifest "$OUT/asap7/filtered_libs_manifest.json"
+export ASAP7_FILTERED_LIB_DIR
 {
   echo "OpenROAD: $(openroad -version)"
   echo "Yosys: $(yosys -V)"
@@ -43,6 +50,7 @@ mkdir -p "$OUT"
 
 for PLATFORM in asap7 sky130hd; do
   for TOP in gcd_binary_combined gcd_binary_split; do
+    unset TECH_LEF SC_LEF LIBERTY ODB SDC SPEF ASAP7_LIB_DIR || true
     CONFIG="$ROOT/physical/config/${TOP}_${PLATFORM}.mk"
     WORK_HOME="$OUT/$PLATFORM/$TOP"
     [[ -s "$CONFIG" ]] || { echo "Missing config: $CONFIG" >&2; exit 2; }
@@ -57,7 +65,7 @@ for PLATFORM in asap7 sky130hd; do
     fi
 
     RESULTS="$WORK_HOME/results/$PLATFORM/$TOP/base"
-    for artifact in 2_floorplan.odb 3_place.odb 4_cts.odb 5_route.odb 6_final.odb 6_final.gds 6_final.spef 6_final.sdc; do
+    for artifact in 2_floorplan.odb 3_place.odb 4_cts.odb 5_route.odb 6_final.odb 6_final.v 6_final.gds 6_final.spef 6_final.sdc; do
       [[ -s "$RESULTS/$artifact" ]] || {
         echo "Missing required $PLATFORM physical artifact: $RESULTS/$artifact" >&2
         find "$WORK_HOME" -maxdepth 7 -type f | sort >&2
@@ -66,15 +74,24 @@ for PLATFORM in asap7 sky130hd; do
     done
 
     if [[ "$PLATFORM" == "asap7" ]]; then
+      if grep -Eq '(^|[[:space:]])(XOR|XNOR|HAxp5)[A-Za-z0-9_]*_ASAP7_75t_R[[:space:]]' "$RESULTS/6_final.v"; then
+        echo "Unsupported ASAP7 XOR/XNOR/HA cell remains in $TOP netlist" >&2
+        exit 1
+      fi
       export TECH_LEF="$FLOW_ROOT/platforms/asap7/lef/asap7_tech_1x_201209.lef"
       export SC_LEF="$FLOW_ROOT/platforms/asap7/lef/asap7sc7p5t_28_R_1x_220121a.lef"
       export ASAP7_LIB_DIR="$FLOW_ROOT/platforms/asap7/lib/NLDM"
+      export ASAP7_FILTERED_LIB_DIR
       export ODB="$RESULTS/6_final.odb"
       export SDC="$RESULTS/6_final.sdc"
       export SPEF="$RESULTS/6_final.spef"
       echo "=== POST-ROUTE MCMM: ASAP7 BC/TC/WC top=$TOP ==="
       openroad -exit "$ROOT/scripts/asap7_mcmm_postroute.tcl" 2>&1 | tee "$WORK_HOME/asap7_mcmm_postroute.log"
       grep -q "TIMINGFORGE_ASAP7_MCMM_COMPLETE" "$WORK_HOME/asap7_mcmm_postroute.log"
+      if grep -q "STA-1111" "$WORK_HOME/asap7_mcmm_postroute.log"; then
+        echo "ASAP7 MCMM emitted missing timing-group warnings for $TOP" >&2
+        exit 1
+      fi
     else
       export LIBERTY="$FLOW_ROOT/platforms/sky130hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib"
       export TECH_LEF="$FLOW_ROOT/platforms/sky130hd/lef/sky130_fd_sc_hd.tlef"
