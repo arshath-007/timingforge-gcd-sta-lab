@@ -33,6 +33,8 @@ report_wns -min -digits 3
 report_tns -min -digits 3
 puts "=== SETUP / MAX PATH DETAILS ==="
 report_checks -path_delay max -format full_clock_expanded -digits 3
+puts "=== REGISTER-TO-REGISTER SETUP PATHS ==="
+report_checks -from [all_registers -output_pins] -to [all_registers -data_pins] -path_delay max -format full_clock_expanded -group_path_count 10 -digits 3
 puts "=== HOLD / MIN PATH DETAILS ==="
 report_checks -path_delay min -format full_clock_expanded -digits 3
 puts "=== UNCONSTRAINED PATH DETAILS ==="
