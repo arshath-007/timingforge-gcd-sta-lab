@@ -10,14 +10,14 @@ command -v "$FORMAL_SOLVER" >/dev/null
 {
   echo "Yosys: $(yosys -V)"
   echo "Solver: $FORMAL_SOLVER ($("$FORMAL_SOLVER" --version 2>&1 | head -n 1))"
-  echo "Proof: bounded transaction-level equivalence, WIDTH=4, depth=18"
+  echo "Proof: bounded transaction-level equivalence, WIDTH=4, depth=34"
 } | tee build/formal/tool_versions.txt
 
-yosys -p "read_verilog -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; clk2fflogic; write_smt2 -wires build/formal/gcd_equiv.smt2" \
+yosys -p "read_verilog -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; write_smt2 -wires build/formal/gcd_equiv.smt2" \
   | tee build/formal/yosys.log
 
 # Prove assertions in the miter; --dump-vcd only selects the trace output file.
-yosys-smtbmc -s "$FORMAL_SOLVER" -t 18 --dump-vcd build/formal/gcd_equiv.vcd build/formal/gcd_equiv.smt2 \
+yosys-smtbmc -s "$FORMAL_SOLVER" -t 34 --dump-vcd build/formal/gcd_equiv.vcd build/formal/gcd_equiv.smt2 \
   | tee build/formal/smtbmc.log
 
 grep -q "Status: PASSED" build/formal/smtbmc.log
@@ -29,11 +29,11 @@ if cmp -s rtl/gcd_binary_combined.sv build/formal/gcd_binary_combined_broken.sv;
   exit 1
 fi
 
-yosys -p "read_verilog -formal -sv build/formal/gcd_binary_combined_broken.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; clk2fflogic; write_smt2 -wires build/formal/gcd_equiv_broken.smt2" \
+yosys -p "read_verilog -formal -sv build/formal/gcd_binary_combined_broken.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; write_smt2 -wires build/formal/gcd_equiv_broken.smt2" \
   | tee build/formal/yosys_negative.log
 
 set +e
-yosys-smtbmc -s "$FORMAL_SOLVER" -t 18 --dump-vcd build/formal/gcd_equiv_negative.vcd build/formal/gcd_equiv_broken.smt2 \
+yosys-smtbmc -s "$FORMAL_SOLVER" -t 34 --dump-vcd build/formal/gcd_equiv_negative.vcd build/formal/gcd_equiv_broken.smt2 \
   > build/formal/smtbmc_negative.log 2>&1
 negative_status=$?
 set -e
