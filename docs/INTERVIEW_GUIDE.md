@@ -79,8 +79,11 @@ Add generated-clock, clock-group and carefully justified multicycle/false-path c
 - [Fault catalog](FAULT_CATALOG.md)
 - [RTL architectures](../rtl/)
 - [Golden SDC](../constraints/gcd_baseline.sdc)
-- [Latest successful CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060)
-- [Downloadable STA logs and matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413)
+- [Baseline measured-results CI run #41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060)
+- [Latest successful CI validation — run #78, documentation-only update](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42006568892)
+- [Downloadable baseline STA logs and matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413)
+
+Run #41999231060 generated the numerical measurements and downloadable STA artifacts. Run #78 reran regression and library-backed STA after documentation-only changes; it validates the final documentation revision but does not regenerate or supersede the baseline measurements.
 
 ## Personal preparation checklist
 
