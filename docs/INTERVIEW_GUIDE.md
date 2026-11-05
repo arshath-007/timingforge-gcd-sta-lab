@@ -79,11 +79,11 @@ Add generated-clock, clock-group and carefully justified multicycle/false-path c
 - [Fault catalog](FAULT_CATALOG.md)
 - [RTL architectures](../rtl/)
 - [Golden SDC](../constraints/gcd_baseline.sdc)
-- [Corrected-load baseline run #131](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609)
-- [Latest corrected-load CI validation run #131](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609)
-- [Downloadable corrected-load STA logs and matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609/artifacts/13407338484)
+- [Corrected-load baseline run #136](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013708525)
+- [Latest corrected-load CI validation run #136](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013708525)
+- [Downloadable corrected-load STA logs and matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013708525/artifacts/13406904777)
 
-Run #131 (ID 42013425609) generated the corrected-load numerical measurements and downloadable STA artifacts; both CI jobs passed on commit `39e6f88d19f739394989697b7c06ecf2ebf24e1b`.
+Run #136 (ID 42013708525) generated the corrected-load numerical measurements and downloadable STA artifacts; both CI jobs passed on commit `66885ced80f9cea43977b576ba187dac671ff4e9`.
 
 ## Personal preparation checklist
 
