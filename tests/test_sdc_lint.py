@@ -83,5 +83,24 @@ class SdcLintTests(unittest.TestCase):
         self.assertFalse(any("TF101 ERROR" in x for x in lint_sdc(text)))
 
 
+    def test_negative_hold_uncertainty_is_rejected(self):
+        text = GOLDEN.replace(
+            "set_clock_uncertainty -hold 0.050",
+            "set_clock_uncertainty -hold -5.000",
+        )
+        self.assertTrue(any("TF402 ERROR" in x for x in lint_sdc(text)))
+
+    def test_other_timing_exceptions_require_review(self):
+        for command, rule in (
+            ("set_multicycle_path 2 -setup -from [all_registers] -to [all_registers]", "TF302 REVIEW"),
+            ("set_clock_groups -asynchronous -group {core_clk}", "TF303 REVIEW"),
+            ("set_disable_timing U1/A", "TF304 REVIEW"),
+            ("set_case_analysis 0 [get_ports test_mode]", "TF305 REVIEW"),
+        ):
+            with self.subTest(command=command):
+                findings = lint_sdc(GOLDEN + command + "\\n")
+                self.assertTrue(any(rule in item for item in findings))
+
+
 if __name__ == "__main__":
     unittest.main()
