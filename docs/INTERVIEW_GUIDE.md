@@ -10,7 +10,7 @@ I use two synthesizable 32-bit binary-GCD architectures as a controlled RTL benc
 
 The flow synthesises both architectures and analyses eight constraint scenarios per design, so there are 16 timing runs. It reports cell area, minimum clock period, Fmax, setup and hold slack, missing I/O delay coverage, unconstrained endpoints, and register-to-register path presence.
 
-One finding is that a broad false-path exception removes the register-to-register paths from the dedicated report. Another is that removing the input delay on a 32-bit bus changes the reported critical path and makes the timing result look better. The project also compares the split architecture's faster reported clock limit against its higher area and greater cycle count.
+One finding is that a broad false-path exception removes the register-to-register paths from the dedicated report. Another is that removing the input delay on a 32-bit bus changes the reported critical path and makes the timing result look better. The project reports all-path timing metrics, cell area, and RTL operation cycle counts separately. Because the reported minimum period includes port paths, it does not claim a register-to-register-only architecture speedup.
 
 The results are educational pre-layout Nangate45 measurements—not production signoff. The next step is multi-corner and physical implementation with realistic clock and parasitic assumptions."
 
@@ -93,5 +93,5 @@ Before presenting this project, be able to:
 - Explain the difference between setup and hold slack.
 - Show the baseline versus M02 timing summary.
 - Show the register-to-register report before and after M04.
-- Explain why split can have a better Fmax but more cycles.
+- Explain why all-path Fmax and register-to-register timing are different metrics, and why split uses more cycles in the tested corpus.
 - State the Nangate45, pre-layout, no-SPEF limitations without prompting.
