@@ -13,6 +13,18 @@ module tb_gcd_compare;
     integer total_split_cycles = 0;
     integer max_combined_cycles = 0;
     integer max_split_cycles = 0;
+    integer random_cases = 0;
+    integer zero_input_cases = 0;
+    integer equal_operand_cases = 0;
+    integer both_even_cases = 0;
+    integer one_even_cases = 0;
+    integer both_odd_cases = 0;
+    integer high_bit_cases = 0;
+    integer gcd_one_cases = 0;
+    integer gcd_nontrivial_cases = 0;
+    integer combined_le32 = 0, combined_33_64 = 0, combined_gt64 = 0;
+    integer split_le32 = 0, split_33_64 = 0, split_gt64 = 0;
+    integer initial_seed = 32'h5446_2026;
     integer seed = 32'h5446_2026;
     reg previous_done_combined = 1'b0;
     reg previous_done_split = 1'b0;
@@ -63,6 +75,14 @@ module tb_gcd_compare;
         integer split_latency;
         begin
             expected = gcd_ref(a, b);
+            if ((a == 0) || (b == 0)) zero_input_cases = zero_input_cases + 1;
+            if (a == b) equal_operand_cases = equal_operand_cases + 1;
+            if (!a[0] && !b[0]) both_even_cases = both_even_cases + 1;
+            else if (a[0] && b[0]) both_odd_cases = both_odd_cases + 1;
+            else one_even_cases = one_even_cases + 1;
+            if (a[WIDTH-1] || b[WIDTH-1]) high_bit_cases = high_bit_cases + 1;
+            if (expected == 1) gcd_one_cases = gcd_one_cases + 1;
+            else if (expected > 1) gcd_nontrivial_cases = gcd_nontrivial_cases + 1;
             combined_seen = 1'b0;
             split_seen = 1'b0;
             elapsed_cycles = 0;
@@ -122,6 +142,12 @@ module tb_gcd_compare;
             total_split_cycles = total_split_cycles + split_latency;
             if (combined_latency > max_combined_cycles) max_combined_cycles = combined_latency;
             if (split_latency > max_split_cycles) max_split_cycles = split_latency;
+            if (combined_latency <= 32) combined_le32 = combined_le32 + 1;
+            else if (combined_latency <= 64) combined_33_64 = combined_33_64 + 1;
+            else combined_gt64 = combined_gt64 + 1;
+            if (split_latency <= 32) split_le32 = split_le32 + 1;
+            else if (split_latency <= 64) split_33_64 = split_33_64 + 1;
+            else split_gt64 = split_gt64 + 1;
             cases = cases + 1;
         end
     endtask
@@ -132,7 +158,7 @@ module tb_gcd_compare;
         repeat (3) @(negedge clk);
         rst = 1'b0;
         // Keep the random corpus reproducible across repeated runs with the same simulator.
-        seed = 32'h5446_2026;
+        seed = initial_seed;
 
         check_case(0, 0);
         check_case(0, 99);
@@ -149,9 +175,20 @@ module tb_gcd_compare;
             ra = $random(seed);
             rb = $random(seed);
             check_case(ra, rb);
+            random_cases = random_cases + 1;
         end
 
+        if (random_cases != 250 || zero_input_cases == 0 || equal_operand_cases == 0 ||
+            both_even_cases == 0 || one_even_cases == 0 || both_odd_cases == 0 ||
+            high_bit_cases == 0 || gcd_one_cases == 0 || gcd_nontrivial_cases == 0)
+            $fatal(1, "coverage requirement not met");
         $display("PASS: %0d cases checked on both architectures", cases);
+        $display("SEED: 0x%08x RANDOM_CASES: %0d", initial_seed, random_cases);
+        $display("COVERAGE: zero=%0d equal=%0d both_even=%0d one_even=%0d both_odd=%0d high_bit=%0d gcd_one=%0d gcd_nontrivial=%0d",
+            zero_input_cases, equal_operand_cases, both_even_cases, one_even_cases, both_odd_cases,
+            high_bit_cases, gcd_one_cases, gcd_nontrivial_cases);
+        $display("LATENCY_BINS: combined_le32=%0d combined_33_64=%0d combined_gt64=%0d split_le32=%0d split_33_64=%0d split_gt64=%0d",
+            combined_le32, combined_33_64, combined_gt64, split_le32, split_33_64, split_gt64);
         $display("LATENCY: combined_avg=%.2f cycles combined_max=%0d cycles split_avg=%.2f cycles split_max=%0d cycles", 1.0*total_combined_cycles/cases, max_combined_cycles, 1.0*total_split_cycles/cases, max_split_cycles);
         $finish;
     end
