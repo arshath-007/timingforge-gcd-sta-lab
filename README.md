@@ -1,3 +1,5 @@
+[![TimingForge regression](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/rtl-regression.yml/badge.svg)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/rtl-regression.yml)
+
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
@@ -21,6 +23,21 @@ TimingForge makes this failure mode testable:
 4. Where a Liberty library and OpenSTA are available, run STA on each scenario.
 5. Compare detected defects, unconstrained paths, and timing results.
 6. Publish every assumption and result rather than inventing PPA numbers.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    A[Reference GCD RTL] --> B[Golden SDC]
+    B --> C[Controlled SDC Mutations]
+    C --> D[Static Constraint Linter]
+    D --> E[JSON and Markdown Scorecard]
+    B --> F[OpenSTA]
+    C --> F
+    F --> G[Timing Impact Analysis - next stage]
+```
+
+The static linter and scorecard are implemented. OpenSTA integration scripts are present, but actual library-backed timing runs and parsed timing-impact comparisons remain future work.
 
 ## First release
 
@@ -81,6 +98,17 @@ make sta
 ```
 
 The synthesis script is a starting point, not a guarantee that every Liberty library will map without library-specific adjustments. Review the Yosys/OpenSTA logs and tool versions.
+
+## Verified CI evidence
+
+Latest successful GitHub Actions run:
+- 258 directed/random test cases checked on both GCD architectures.
+- 6 Python unit tests passed.
+- Golden SDC pattern lint passed.
+- 4 of 4 controlled static mutation patterns were detected by the prototype.
+- JSON and Markdown benchmark scorecards were uploaded as a workflow artifact.
+
+These results do **not** mean arbitrary SDC defects are detected or that STA signoff has been completed. No Yosys/OpenSTA PPA measurements are published yet.
 
 ## Research questions
 
