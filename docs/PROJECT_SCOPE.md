@@ -49,12 +49,12 @@ The checker is interface-specific and uses simple line-oriented pattern checks. 
 
 ## Published evidence
 
-The historical v0.2 measurements and seven controlled mutations are sourced from baseline run ID `41999231060` (workflow run #69). The original SDC load values were later found to be 0.02/0.03 fF rather than the intended 20/30 fF; a corrected-load matrix is being regenerated, so the historical numbers are not the corrected-load baseline. The latest CI validation is run ID `42007925745` (workflow run #82):
+The corrected-load v0.2 baseline is sourced from [GitHub Actions run #116 (ID 42012354266)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266), source commit `e3d529618c80a59123bb16a2271289d41ce1b961`. Both regression and library-backed STA jobs passed.
 
-- [Baseline measurement run ID 41999231060 (workflow run #69)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060) — source of the published numerical results and baseline artifacts.
-- [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413) — raw timing logs and parsed matrix evidence for both architectures and eight SDC scenarios each.
-- [Static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334) — generated static SDC fault-injection scorecard.
-- [Measured results and scenario interpretations](INITIAL_RESULTS.md).
-- [Latest CI validation — run ID 42007925745 (workflow run #82)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007925745) — regression and library-backed STA both passed. This validates the later repository revision; the numerical measurements and baseline artifacts remain sourced from run ID 41999231060.
+- [Corrected-load STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266/artifacts/13407377245) — 16 raw timing logs and parsed JSON/Markdown summary for two architectures × eight SDC scenarios.
+- [Static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266/artifacts/13406973684) — golden SDC passed and all seven defined fault patterns were detected.
+- [Corrected measured results and scenario interpretations](INITIAL_RESULTS.md).
+- The earlier run ID `41999231060` used 0.02/0.03 fF output loads and is superseded for numerical baseline claims.
+
 
 Keep scenario-level values sourced from the generated artifacts and measured-results report. Do not fill gaps with estimates or infer unreported WNS, hold, or unconstrained-path values.
