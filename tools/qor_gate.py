@@ -46,11 +46,16 @@ def evaluate(reference: dict, candidate: dict, policy: dict) -> dict:
             before = _finite(old.get(metric), f"baseline {key} {metric}")
             after = _finite(new.get(metric), f"candidate {key} {metric}")
             if metric in ("cell_area", "all_path_min_period_ns"):
-                if before <= 0:
-                    raise ValueError(f"baseline {metric} must be positive")
+                if before <= 0 or after <= 0:
+                    raise ValueError(f"baseline and candidate {metric} must be positive")
                 delta = (after / before - 1.0) * 100.0
-                limit_key = "cell_area_growth_percent" if metric == "cell_area" else "all_path_min_period_growth_percent"
-                limit = float(limits[limit_key])
+                limit_keys = {
+                    "cell_area": "cell_area_growth_percent",
+                    "all_path_min_period_ns": "all_path_min_period_growth_percent",
+                    "worst_setup_slack_ns": "worst_setup_slack_drop_ns",
+                    "worst_hold_slack_ns": "worst_hold_slack_drop_ns",
+                }
+                limit = float(limits[limit_keys[metric]])
                 passed = delta <= limit
                 check = {
                     "top": key[0], "metric": metric, "baseline": before,
