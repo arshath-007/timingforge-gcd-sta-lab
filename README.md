@@ -132,21 +132,22 @@ Review the raw Yosys/OpenSTA logs and tool versions. A successful script exit al
 
 ## Verified evidence
 
-The corrected-load baseline is reproducible from [GitHub Actions run #154](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42014756565), source commit `0591f6a3bf9fa7dffa995f2771bc2127f9ce5634`. Both the RTL/Python regression and the 16-run Nangate45 library-backed STA matrix passed.
+The v0.2.0 release was validated by [GitHub Actions run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699), source commit `bdd42621749035fa088e326c766f3af8031af337`. Both RTL/Python regression and the 16-run Nangate45 STA matrix passed.
 
-- 258 directed/random GCD input pairs checked on each RTL architecture by the functional testbench.
-- 20 Python unit tests passed in the expanded regression suite.
-- Seven controlled static SDC fault patterns detected (7/7) with the golden SDC passing. This is a score for the defined patterns only, not general SDC correctness.
+- Two synthesizable GCD architectures evaluated.
+- Seven defined SDC fault patterns detected (7/7).
 - Both architectures synthesized against the pinned Nangate45 typical Liberty file.
-- Eight SDC scenarios analysed for each architecture (16 raw STA log files).
+- Eight SDC scenarios analysed per architecture (16 STA logs).
 - Corrected golden output loads: 20 fF on scalar outputs and 30 fF on the GCD output bus.
-- Corrected-load baseline measurements: combined 1657.180 area units, 2.940 ns all-path period / 340.67 MHz, +7.065 ns worst setup slack, and -0.002 ns worst hold slack; split 1681.918 area units, 2.350 ns all-path period / 425.57 MHz, +7.650 ns worst setup slack, and +0.005 ns worst hold slack.
-- The split architecture reports a 0.740 ns register-to-register minimum period / 1353.86 MHz. The equivalent combined-design query returned 0.00 ns / infinity, so the parser correctly records it as n/a; a separate path-presence report still finds register-to-register paths.
-- Historical finite-corpus latency observations (63.63 average / 93 max observed combined; 84.17 average / 124 max observed split) are not proven worst-case bounds and are not newly remeasured by the STA matrix.
+- Combined: 1657.180 area units, 2.94 ns all-path period, 340.67 MHz all-path Fmax, +7.065 ns worst setup slack and -0.002 ns worst hold slack.
+- Split: 1681.918 area units, 2.35 ns all-path period, 425.57 MHz all-path Fmax, +7.650 ns worst setup slack and +0.005 ns worst hold slack.
+- All-path period includes I/O port paths. These figures are not a register-to-register-only architecture speed comparison.
+- Split register-to-register minimum period: 0.740 ns. The equivalent combined-design minimum-period query returned no usable measurement, although a separate path report finds register-to-register paths.
+- Latency figures are finite-corpus observations, not proven worst-case bounds.
 
-Download the [corrected-load raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42014756565/artifacts/13408398793) and the [static benchmark scorecard](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42014756565/artifacts/13409355024). See [corrected initial results](docs/INITIAL_RESULTS.md) and [CI run #154](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42014756565).
+Download the [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408368824) and [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408887449).
 
-The testbench uses directed cases, an explicit high-iteration operand pair, and 250 randomized pairs from a fixed seed. This makes the random corpus repeatable for the same simulator and testbench revision; observed maxima remain finite-corpus results, not proven worst-case bounds.
+See [initial results](docs/INITIAL_RESULTS.md) and [final CI run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699).
 
 ## Research questions
 
