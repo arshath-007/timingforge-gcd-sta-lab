@@ -8,5 +8,7 @@ export CORE_ASPECT_RATIO = 1
 export CORE_MARGIN = 0.5
 export PLACE_DENSITY = 0.50
 export TNS_END_PERCENT = 100
+# Exclude cells with missing TT/SS combinational timing groups in pinned ASAP7 SIMPLE libraries.
+export DONT_USE_CELLS += XOR* XNOR* HAxp5*
 export SYNTH_USE_SYN = 1
 export SETUP_REPAIR_PHASES = PARALLEL_EVAL
