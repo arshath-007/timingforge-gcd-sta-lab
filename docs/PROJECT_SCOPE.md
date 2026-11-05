@@ -55,5 +55,6 @@ The v0.2 baseline and all seven controlled mutations have been evaluated in the 
 - [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413) — raw timing logs and parsed matrix evidence for both architectures and eight SDC scenarios each.
 - [Static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334) — generated static SDC fault-injection scorecard.
 - [Measured results and scenario interpretations](INITIAL_RESULTS.md).
+- [Latest CI validation — run #80](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007562314) — regression and library-backed STA both passed after documentation-only updates. This validates the current documentation revision; the numerical measurements and downloadable baseline artifacts remain sourced from run #41999231060.
 
 Keep scenario-level values sourced from the generated artifacts and measured-results report. Do not fill gaps with estimates or infer unreported WNS, hold, or unconstrained-path values.
