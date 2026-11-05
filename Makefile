@@ -2,7 +2,7 @@ PYTHON ?= python3
 IVERILOG ?= iverilog
 VVP ?= vvp
 
-.PHONY: help rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity clean
+.PHONY: help rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity formal clean
 
 help:
 	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity clean"
@@ -40,7 +40,7 @@ sta:
 sta-matrix:
 	bash scripts/run_nangate_sta.sh
 
-sta-quality: sta-matrix
+formal:\n\tbash scripts/run_formal.sh\n\nsta-quality: sta-matrix
 	$(PYTHON) -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
 
 sensitivity: sta-matrix
