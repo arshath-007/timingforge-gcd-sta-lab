@@ -1,10 +1,10 @@
 # Phase 2 formal and assertion evidence — scope and interpretation
 
-The formal property set checks both architecture equivalence and each implementation against an independent Euclidean GCD reference at the transaction boundary. It does not require the two `done` pulses to occur on the same cycle because the split architecture intentionally has additional processing latency.
+The formal property set checks both architecture equivalence and each implementation against an independent exhaustive 64-entry Euclidean GCD truth table at the transaction boundary. It does not require the two `done` pulses to occur on the same cycle because the split architecture intentionally has additional processing latency.
 
 - Formal width: 3 bits; all 64 symbolic operand pairs are considered.
 - Stimulus: one reset followed by one accepted start request.
-- Assertions: each implementation completes once, reports `done` with `busy` low, returns the Euclidean-reference GCD, agrees with the other implementation, and completes within the 12-cycle bound.
+- Assertions: each implementation completes once, reports `done` with `busy` low, returns the truth-table GCD, agrees with the other implementation, and completes within the 12-cycle bound.
 - Engine: Yosys SMT2 export plus `yosys-smtbmc` and CVC5.
 - Bound: 26 SMT steps (12 positive clock edges).
 - Negative control: a deliberately broken subtract operation must fail the same miter.
