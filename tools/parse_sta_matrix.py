@@ -77,10 +77,10 @@ def classify_critical_path(startpoint, endpoint):
 
     start = re.sub(r"\s+\(.*\)$", "", startpoint.strip())
     end = re.sub(r"\s+\(.*\)$", "", endpoint.strip())
-    start_input = is_port(start, "a_in") or is_port(start, "b_in")
-    end_output = is_port(end, "gcd_out")
-    start_reg = bool(re.search(r"/(?:Q|QN)$", start))
-    end_reg = bool(re.search(r"/D$", end))
+    start_input = is_port(start, "a_in") or is_port(start, "b_in") or "input port" in startpoint.lower()
+    end_output = is_port(end, "gcd_out") or "output port" in endpoint.lower()
+    start_reg = bool(re.search(r"/(?:Q|QN)$", start)) or "flip-flop" in startpoint.lower()
+    end_reg = bool(re.search(r"/D$", end)) or "flip-flop" in endpoint.lower()
 
     if start_input and end_reg:
         return "input_to_register"
