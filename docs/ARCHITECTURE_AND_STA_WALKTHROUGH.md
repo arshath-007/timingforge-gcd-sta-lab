@@ -41,7 +41,9 @@ In the v0.2.0 baseline log, the combined architecture has a same-clock rising-ed
 
 The same baseline run reports `report_clock_min_period` as `0.00 / inf` for the combined architecture, while the split architecture reports 0.740 ns. This is an inconsistency between the command summary and detailed path evidence; it is not proof that the combined architecture has no register paths or infinite operating frequency.
 
-The follow-up diagnostic adds explicit rising-edge and falling-edge register-to-register path queries. The correct next step is to compare their complete path inventory and endpoint coverage with the clock-min-period result. Do not derive or publish an internal Fmax until the query is understood and independently validated.
+The follow-up diagnostic adds an explicit same-clock rising-edge register-to-register path query. In [GitHub Actions run #190](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42028153820), the combined baseline reported 104 paths (below the 1000-path cap), with worst slack 8.414 ns, while the native minimum-period command still returned 0.00 / inf. The raw logs are available in [the run #190 STA artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42028153820/artifacts/13413714824).
+
+This is useful path evidence, but it does not yet explain the native command discrepancy. The explicit path-report slack did not reconcile consistently with the native result for both architectures, so the parser now reports path count and slack separately and does not infer an internal Fmax. Keep the combined native register-only period unavailable until the tool behaviour is understood and independently validated.
 
 ## 4. Known baseline results and limitations
 
