@@ -9,7 +9,11 @@
 **Latest CI validation:** [run ID 42007925745 (workflow run #82)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007925745) — regression and library-backed STA jobs passed; this is validation, not the source of the numerical baseline.  
 **Source commit for the run:** `bd29bcd96914f0415771aa5aa76949cf7163b66e`
 
-## Baseline architecture comparison
+## Historical baseline architecture comparison
+
+**Important measurement qualification:** the historical run used `set_load 0.020/0.030` while the pinned Liberty declares capacitance in femtofarads. Those values therefore represented 0.02/0.03 fF, not 20/30 fF. The golden SDC has now been corrected to 20/30 fF and the STA matrix is being regenerated. Treat every numerical result below as historical evidence for the earlier load assumption; do not use it as the corrected-load baseline or as release-final PPA/timing data until the new run is green and inspected.
+
+
 
 The same 32-bit GCD top-level interface and illustrative SDC were used for both architectures. Yosys reported the following Liberty cell-area totals:
 
@@ -30,9 +34,9 @@ The same 32-bit GCD top-level interface and illustrative SDC were used for both 
 | Latency measurement | Combined | Split |
 |---|---:|---:|
 | Average cycles from accepted start to done | 63.63 | 84.17 |
-| Maximum cycles in the corpus | 93 | 124 |
+| Maximum cycles observed in the 258-case corpus | 93 | 124 |
 
-The split architecture averages about 32.3% more cycles because it registers the comparison and performs subtraction in a separate state. Since the available minimum-period figures include port paths, multiplying them by cycle counts is not a defensible architecture-specific operation-latency proxy; the previously quoted 187.1 ns versus 197.8 ns comparison is withdrawn. The key conclusion supported by the RTL simulation is that the split architecture takes more cycles in this test corpus. A valid frequency-versus-operation-latency comparison requires a separately measured register-to-register timing metric and a clearly defined interface timing model.
+The split architecture averaged about 32.3% more cycles in this 258-case corpus because it registers the comparison and performs subtraction in a separate state. Since the available minimum-period figures include port paths, multiplying them by cycle counts is not a defensible architecture-specific operation-latency proxy; the previously quoted 187.1 ns versus 197.8 ns comparison is withdrawn. The key conclusion supported by the RTL simulation is that the split architecture takes more cycles in this test corpus. A valid frequency-versus-operation-latency comparison requires a separately measured register-to-register timing metric and a clearly defined interface timing model.
 
 WNS is zero for the positive setup margins because the report command returns zero when there is no negative slack; the positive margin is shown in the worst-setup-slack column. The combined architecture's baseline hold result is a small negative slack (-0.002 ns), while the split architecture has a small positive margin (+0.005 ns). These are educational pre-layout values, not signoff conclusions.
 
@@ -51,6 +55,8 @@ The baseline CI artifact documents 8 SDC scenarios for each architecture (16 STA
 | M07 — zero clock period | Worst setup slack becomes -2.935 ns (combined) and -2.350 ns (split), with strongly negative TNS. | A non-positive clock period is invalid and produces a failing timing result. |
 
 The static linter detects six controlled mutations as ERROR findings and flags M04 as a REVIEW finding; the scorecard counts all seven expected mutation patterns as detected. The STA run shows why several are important: paths can become unconstrained or disappear, and removing a margin assumption can improve reported slack without changing the RTL.
+
+The 93-cycle and 124-cycle figures are maxima observed in this finite corpus, not proven algorithmic worst-case bounds. The `$urandom` stimulus is not explicitly seeded, so the exact average and corpus maximum may vary across simulator versions or runs.
 
 ## Reproduction
 
