@@ -18,19 +18,19 @@ SCENARIOS = (
 
 
 def metric(text, name, mode):
-    pattern = rf"^\\s*{name}\\s+{mode}\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*$"
+    pattern = rf"^\s*{name}\s+{mode}\s+([-+]?(?:\d+\.?\d*|\.\d+))\s*$"
     match = re.search(pattern, text, re.MULTILINE | re.IGNORECASE)
     return float(match.group(1)) if match else None
 
 
 def worst_slack(text, mode):
-    pattern = rf"^\\s*worst slack\\s+{mode}\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*$"
+    pattern = rf"^\s*worst slack\s+{mode}\s+([-+]?(?:\d+\.?\d*|\.\d+))\s*$"
     match = re.search(pattern, text, re.MULTILINE | re.IGNORECASE)
     return float(match.group(1)) if match else None
 
 
 def clock_metrics(text):
-    match = re.search(r"^\\s*\\S+\\s+period_min\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s+fmax\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text, re.MULTILINE | re.IGNORECASE)
+    match = re.search(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", text, re.MULTILINE | re.IGNORECASE)
     return (float(match.group(1)), float(match.group(2))) if match else (None, None)
 
 
@@ -50,7 +50,7 @@ def cell_area(top, report_path):
     for candidate in candidates:
         if candidate.is_file():
             data = candidate.read_text(encoding="utf-8", errors="replace")
-            matches = re.findall(r"Chip area for module .*?:\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", data)
+            matches = re.findall(r"Chip area for module .*?:\s*([-+]?(?:\d+\.?\d*|\.\d+))", data)
             if matches:
                 return float(matches[-1])
     return None
@@ -66,13 +66,13 @@ def parse_log(path):
     setup = section(text, "=== SETUP / MAX PATH DETAILS ===", "=== REGISTER-TO-REGISTER SETUP PATHS ===")
     reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== HOLD / MIN PATH DETAILS ===")
     unconstrained = section(text, "=== UNCONSTRAINED PATH DETAILS ===")
-    start = re.search(r"^Startpoint:\\s*(.+)$", setup, re.MULTILINE)
-    end = re.search(r"^Endpoint:\\s*(.+)$", setup, re.MULTILINE)
-    rr_start = re.search(r"^Startpoint:\\s*(.+)$", reg2reg, re.MULTILINE)
-    rr_end = re.search(r"^Endpoint:\\s*(.+)$", reg2reg, re.MULTILINE)
-    warning = re.search(r"There are\\s+(\\d+)\\s+unconstrained endpoints", text, re.IGNORECASE)
-    input_missing = re.search(r"There are\\s+(\\d+)\\s+input ports missing set_input_delay", text, re.IGNORECASE)
-    output_missing = re.search(r"There are\\s+(\\d+)\\s+output ports missing set_output_delay", text, re.IGNORECASE)
+    start = re.search(r"^Startpoint:\s*(.+)$", setup, re.MULTILINE)
+    end = re.search(r"^Endpoint:\s*(.+)$", setup, re.MULTILINE)
+    rr_start = re.search(r"^Startpoint:\s*(.+)$", reg2reg, re.MULTILINE)
+    rr_end = re.search(r"^Endpoint:\s*(.+)$", reg2reg, re.MULTILINE)
+    warning = re.search(r"There are\s+(\d+)\s+unconstrained endpoints", text, re.IGNORECASE)
+    input_missing = re.search(r"There are\s+(\d+)\s+input ports missing set_input_delay", text, re.IGNORECASE)
+    output_missing = re.search(r"There are\s+(\d+)\s+output ports missing set_output_delay", text, re.IGNORECASE)
     rr_period, rr_fmax = clock_metrics(section(text, "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===", "=== ALL-PATH CLOCK PERIOD / FREQUENCY"))
     all_period, all_fmax = clock_metrics(section(text, "=== ALL-PATH CLOCK PERIOD / FREQUENCY (INCLUDING PORT PATHS) ===", "=== SETUP SUMMARY ==="))
     try:
@@ -124,7 +124,7 @@ def summarise(report_dir=REPORT_DIR):
         "logs_found": len(records), "records": records,
     }
     report_dir.mkdir(parents=True, exist_ok=True)
-    (report_dir / "sta_matrix_summary.json").write_text(json.dumps(output, indent=2) + "\\n", encoding="utf-8")
+    (report_dir / "sta_matrix_summary.json").write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
     rows = [
         "# TimingForge library-backed STA matrix", "",
         "- Generated UTC: " + output["generated_at_utc"],
@@ -151,7 +151,7 @@ def summarise(report_dir=REPORT_DIR):
         "WNS may be zero when slack is positive; worst slack retains the margin. Missing metrics require raw-log investigation.",
         "",
     ])
-    (report_dir / "sta_matrix_summary.md").write_text("\\n".join(rows), encoding="utf-8")
+    (report_dir / "sta_matrix_summary.md").write_text("\n".join(rows), encoding="utf-8")
     print("Parsed STA logs: " + str(len(records)))
     print("Summary: " + str(report_dir / "sta_matrix_summary.md"))
     return output
