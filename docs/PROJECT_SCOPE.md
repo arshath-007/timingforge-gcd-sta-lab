@@ -35,7 +35,7 @@ Test whether a timing-constraint review flow identifies a small, explicitly defi
 | M06 | Remove hold uncertainty | TF402 ERROR | Hold analysis assumptions are incomplete |
 | M07 | Set period to zero | TF002 ERROR | A clock period must be positive |
 
-The checker is interface-specific and uses simple line-oriented pattern checks. A PASS means only that its expected patterns were found. It does not prove that the SDC is complete, semantically correct, or appropriate for a real design.
+The checker is interface-specific and uses simple line-oriented pattern checks. It requires a positive period on the named clock, setup and hold uncertainty, and both min/max I/O delay patterns; exact/simple wildcard matching is used for the known GCD top-level ports. A PASS means only that its expected patterns were found. It does not prove that the SDC is complete, semantically correct, or appropriate for a real design.
 
 ## Experimental protocol
 
