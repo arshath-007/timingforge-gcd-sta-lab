@@ -43,3 +43,9 @@ No second library or multi-corner result is claimed. Add those only after indepe
 ### Internal ORFS LEC boundary
 
 The physical CI sets `LEC_CHECK=0` because the container's optional Kepler-based LEC child process intermittently terminates with an illegal-instruction signal during CTS timing repair. This does not disable CTS, timing repair, SPEF extraction, or post-route STA. The project runs a separate bounded RTL transaction-equivalence proof in Phase 2. Consequently, the physical flow does not claim a netlist-to-netlist LEC result across ORFS optimization stages; that check remains a documented limitation.
+
+## Latest validated run
+
+The current implementation was exercised successfully in [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456). Its [90-day evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211) contains the raw stage outputs, final databases, GDS, extracted SPEF, post-route timing logs, comparison JSON and SHA-256 manifest.
+
+See [Phase 3 measured results](PHASE3_RESULTS.md) for the post-route timing table, matched pre-layout comparison, and interpretation limits.
