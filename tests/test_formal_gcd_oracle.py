@@ -7,7 +7,7 @@ from pathlib import Path
 class FormalGcdOracleTests(unittest.TestCase):
     def test_formal_width_three_oracle_is_exhaustive_and_correct(self):
         root = Path(__file__).resolve().parents[1]
-        source = (root / "formal" / "gcd_equiv.sv").read_text(encoding="utf-8")
+        source = (root / "formal" / "gcd_oracle_3bit.sv").read_text(encoding="utf-8")
         rows = re.findall(
             r"6'b([01]{6}):\s*expected_gcd\s*=\s*3'd([0-7]);",
             source,
