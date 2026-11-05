@@ -24,7 +24,11 @@ def _active_lines(text):
 
 def _port_patterns(line):
     """Extract simple get_ports patterns; deliberately avoid substring matching."""
-    return [match.group(1) or match.group(2) for match in GET_PORTS.finditer(line)]
+    patterns = []
+    for match in GET_PORTS.finditer(line):
+        # Tcl brace collections can contain multiple whitespace-separated patterns.
+        patterns.extend((match.group(1) or match.group(2)).split())
+    return patterns
 
 
 def _covers_port(pattern, port):
@@ -32,11 +36,12 @@ def _covers_port(pattern, port):
     return pattern in {port, port + "*", port + "[*]"}
 
 
-def _has_delay(lines, command, port, mode):
+def _has_delay(lines, command, port, mode, clock_names):
     for line in lines:
         if not line.startswith(command + " "):
             continue
-        if not re.search(r"-clock\s+\S+", line):
+        clock = re.search(r"-clock\s+(\S+)", line)
+        if not clock or clock.group(1) not in clock_names:
             continue
         if not re.search(rf"-{mode}\s+[-+0-9.eE]+", line):
             continue
@@ -62,6 +67,13 @@ def lint_sdc(text):
             valid_clock = True
             break
 
+    clock_names = {
+        match.group(1)
+        for line in clocks
+        for match in [re.search(r"-name\s+(\S+)", line)]
+        if match
+    }
+
     if not clocks:
         findings.append("TF001 ERROR: no create_clock command found")
     elif not valid_clock:
@@ -69,12 +81,12 @@ def lint_sdc(text):
 
     for port in INPUTS:
         for mode in ("max", "min"):
-            if not _has_delay(lines, "set_input_delay", port, mode):
+            if not _has_delay(lines, "set_input_delay", port, mode, clock_names):
                 findings.append(f"TF101 ERROR: missing {mode} input delay for port '{port}'")
 
     for port in OUTPUTS:
         for mode in ("max", "min"):
-            if not _has_delay(lines, "set_output_delay", port, mode):
+            if not _has_delay(lines, "set_output_delay", port, mode, clock_names):
                 findings.append(f"TF201 ERROR: missing {mode} output delay for port '{port}'")
 
     if not any(line.startswith("set_clock_uncertainty -setup ") for line in lines):
