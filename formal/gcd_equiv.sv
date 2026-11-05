@@ -1,4 +1,4 @@
-// Bounded sequential miter: architecture equivalence and transaction protocol.
+// Bounded sequential miter: WIDTH=3 GCD correctness, architecture equivalence and protocol.
 // The symbolic input space is exhaustive for WIDTH=3 only.
 module gcd_equiv_formal;
     localparam integer WIDTH = 3;
@@ -13,6 +13,7 @@ module gcd_equiv_formal;
 
     wire [WIDTH-1:0] gcd_combined;
     wire [WIDTH-1:0] gcd_split;
+    wire [WIDTH-1:0] expected_gcd;
     wire busy_combined, done_combined;
     wire busy_split, done_split;
 
@@ -20,6 +21,10 @@ module gcd_equiv_formal;
     reg split_seen = 0;
     reg [WIDTH-1:0] combined_result = 0;
     reg [WIDTH-1:0] split_result = 0;
+
+    gcd_oracle_3bit u_oracle (
+        .a(a_in), .b(b_in), .expected_gcd(expected_gcd)
+    );
 
     gcd_binary_combined #(.WIDTH(WIDTH)) u_combined (
         .clk(clk), .rst(rst), .start(start), .a_in(a_in), .b_in(b_in),
@@ -48,12 +53,14 @@ module gcd_equiv_formal;
             if (done_combined) begin
                 assert(!combined_seen);
                 assert(!busy_combined);
+                assert(gcd_combined == expected_gcd);
                 combined_seen <= 1;
                 combined_result <= gcd_combined;
             end
             if (done_split) begin
                 assert(!split_seen);
                 assert(!busy_split);
+                assert(gcd_split == expected_gcd);
                 split_seen <= 1;
                 split_result <= gcd_split;
             end
