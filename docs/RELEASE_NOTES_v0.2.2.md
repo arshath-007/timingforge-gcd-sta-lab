@@ -10,7 +10,9 @@ This release candidate strengthens the functional regression and aligns project 
 - Added FIFO directed checks for simultaneous read/write at non-full occupancy and simultaneous read/write while full, documenting the current implementation's behavior.
 - Added MAC directed checks for the most-negative signed operand boundary case and synchronous clear priority over enable.
 - Updated the interview guide to describe FIFO/MAC STA-matrix integration as future work, not as missing RTL functionality.
-- Prepared README and citation metadata for version 0.2.2.
+- Added conservative golden-result quality findings to the library-backed STA CI artifact.
+- Added heuristic GCD critical-path classification (input-to-register, register-to-register, register-to-output, input-to-output, or unknown) to the parsed STA matrix report.
+- Added unit tests for quality findings and path-class parsing.
 
 ## Verification
 
