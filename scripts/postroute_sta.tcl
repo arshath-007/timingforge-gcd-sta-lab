@@ -10,15 +10,25 @@ read_lef $::env(SC_LEF)
 read_liberty $::env(LIBERTY)
 read_db $::env(ODB)
 read_sdc $::env(SDC)
-set_propagated_clock [all_clocks]
 read_spef $::env(SPEF)
+set_propagated_clock [all_clocks]
 
 puts "=== TIMINGFORGE POST-ROUTE SETUP CHECK ==="
 check_setup -verbose
 puts "=== POST-ROUTE CLOCK PROPERTIES ==="
 report_clock_properties
-puts "=== POST-ROUTE CLOCK PERIOD ==="
+puts "=== POST-ROUTE SETUP CLOCK SKEW ==="
+if {[catch {report_clock_skew -setup} skew_error]} {
+    puts "TIMINGFORGE_CLOCK_SKEW_UNSUPPORTED: setup: $skew_error"
+}
+puts "=== POST-ROUTE HOLD CLOCK SKEW ==="
+if {[catch {report_clock_skew -hold} skew_error]} {
+    puts "TIMINGFORGE_CLOCK_SKEW_UNSUPPORTED: hold: $skew_error"
+}
+puts "=== POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ==="
 report_clock_min_period
+puts "=== POST-ROUTE ALL-PATH CLOCK PERIOD ==="
+report_clock_min_period -include_port_paths
 puts "=== POST-ROUTE SETUP SUMMARY ==="
 report_worst_slack -max -digits 3
 report_wns -max -digits 3
