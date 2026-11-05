@@ -177,6 +177,8 @@ def parse_log(path):
         "drv_max_capacitance_violation_lines": drv_cap["reported_lines"],
         "drv_max_fanout_supported": drv_fanout["supported"],
         "drv_max_fanout_violation_count": drv_fanout["violation_count"],
+        )
+    rows.extend([
         "drv_max_fanout_violation_lines": drv_fanout["reported_lines"],
     }
 
