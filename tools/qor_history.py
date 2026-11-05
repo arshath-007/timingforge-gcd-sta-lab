@@ -108,7 +108,7 @@ def main() -> int:
             json.loads(args.reference.read_text(encoding="utf-8")),
             json.loads(args.candidate.read_text(encoding="utf-8")),
         )
-        rendered = json.dumps(result, indent=2) + "\\n"
+        rendered = json.dumps(result, indent=2) + "\n"
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(rendered, encoding="utf-8")
