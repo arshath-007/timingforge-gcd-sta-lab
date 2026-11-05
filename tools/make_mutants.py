@@ -2,7 +2,6 @@
 """Generate named, controlled SDC mutations from the GCD golden baseline."""
 from pathlib import Path
 import argparse
-import re
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "constraints" / "gcd_baseline.sdc"
@@ -10,22 +9,26 @@ OUTPUT = ROOT / "build" / "mutants"
 
 MUTATIONS = {
     "M01_missing_clock": {
-        "remove": [r"^create_clock\\b"],
+        "remove_prefix": ["create_clock"],
+        "remove_contains": [],
         "append": [],
         "description": "Remove the primary clock definition",
     },
     "M02_missing_input_delay": {
-        "remove": [r"^set_input_delay.*a_in"],
+        "remove_prefix": ["set_input_delay"],
+        "remove_contains": ["a_in"],
         "append": [],
         "description": "Remove the input arrival budget for a_in",
     },
     "M03_missing_output_delay": {
-        "remove": [r"^set_output_delay.*gcd_out"],
+        "remove_prefix": ["set_output_delay"],
+        "remove_contains": ["gcd_out"],
         "append": [],
         "description": "Remove the output required-time budget for gcd_out",
     },
     "M04_unjustified_false_path": {
-        "remove": [],
+        "remove_prefix": [],
+        "remove_contains": [],
         "append": [
             "# MUTATION ONLY: broad exception for a controlled negative test",
             "set_false_path -from [all_inputs]",
@@ -38,10 +41,12 @@ MUTATIONS = {
 def mutate(text, spec):
     kept = []
     for line in text.splitlines():
-        if any(re.search(pattern, line) for pattern in spec["remove"]):
-            continue
-        kept.append(line)
-    return "\\n".join(kept + spec["append"]) + "\\n"
+        stripped = line.strip()
+        remove = any(stripped.startswith(prefix) for prefix in spec["remove_prefix"])
+        remove = remove and any(token in stripped for token in spec["remove_contains"]) if spec["remove_contains"] else remove
+        if not remove:
+            kept.append(line)
+    return "\n".join(kept + spec["append"]) + "\n"
 
 
 def main():
