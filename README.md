@@ -178,28 +178,31 @@ See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report
 
 ## Phase 2 verification evidence — bounded formal + reproducible simulation
 
-The Phase 2 implementation is in [PR #6](https://github.com/arshath-007/timingforge-gcd-sta-lab/pull/6), with successful CI on the final Phase 3 branch revision. The [formal workflow run #46](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42061500757) passed the positive CVC5 proof and the deliberate subtract-mutant negative control; the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42061500757/artifacts/13431083725) contains solver logs and the counterexample trace. The [regression run #333](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42061500995) passed the 32-bit RTL regression, FIFO/MAC tests, Python checks, SDC lint, fault-injection benchmark and library-backed STA matrix.
+The current [formal workflow run #49](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430) passed the positive CVC5 proof and the deliberate subtract-mutant negative control; download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430/artifacts/13439043462). The [regression and library-backed STA run #336](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502) passed the 32-bit RTL regression, FIFO/MAC tests, Python checks, SDC lint, fault-injection benchmark and library-backed STA matrix. Its [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502/artifacts/13439247462) records 7/7 controlled static fault patterns detected; this is not a general SDC correctness score.
 
 - Bounded transaction-level equivalence checks all symbolic 3-bit input pairs, including zero/equal operands, with independent completion timing; CVC5 1.1.2 and Yosys 0.33, 26 SMT steps / 12 positive clock edges.
 - The negative control deliberately corrupts the combined subtract operation and is rejected by the same property set.
-- The 32-bit simulation includes directed cases and 250 deterministic constrained-random cases using seed `0x54462026`, with parity, zero/equal, high-bit, GCD-class and latency-bin coverage.
+- The 32-bit simulation includes directed cases and 250 deterministic constrained-random cases using seed `0x54462026`; 259 cases were checked on each architecture, with parity, zero/equal, high-bit, GCD-class and latency-bin coverage.
 - QoR snapshots record source SHA, tool versions, platform/corner, Liberty hash, scenario and SDC hashes. The comparator rejects environment or scenario mismatches. Snapshots are artifact-backed, not a persistent database/dashboard.
 - The proof is bounded at WIDTH=3, not a 32-bit or unbounded proof. The flow uses immediate assertions; concurrent `assert property` SVA syntax is not supported by this selected frontend path.
+- The OpenSTA mutation-impact report has 12 matched and 2 inconclusive cases; both inconclusive observations are hold-uncertainty cases. No aggregate accuracy score is claimed.
 
 ## Phase 3 physical-design evidence — Nangate45 typical
 
-The [physical-design workflow run #21](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42061500321) passed for both architectures. Download the [complete physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42061500321/artifacts/13432068579), which includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA logs, comparison JSON and SHA-256 manifest. Detailed interpretation is in [Phase 3 measured results](docs/PHASE3_RESULTS.md).
+The current [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) passed for both architectures. Download the [complete physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211), which includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA logs, comparison JSON and SHA-256 manifest. Detailed interpretation is in [Phase 3 measured results](docs/PHASE3_RESULTS.md).
 
 | Post-route metric | Combined GCD | Split GCD |
 |---|---:|---:|
+| Register-to-register minimum period | 0.95 ns | 1.02 ns |
+| Register-to-register Fmax | 1048.98 MHz | 984.86 MHz |
 | All-path minimum period | 2.13 ns | 2.26 ns |
 | All-path Fmax | 469.98 MHz | 442.15 MHz |
-| Standard-cell area | 2,654.95 µm² | 2,502.00 µm² |
 | Worst setup slack | +7.872 ns | +7.738 ns |
 | Worst hold slack | +0.031 ns | +0.018 ns |
-| Setup clock skew (magnitude) | 0.156 ns | 0.157 ns |
+| Reported setup skew (worst reported path) | +0.16 ns | +0.16 ns |
+| Reported hold skew (worst reported path) | -0.06 ns | -0.06 ns |
 
-Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are typical-corner educational results, not signoff. Multi-corner analysis is deferred because a second, independently verified Liberty PVT model is not part of the selected platform. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
+The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are typical-corner educational results, not signoff. Multi-corner analysis is deferred because a second, independently verified Liberty PVT model is not part of the selected platform. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
 
 ## Research questions
 
