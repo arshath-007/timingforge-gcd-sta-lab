@@ -123,7 +123,7 @@ def summarise(report_dir=REPORT_DIR):
         "- Parasitics: " + output["parasitics"],
         "- Logs parsed: " + str(len(records)), "",
         "| Architecture | SDC scenario | Yosys cell area | Min period (ns) | Fmax (MHz) | Worst setup slack (ns) | Setup WNS (ns) | Worst hold slack (ns) | Reg-to-reg path | Missing input-delay warnings | Missing output-delay warnings | Unconstrained endpoints |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---|---:|",
+        "|---|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|",
     ]
     fmt = lambda v: "n/a" if v is None else f"{v:.3f}"
     for row in records:
