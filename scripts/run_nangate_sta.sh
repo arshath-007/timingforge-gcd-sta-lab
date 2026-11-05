@@ -45,5 +45,7 @@ for TOP in gcd_binary_combined gcd_binary_split; do
   done
 done
 
+python3 -m tools.parse_sta_matrix
+cat build/reports/sta_matrix_summary.md
 echo "Completed synthesis for both architectures and STA for ${#SDCS[@]} SDC scenarios."
 echo "Review build/yosys_*.log and build/reports/sta_*.log."
