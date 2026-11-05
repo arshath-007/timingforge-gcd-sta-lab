@@ -1,68 +1,71 @@
 # TimingForge development phases
 
-This document is the execution tracker for the proposed expansion roadmap. A checkbox is marked complete only when the implementation exists and its stated acceptance evidence is available.
+This tracker distinguishes implemented code from completed validation. A feature is marked validated only when a successful run exercises it and its evidence artifact is retained.
 
 ## Phase 1 — Trustworthy analysis and result quality
 
-### Completed
-- [x] Correct the README roadmap so functional FIFO/MAC blocks are not described as missing.
-- [x] Add directed FIFO simultaneous read/write checks at non-full occupancy and while full.
-- [x] Add MAC signed-boundary and clear-priority checks.
-- [x] Add conservative quality findings for golden STA rows: missing required metrics, non-positive values, unconstrained endpoints, missing I/O delays, negative hold slack, missing register paths, capped path inventories, and unavailable native register-only period.
-- [x] Add unit tests for quality-check behavior and run the checker in CI.
-- [x] Add heuristic critical-path class labels from OpenSTA startpoint/endpoint names, with unknown fallback and unit tests.
-- [x] Add OpenSTA violator-only reports for max transition, max capacitance and max fanout; unsupported reports remain null and empty fanout output is not treated as complete check coverage.
-- [x] Add nine clock-constraint sensitivity variants per architecture, derived from the immutable golden SDC, with explicit setup/hold slack deltas and reproducibility metadata.
-- [x] Add expected-versus-observed mutation impact scoring with matched, mismatched and inconclusive states; no aggregate accuracy percentage.
-- [x] Validate findings against archived raw logs from feature-branch run #257 and post-merge main run #258; both passed both CI jobs.
+### Completed and validated
+- [x] Two synthesizable GCD architectures and self-checking functional regression.
+- [x] FIFO/MAC functional extension tests (not included in the GCD STA/physical matrix).
+- [x] Seven controlled SDC mutation patterns, conservative static checker, machine-readable scorecard and unit tests.
+- [x] Library-backed Nangate45 typical synthesis/OpenSTA matrix for both architectures.
+- [x] Quality findings, critical-path labels, DRV reports, nine clock-sensitivity variants per architecture, and expected-versus-observed mutation impact scoring.
+- [x] Historical evidence validated in [run #257](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42046659049) and [post-merge run #258](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600).
 
-**Phase 1 exit criteria:** all new checks have unit tests; the full workflow produces machine-readable findings; baseline and mutation behavior is explained; no derived internal Fmax is published without an independently validated method.
-
-**Evidence:** [run #257](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42046659049) and [post-merge run #258](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600), including the [run #258 STA artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600/artifacts/13425391627).
+**Known interpretation:** mutation impact was 12 matched, 0 mismatched and 2 inconclusive (both hold-uncertainty cases). Golden quality findings were REVIEW; combined hold slack was -0.002 ns and its native register-only minimum-period query was unavailable. No overall checker accuracy percentage is claimed.
 
 ## Phase 2 — Verification depth and QoR analytics
 
-### Implemented and CI-verified
-- [x] Add a bounded sequential transaction-equivalence property set for both GCD architectures, with tool/version and proof logs.
-- [x] Add a documented immediate-assertion support matrix and explicit limitation for concurrent `assert property` SVA syntax.
-- [x] Add 32-bit constrained-random tests with reproducible seed and coverage summaries (250 random cases plus directed cases).
-- [x] Add environment-keyed QoR snapshots and a comparator that rejects mismatched platform, corner, tool versions, Liberty hash, scenario set, and SDC hashes.
-- [x] Verify the formal positive proof and a deliberately broken RTL negative control.
+### Implemented
+- [x] Bounded WIDTH=3 transaction miter with independent completion timing and a 12-positive-edge completion bound (26 SMT steps).
+- [x] Independent 64-entry WIDTH=3 GCD truth-table oracle, cross-checked against Python's Euclidean math.gcd reference.
+- [x] Positive proof and deliberately broken subtract-mutant negative control are part of the formal script.
+- [x] Concurrent protocol SVA (done one-cycle pulse and done -> !busy) exercised dynamically with Verilator.
+- [x] Parameterized WIDTH=8/16/32 simulation sweep.
+- [x] 32-bit directed and 250 seeded constrained-random tests (seed 0x54462026; 259 cases per architecture).
+- [x] Environment-keyed QoR snapshots and a fail-closed Nangate45 typical-corner regression gate.
+- [x] Latest regression/STA workflow on PR #8 commit 388958f passed: [run #42094688499](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42094688499). It exercised the RTL/width/SVA/Python and library-backed STA/QoR paths.
 
-### Deliberately deferred
-- [ ] Add reviewed fail-closed thresholds for suspicious QoR findings; current quality findings are reported for engineering review rather than converted into broad CI failure gates.
-- [ ] Add parameter/width sweeps after the reference model, testbench, synthesis top, and timing constraints are parameter-safe.
-- [ ] Add concurrent SVA properties when a supported frontend/tool path is selected.
+### Formal proof scope and current CI state
+The independent oracle is now connected to both implementations inside the bounded formal miter. However, the dedicated formal workflow for the updated miter, [run #42094688482](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42094688482), was still reported in progress at the last repository check; its install step had not completed. Therefore the updated oracle-backed proof is implemented but **not yet recorded as CI-verified**. The earlier [run #49](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430) validates the earlier bounded miter and negative control, not the new oracle-connected property set.
 
-**Formal scope:** WIDTH=3, symbolic input pairs, one reset/start transaction, completion by 12 positive clock edges (26 SMT steps), Yosys 0.33 and CVC5 1.1.2. This is not a 32-bit or unbounded proof. The 32-bit designs are separately covered by simulation. QoR snapshots are GitHub Actions artifacts, not a persistent database/dashboard.
+The proof is WIDTH=3 and bounded. It is not a proof of all 32-bit inputs, arbitrary back-to-back transactions, or an unbounded invariant. Verilator SVA and wider simulations are complementary dynamic evidence, not a substitute for those proofs.
 
-**Phase 2 evidence:**
-- [Formal equivalence run #49](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430) and its [proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430/artifacts/13439043462).
-- [Regression and library-backed STA run #336](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502), including [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502/artifacts/13439247462).
-- 32-bit simulation checked 259 cases on both architectures (250 seeded random plus directed cases), seed `0x54462026`; 49 Python tests passed.
+### QoR gate boundary
+The reviewed baseline and limits apply only to the pinned Nangate45 typical environment. They are regression thresholds for this educational benchmark, not universal signoff limits. QoR snapshots are retained as CI artifacts, not a persistent database/dashboard.
 
 ## Phase 3 — Physical implementation and technology breadth
 
-### Implemented and experimentally validated
-- [x] Establish a reproducible floorplan and placement flow for both GCD designs.
-- [x] Add CTS, propagated-clock timing reports, and clock-skew reports.
-- [x] Add global/detail routing and extracted parasitics, then run post-route STA.
-- [x] Compare pre-layout and post-layout results without mixing corners, constraints, or tool versions.
-- [x] Archive raw logs, tool versions, platform/constraint hashes, parasitics, reports, final databases, GDS and SHA-256 manifests.
+### Validated baseline
+- [x] Nangate45 typical physical implementation for both architectures through floorplan, placement, CTS, routing, extraction and post-route OpenSTA.
+- [x] ODB/GDS/SPEF/SDC, logs, reports and SHA-256 evidence archived in [physical run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456), artifact [13439243211](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211).
 
-### Remaining technology-breadth work
-- [ ] Add multi-corner analysis only after identifying and verifying distinct Liberty process/voltage/temperature models.
-- [ ] Add a second technology library only when its source, license, units, corner identity, and mapping compatibility are documented.
-- [ ] Add variation-aware experiments (OCV/AOCV/POCV) only with appropriate validated models and methodology.
+### Implemented technology-breadth experiment — validation pending
+- [x] Add ASAP7 BC/TC/WC Liberty scene setup and post-route OpenSTA MCMM analysis scripts for both architectures.
+- [x] Add separate SKY130HD TT RTL-to-GDS physical implementation and extracted-parasitic post-route STA for both architectures.
+- [x] Pin platform provenance, record Liberty/artifact hashes, check library units, and generate a manifest.
+- [ ] Complete and archive the dedicated [technology-breadth workflow](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/technology-breadth.yml). Its run [#42094688423](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42094688423) was still in progress at the last repository check, so no MCMM/second-library measured result is yet published as validated.
 
-**Phase 3 evidence:** [OpenROAD physical-design run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) passed for both architectures. The [90-day physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211) includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA, comparison JSON and SHA-256 manifest. See [measured Phase 3 results](PHASE3_RESULTS.md).
+**ASAP7 interpretation:** BC/TC/WC use distinct Liberty timing models, but the experiment reuses the single TC-extracted SPEF unchanged for all three scenes. This isolates cell timing model differences under shared parasitics; it is not corner-specific RC extraction or complete PVT/RC signoff.
 
-**Phase 3 boundary:** one educational Nangate45 typical-corner experiment, not foundry signoff, multi-corner closure, DRC/LVS signoff, IR-drop/EM closure, or manufacturing readiness. The optional ORFS Kepler-based internal netlist LEC is disabled; the separate bounded RTL proof does not replace netlist-to-netlist LEC across physical optimization stages.
+**SKY130HD interpretation:** the pinned platform provides the verified TT model used here. No fast/slow SKY130HD corners are fabricated. Cross-library absolute PPA ranking is not claimed.
 
-## Current release boundary
+### Explicitly out of scope
+- [ ] OCV/AOCV/POCV without validated variation models and methodology.
+- [ ] Crosstalk/SI, power signoff, IR-drop/EM qualification, timing ECO closure, foundry DRC/LVS signoff, or manufacturing readiness.
+- [ ] Netlist-to-netlist LEC across ORFS optimization stages; the optional Kepler LEC subprocess is disabled.
 
-The v0.4.0 candidate includes completed Phase 1 diagnostics, the bounded Phase 2 verification/QoR implementation, and the experimentally validated single-corner Phase 3 physical implementation. Multi-corner analysis, a second library, reviewed fail-closed QoR thresholds, parameter sweeps, and stronger formal coverage remain future work. FIFO and MAC are functional-only extensions and are not part of the GCD STA/physical matrix. No signoff claim is made.
+## v0.4.0 release gate
+
+Do not publish v0.4.0 until all of the following are true:
+1. The updated oracle-backed formal workflow passes positive proof and negative control.
+2. The technology-breadth workflow completes all four physical builds, both ASAP7 three-scene MCMM analyses, both SKY130HD post-route analyses, and manifest validation.
+3. The final PR is merged; fresh workflows on the resulting main commit pass regression, formal, Nangate45 physical and technology breadth.
+4. README, phase tracker, measured-results page, changelog and release notes refer only to evidence from those final runs.
+5. A release tag is created at the validated main commit and its evidence artifacts are attached or linked.
+
+The latest PR #8 regression and Nangate45 STA/QoR run passed on its then-current source SHA. The updated formal and technology-breadth runs were not yet complete at last check. The PR remains open; no v0.4.0 tag/release is published.
 
 ## Execution policy
 
-Do not mark an item complete because a script exists or a CI job passed once. Require a test or report that directly exercises the behavior, retain raw evidence, and record unsupported capabilities as blocked rather than approximating them.
+A script or an uncompleted workflow is not validation. Preserve raw logs and hashes, report blocked checks plainly, and never turn an unsupported capability into a claimed result.
