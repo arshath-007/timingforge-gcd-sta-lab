@@ -15,7 +15,7 @@ module gcd_equiv_formal;
     wire [WIDTH-1:0] gcd_split;
     wire busy_combined, done_combined;
     wire busy_split, done_split;
-    wire [WIDTH-1:0] expected_gcd;
+    reg [WIDTH-1:0] expected_gcd;
 
     reg combined_seen = 0;
     reg split_seen = 0;
