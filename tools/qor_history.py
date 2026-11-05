@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
-PLATFORM_REVISION = "11aa833a11488c3a540a1d8eb4c4aa23fd22df703"
+PLATFORM_REVISION = "11aa833a11488c3a540a1d8eb4caa23fd22df703"
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -102,7 +102,7 @@ def main() -> int:
     if args.command == "snapshot":
         result = build_snapshot(args.matrix)
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(result, indent=2) + "\\n", encoding="utf-8")
+        args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     else:
         result = compare_snapshots(
             json.loads(args.reference.read_text(encoding="utf-8")),
