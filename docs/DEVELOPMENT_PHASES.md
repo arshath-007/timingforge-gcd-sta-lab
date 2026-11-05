@@ -24,12 +24,15 @@ This tracker distinguishes implemented code from completed validation. A feature
 - [x] Parameterized WIDTH=8/16/32 simulation sweep.
 - [x] 32-bit directed and 250 seeded constrained-random tests (seed 0x54462026; 259 cases per architecture).
 - [x] Environment-keyed QoR snapshots and a fail-closed Nangate45 typical-corner regression gate.
-- [x] Latest regression/STA workflow on PR #8 commit 388958f passed: [run #42094688499](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42094688499). It exercised the RTL/width/SVA/Python and library-backed STA/QoR paths.
+- [x] Latest PR #8 regression and library-backed STA/QoR workflow passed on commit 6f5a9c1b9c73261005445a6fd941242e6dde54cb: [run #42098727056](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727056). Artifacts: [Nangate45 STA matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727056/artifacts/13449670505) and [static benchmark](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727056/artifacts/13449555421).
 
-### Formal proof scope and current CI state
-The independent oracle is now connected to both implementations inside the bounded formal miter. However, the dedicated formal workflow for the updated miter, [run #42094688482](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42094688482), was still reported in progress at the last repository check; its install step had not completed. Therefore the updated oracle-backed proof is implemented but **not yet recorded as CI-verified**. The earlier [run #49](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430) validates the earlier bounded miter and negative control, not the new oracle-connected property set.
+### Formal proof validation and scope
 
-The proof is WIDTH=3 and bounded. It is not a proof of all 32-bit inputs, arbitrary back-to-back transactions, or an unbounded invariant. Verilator SVA and wider simulations are complementary dynamic evidence, not a substitute for those proofs.
+The updated oracle-backed miter passed the dedicated [formal workflow run #42098727465](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465); the [formal artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465/artifacts/13449462598) records the positive proof and negative control. Yosys 0.33 plus CVC5 1.1.2 completed the positive proof at 26 SMT steps / 12 positive clock edges in 11:08. The intentionally broken subtract mutant was rejected at step 5 for operands a=5, b=3.
+
+The proof checks both architectures against the independent 64-entry WIDTH=3 GCD oracle, checks mutual result equivalence, and verifies one accepted transaction, completion, done/busy behavior and the 12-edge bound. It is exhaustive for all 64 WIDTH=3 operand pairs only. It is not a proof of all 32-bit operands, arbitrary back-to-back transactions, or an unbounded sequential invariant. The 32-bit and WIDTH=8/16/32 tests remain simulation evidence; Verilator concurrent-SVA protocol checks are dynamic assertion evidence, not part of the Yosys/CVC5 proof.
+
+
 
 ### QoR gate boundary
 The reviewed baseline and limits apply only to the pinned Nangate45 typical environment. They are regression thresholds for this educational benchmark, not universal signoff limits. QoR snapshots are retained as CI artifacts, not a persistent database/dashboard.
@@ -38,17 +41,38 @@ The reviewed baseline and limits apply only to the pinned Nangate45 typical envi
 
 ### Validated baseline
 - [x] Nangate45 typical physical implementation for both architectures through floorplan, placement, CTS, routing, extraction and post-route OpenSTA.
-- [x] ODB/GDS/SPEF/SDC, logs, reports and SHA-256 evidence archived in [physical run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456), artifact [13439243211](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211).
+- [x] ODB/GDS/SPEF/SDC, logs, reports and SHA-256 evidence archived in the latest PR #8 [physical run #42098727330](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727330), artifact [13450410051](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727330/artifacts/13450410051).
 
-### Implemented technology-breadth experiment — validation pending
-- [x] Add ASAP7 BC/TC/WC Liberty scene setup and post-route OpenSTA MCMM analysis scripts for both architectures.
-- [x] Add separate SKY130HD TT RTL-to-GDS physical implementation and extracted-parasitic post-route STA for both architectures.
-- [x] Pin platform provenance, record Liberty/artifact hashes, check library units, and generate a manifest.
-- [ ] Complete and archive the dedicated [technology-breadth workflow](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/technology-breadth.yml). Its run [#42094688423](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42094688423) was still in progress at the last repository check, so no MCMM/second-library measured result is yet published as validated.
+### Implemented and validated technology-breadth experiment
 
-**ASAP7 interpretation:** BC/TC/WC use distinct Liberty timing models, but the experiment reuses the single TC-extracted SPEF unchanged for all three scenes. This isolates cell timing model differences under shared parasitics; it is not corner-specific RC extraction or complete PVT/RC signoff.
+- [x] ASAP7 BC/TC/WC Liberty scene setup and post-route OpenSTA MCMM analysis for both architectures.
+- [x] Separate SKY130HD TT physical implementation and extracted-parasitic post-route STA for both architectures.
+- [x] Pinned platform provenance, Liberty PVT/unit checks, tool/library/artifact hashes and a SHA-256 manifest.
+- [x] All four physical builds, both ASAP7 three-scene MCMM analyses, both SKY130HD post-route analyses and manifest generation passed in PR #8 [technology-breadth run #42098727158](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727158). The [90-day artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727158/artifacts/13449087689) contains 412 files and the manifest. Its four design/platform combinations each include final ODB, Verilog, GDS, SPEF and SDC; all 36 manifest-listed implementation-artifact hashes were independently verified after download.
 
-**SKY130HD interpretation:** the pinned platform provides the verified TT model used here. No fast/slow SKY130HD corners are fabricated. Cross-library absolute PPA ranking is not claimed.
+**ASAP7 measured MCMM results (minimum slack among the 100 reported paths per type and scene):**
+
+| Architecture | Scene | PVT | Setup slack (ps) | Hold slack (ps) |
+|---|---|---|---:|---:|
+| Combined | BC | FF, 0°C, 0.77 V | 7973.601 | 8.200 |
+| Combined | TC | TT, 25°C, 0.70 V | 7803.926 | 17.088 |
+| Combined | WC | SS, 100°C, 0.63 V | 7504.804 | -3.225 |
+| Split | BC | FF, 0°C, 0.77 V | 7948.192 | 5.724 |
+| Split | TC | TT, 25°C, 0.70 V | 7780.835 | 16.630 |
+| Split | WC | SS, 100°C, 0.63 V | 7490.069 | 5.691 |
+
+The combined WC scene has a negative hold slack among its 100 reported paths; the experiment must not be described as full hold closure. The path report cap is 100, so the recorded minimum is not an exhaustive signoff path inventory. Each architecture's TC-extracted SPEF is reused unchanged across BC/TC/WC. There is no corner-specific RC extraction or scaling.
+
+**SKY130HD TT post-route results:**
+
+| Architecture | Register-to-register minimum period | Register-to-register Fmax | All-path minimum period | All-path Fmax | Worst setup slack | Worst hold slack |
+|---|---:|---:|---:|---:|---:|---:|
+| Combined | 4.96 ns | 201.70 MHz | 4.96 ns | 201.70 MHz | +5.042 ns | +0.066 ns |
+| Split | 4.91 ns | 203.52 MHz | 5.06 ns | 197.46 MHz | +4.936 ns | +0.257 ns |
+
+The SKY130HD experiment uses the pinned platform's verified TT, 25°C, 1.80 V model only. No SKY130HD fast/slow corners are claimed. The ASAP7 and SKY130HD results are separate platform experiments; absolute cross-library PPA ranking is not valid.
+
+
 
 ### Explicitly out of scope
 - [ ] OCV/AOCV/POCV without validated variation models and methodology.
@@ -58,13 +82,15 @@ The reviewed baseline and limits apply only to the pinned Nangate45 typical envi
 ## v0.4.0 release gate
 
 Do not publish v0.4.0 until all of the following are true:
-1. The updated oracle-backed formal workflow passes positive proof and negative control.
-2. The technology-breadth workflow completes all four physical builds, both ASAP7 three-scene MCMM analyses, both SKY130HD post-route analyses, and manifest validation.
-3. The final PR is merged; fresh workflows on the resulting main commit pass regression, formal, Nangate45 physical and technology breadth.
-4. README, phase tracker, measured-results page, changelog and release notes refer only to evidence from those final runs.
-5. A release tag is created at the validated main commit and its evidence artifacts are attached or linked.
+1. [x] The updated oracle-backed formal workflow passes positive proof and negative control on PR #8.
+2. [x] The technology-breadth workflow completes all four physical builds, both ASAP7 three-scene MCMM analyses, both SKY130HD post-route analyses, and manifest validation on PR #8.
+3. [ ] The PR is merged; fresh workflows on the resulting main commit pass regression, formal, Nangate45 physical and technology breadth.
+4. [ ] README, phase tracker, measured-results page and release notes are confirmed against the final main-branch run IDs.
+5. [ ] A release tag is created at the validated main commit and its evidence artifacts are attached or linked.
 
-The latest PR #8 regression and Nangate45 STA/QoR run passed on its then-current source SHA. The updated formal and technology-breadth runs were not yet complete at last check. The PR remains open; no v0.4.0 tag/release is published.
+PR #8 commit 6f5a9c1b9c73261005445a6fd941242e6dde54cb has passed all four required PR workflows: [regression #42098727056](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727056), [formal #42098727465](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465), [Nangate45 physical #42098727330](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727330), and [technology breadth #42098727158](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727158). The PR still requires merge and fresh main-branch validation before v0.4.0 can be tagged or published.
+
+
 
 ## Execution policy
 
