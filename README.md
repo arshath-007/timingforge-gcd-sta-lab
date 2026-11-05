@@ -146,7 +146,7 @@ The corrected-load baseline is reproducible from [GitHub Actions run #136](https
 
 Download the [corrected-load raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013708525/artifacts/13406904777) and the [static benchmark scorecard](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013708525/artifacts/13408252094). See [corrected initial results](docs/INITIAL_RESULTS.md) and [CI run #136](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013708525).
 
-The testbench uses a finite set of directed cases and 250 randomized pairs per run. The random stimulus is not explicitly seeded, so exact corpus averages and maxima may vary by simulator/run; they are observations, not worst-case bounds.
+The testbench uses directed cases, an explicit high-iteration operand pair, and 250 randomized pairs from a fixed seed. This makes the random corpus repeatable for the same simulator and testbench revision; observed maxima remain finite-corpus results, not proven worst-case bounds.
 
 ## Research questions
 
