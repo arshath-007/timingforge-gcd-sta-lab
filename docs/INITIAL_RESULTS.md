@@ -5,7 +5,8 @@
 **Platform source revision:** `11aa833a11488c3a540a1d8eb4caa23fd22df703`  
 **Synthesis:** Yosys 0.68+post with Liberty mapping through ABC  
 **Timing engine:** OpenROAD-integrated OpenSTA  
-**CI evidence:** [Successful library-backed run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060)  
+**Baseline measurement evidence:** [run ID 41999231060 (workflow run #69)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060)  
+**Latest CI validation:** [run ID 42007925745 (workflow run #82)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007925745) — regression and library-backed STA jobs passed; this is validation, not the source of the numerical baseline.  
 **Source commit for the run:** `bd29bcd96914f0415771aa5aa76949cf7163b66e`
 
 ## Baseline architecture comparison
@@ -15,29 +16,29 @@ The same 32-bit GCD top-level interface and illustrative SDC were used for both 
 | Measurement | Combined compare/subtract | Split compare/subtract |
 |---|---:|---:|
 | Yosys-reported cell area (Liberty area units) | 1657.180 | 1681.918 |
-| Minimum clock period reported | 2.94 ns | 2.35 ns |
-| Corresponding reported Fmax | 340.67 MHz | 425.57 MHz |
+| All-path minimum clock period (`-include_port_paths`) | 2.94 ns | 2.35 ns |
+| Corresponding all-path Fmax | 340.67 MHz | 425.57 MHz |
 | Worst setup slack | +7.065 ns | +7.650 ns |
 | Setup WNS | 0.000 ns | 0.000 ns |
 | Worst hold slack | -0.002 ns | +0.005 ns |
 | Hold WNS | -0.002 ns | 0.000 ns |
 
-*The minimum clock periods are displayed to two decimal places; Fmax is calculated from the underlying unrounded period, so recomputing from the displayed value may differ slightly.*
+*The all-path minimum clock periods are displayed to two decimal places; Fmax is calculated from the underlying unrounded period, so recomputing from the displayed value may differ slightly. They include port paths and are not register-to-register-only metrics.*
 
-**Observed trade-off in this run:** the split architecture uses about 1.49% more Liberty cell area, while its reported minimum period is about 20.1% lower (reported Fmax about 24.9% higher). However, the self-checking RTL simulation also measured operation latency over the same 258-case corpus:
+**Observed measurements in this run:** the split architecture uses about 1.49% more Liberty cell area. The reported minimum-period/Fmax values include port paths because the STA script invokes `report_clock_min_period -include_port_paths`; they must not be interpreted as a register-to-register-only comparison. The parser separately records whether a register-to-register setup path exists, but does not calculate a register-to-register-only minimum period. A dedicated quantitative register-to-register comparison is therefore not claimed here. The self-checking RTL simulation measured operation latency over the same 258-case corpus:
 
 | Latency measurement | Combined | Split |
 |---|---:|---:|
 | Average cycles from accepted start to done | 63.63 | 84.17 |
 | Maximum cycles in the corpus | 93 | 124 |
 
-The split architecture averages about 32.3% more cycles because it registers the comparison and performs subtraction in a separate state. Multiplying the sample-average cycle count by each architecture's reported minimum clock period gives a rough timing-budget proxy of about 187.1 ns (combined) versus 197.8 ns (split), roughly 5.7% longer for split. This product is only an illustrative proxy—not measured silicon latency—and assumes the same ideal-clock, pre-layout timing model. The key conclusion is that a higher Fmax does not automatically mean lower operation latency.
+The split architecture averages about 32.3% more cycles because it registers the comparison and performs subtraction in a separate state. Since the available minimum-period figures include port paths, multiplying them by cycle counts is not a defensible architecture-specific operation-latency proxy; the previously quoted 187.1 ns versus 197.8 ns comparison is withdrawn. The key conclusion supported by the RTL simulation is that the split architecture takes more cycles in this test corpus. A valid frequency-versus-operation-latency comparison requires a separately measured register-to-register timing metric and a clearly defined interface timing model.
 
 WNS is zero for the positive setup margins because the report command returns zero when there is no negative slack; the positive margin is shown in the worst-setup-slack column. The combined architecture's baseline hold result is a small negative slack (-0.002 ns), while the split architecture has a small positive margin (+0.005 ns). These are educational pre-layout values, not signoff conclusions.
 
 ## What the injected faults demonstrated
 
-The successful matrix ran 8 SDC scenarios for each architecture (16 STA log files total). Download the [raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413) or the [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334).
+The baseline CI artifact documents 8 SDC scenarios for each architecture (16 STA log files total). The latest validation run is ID 42007925745 (workflow run #82); the numerical measurements below remain sourced from baseline run ID 41999231060 (workflow run #69). Download the [raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413) or the [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334).
 
 | Mutation | Observed STA evidence | Interpretation |
 |---|---|---|
@@ -49,7 +50,7 @@ The successful matrix ran 8 SDC scenarios for each architecture (16 STA log file
 | M06 — missing hold uncertainty | Worst hold slack improves by exactly 0.050 ns in both architectures relative to baseline: combined -0.002 to +0.048 ns; split +0.005 to +0.055 ns. | Removing a hold-margin assumption makes the apparent hold result more optimistic. |
 | M07 — zero clock period | Worst setup slack becomes -2.935 ns (combined) and -2.350 ns (split), with strongly negative TNS. | A non-positive clock period is invalid and produces a failing timing result. |
 
-The static linter detects seven controlled pattern/coverage defects. The STA run shows why several are important: paths can become unconstrained or disappear, and removing a margin assumption can improve reported slack without changing the RTL.
+The static linter detects six controlled mutations as ERROR findings and flags M04 as a REVIEW finding; the scorecard counts all seven expected mutation patterns as detected. The STA run shows why several are important: paths can become unconstrained or disappear, and removing a margin assumption can improve reported slack without changing the RTL.
 
 ## Reproduction
 
