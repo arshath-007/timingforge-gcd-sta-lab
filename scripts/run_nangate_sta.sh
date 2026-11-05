@@ -21,6 +21,8 @@ if ! command -v "$STA" >/dev/null 2>&1; then
   exit 2
 fi
 
+# Start from a clean matrix workspace so stale logs cannot satisfy completeness checks.
+rm -rf build/reports build/mutants build/netlists
 mkdir -p "$LIB_DIR" build/netlists build/reports
 if ! command -v curl >/dev/null 2>&1 && { [[ ! -s "$LIBERTY" ]] || [[ ! -s "$TECH_LEF" ]] || [[ ! -s "$SC_LEF" ]]; }; then
   echo "curl is required to download the Nangate45 platform files." >&2
@@ -43,6 +45,11 @@ export LIBERTY TECH_LEF SC_LEF
 python3 -m tools.make_mutants
 SDCS=("constraints/gcd_baseline.sdc")
 while IFS= read -r file; do SDCS+=("$file"); done < <(find build/mutants -maxdepth 1 -type f -name '*.sdc' | sort)
+
+if [[ ${#SDCS[@]} -ne 8 ]]; then
+  echo "ERROR: expected golden SDC plus exactly seven mutations; found ${#SDCS[@]}" >&2
+  exit 1
+fi
 
 for TOP in gcd_binary_combined gcd_binary_split; do
   echo "=== SYNTHESIS: $TOP ==="
