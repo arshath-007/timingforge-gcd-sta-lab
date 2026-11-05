@@ -3,7 +3,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.2.0 · **License:** MIT
+**Status:** Research prototype · **Version:** 0.2.1 · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -47,6 +47,7 @@ The static checker is a conservative, interface-specific prototype—not a full 
 
 - Two synthesizable iterative binary-GCD microarchitectures: combined compare/subtract and split compare/subtract.
 - A self-checking SystemVerilog testbench using a Euclidean-algorithm reference model.
+- Additional parameterized synchronous FIFO and signed MAC accumulator blocks with directed SystemVerilog regression tests.
 - A documented 10 ns block-level SDC example with setup/hold uncertainty and min/max I/O delays.
 - Seven controlled SDC mutation cases:
   - M01 missing primary clock.
@@ -64,8 +65,8 @@ The static checker is a conservative, interface-specific prototype—not a full 
 ## Repository layout
 
 ```text
-rtl/             synthesizable GCD architectures
-tb/              self-checking SystemVerilog testbench
+rtl/             synthesizable GCD architectures plus FIFO/MAC extension blocks
+tb/              self-checking GCD, FIFO and MAC SystemVerilog testbenches
 constraints/     golden SDC
 tools/           fault injector, SDC linter, benchmark and STA parser
 tests/           Python unit tests
@@ -83,6 +84,7 @@ Requirements: Icarus Verilog with SystemVerilog support.
 
 ```bash
 make rtl-test
+make ip-block-test
 ```
 
 ### 2. Static SDC fault-injection benchmark
@@ -147,7 +149,7 @@ The v0.2.0 release was validated by [GitHub Actions run #160](https://github.com
 
 Download the [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408368824) and [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408887449).
 
-See [initial results](docs/INITIAL_RESULTS.md) and [final CI run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699).
+See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report walkthrough](docs/ARCHITECTURE_AND_STA_WALKTHROUGH.md), the [portfolio and interview guide](docs/PORTFOLIO_AND_INTERVIEW.md), and [final CI run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699).
 
 ## Research questions
 
