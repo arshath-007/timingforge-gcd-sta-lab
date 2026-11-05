@@ -22,10 +22,10 @@ python-test:
 	$(PYTHON) -m unittest discover -s tests -v
 
 synth:
-	./scripts/synth.sh
+	bash scripts/synth.sh
 
 sta:
-	./scripts/run_sta.sh
+	bash scripts/run_sta.sh
 
 clean:
 	rm -rf build
