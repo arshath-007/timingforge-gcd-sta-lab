@@ -17,7 +17,7 @@ yosys -p "read_verilog -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_spl
   | tee build/formal/yosys.log
 
 # Prove assertions in the miter; --dump-vcd only selects the trace output file.
-yosys-smtbmc -s "$FORMAL_SOLVER" -t 34 --dump-vcd build/formal/gcd_equiv.vcd build/formal/gcd_equiv.smt2 \
+yosys-smtbmc -s "$FORMAL_SOLVER" -t 26 --dump-vcd build/formal/gcd_equiv.vcd build/formal/gcd_equiv.smt2 \
   | tee build/formal/smtbmc.log
 
 grep -q "Status: PASSED" build/formal/smtbmc.log
@@ -33,7 +33,7 @@ yosys -p "read_verilog -formal -sv build/formal/gcd_binary_combined_broken.sv rt
   | tee build/formal/yosys_negative.log
 
 set +e
-yosys-smtbmc -s "$FORMAL_SOLVER" -t 34 --dump-vcd build/formal/gcd_equiv_negative.vcd build/formal/gcd_equiv_broken.smt2 \
+yosys-smtbmc -s "$FORMAL_SOLVER" -t 26 --dump-vcd build/formal/gcd_equiv_negative.vcd build/formal/gcd_equiv_broken.smt2 \
   > build/formal/smtbmc_negative.log 2>&1
 negative_status=$?
 set -e
