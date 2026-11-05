@@ -76,8 +76,8 @@ Add generated-clock, clock-group and carefully justified multicycle/false-path c
 - [Fault catalog](FAULT_CATALOG.md)
 - [RTL architectures](../rtl/)
 - [Golden SDC](../constraints/gcd_baseline.sdc)
-- [Latest successful CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41998842007)
-- [Downloadable STA logs and matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41998842007/artifacts/13401900651)
+- [Latest successful CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060)
+- [Downloadable STA logs and matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413)
 
 ## Personal preparation checklist
 
