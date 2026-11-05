@@ -13,6 +13,7 @@ module tb_gcd_compare;
     integer total_split_cycles = 0;
     integer max_combined_cycles = 0;
     integer max_split_cycles = 0;
+    integer seed = 32'h5446_2026;
 
     always #5 clk = ~clk;
 
@@ -103,6 +104,8 @@ module tb_gcd_compare;
     initial begin
         repeat (3) @(negedge clk);
         rst = 1'b0;
+        // Keep the random corpus reproducible across repeated runs with the same simulator.
+        seed = $random(seed);
 
         check_case(0, 0);
         check_case(0, 99);
@@ -112,10 +115,12 @@ module tb_gcd_compare;
         check_case(32'h8000_0000, 32'h4000_0000);
         check_case(32'hffff_ffff, 32'h7fff_ffff);
         check_case(32'hffff_ffff, 32'hffff_ffff);
+        // Explicit high-iteration stress case; distinct adjacent odd operands.
+        check_case(32'hffff_ffff, 32'hffff_fffe);
 
         for (i = 0; i < 250; i = i + 1) begin
-            ra = {$urandom, $urandom};
-            rb = {$urandom, $urandom};
+            ra = {$random(seed), $random(seed)};
+            rb = {$random(seed), $random(seed)};
             check_case(ra, rb);
         end
 
