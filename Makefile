@@ -2,10 +2,17 @@ PYTHON ?= python3
 IVERILOG ?= iverilog
 VVP ?= vvp
 
-.PHONY: help rtl-test mutants lint-sdc python-test benchmark synth sta sta-matrix clean
+.PHONY: help rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix clean
 
 help:
-	@echo "Targets: rtl-test mutants lint-sdc python-test benchmark synth sta sta-matrix clean"
+	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix clean"
+
+ip-block-test:
+	mkdir -p build
+	$(IVERILOG) -g2012 -s tb_sync_fifo -o build/tb_sync_fifo.vvp rtl/sync_fifo.sv tb/tb_sync_fifo.sv
+	$(VVP) build/tb_sync_fifo.vvp
+	$(IVERILOG) -g2012 -s tb_mac_accumulator -o build/tb_mac_accumulator.vvp rtl/mac_accumulator.sv tb/tb_mac_accumulator.sv
+	$(VVP) build/tb_mac_accumulator.vvp
 
 rtl-test:
 	mkdir -p build
