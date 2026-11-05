@@ -28,7 +28,7 @@ def clock_metrics(text):
     return (float(match.group(1)), float(match.group(2))) if match else (None, None)
 
 
-def section(text, heading, next_heading):
+def section(text, heading, next_heading=None):
     start = text.find(heading)
     if start < 0:
         return ""
