@@ -5,7 +5,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.4.0 candidate · **Latest published release:** v0.2.0 · **License:** MIT
+**Status:** Research prototype · **Version:** 0.4.0 candidate (validation in progress) · **Latest published release:** [v0.2.1](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.1) · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -64,7 +64,11 @@ The static checker is a conservative, interface-specific prototype—not a full 
 - STA report parser that summarises area, minimum clock period, Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, unconstrained endpoints, heuristic critical-path classes, and OpenSTA max-slew/max-capacitance/max-fanout violation records.
 - Phase 1 quality findings, SDC mutation impact scoring, and reproducible clock-uncertainty/source-latency sensitivity experiments.
 - Conservative golden-result quality checks that flag missing metrics, unconstrained endpoints, missing I/O delays, negative hold slack, and unavailable native register-only period without inventing a derived Fmax.
-- GitHub Actions regression and library-backed STA jobs.
+- Bounded WIDTH=3 formal miter with an independent exhaustive GCD truth-table oracle, protocol assertions, and a deliberately broken RTL negative control (formal proof of the updated oracle-backed miter is pending CI completion).
+- Verilator concurrent-SVA protocol checks and WIDTH=8/16/32 simulation sweeps; these are simulation/assertion evidence, not full-width formal proofs.
+- Environment-specific fail-closed Nangate45 typical-corner QoR regression gate.
+- Experimental ASAP7 BC/TC/WC MCMM and SKY130HD TT physical-flow extension; technology-breadth validation is pending its dedicated CI run.
+- GitHub Actions regression, formal, physical-design and technology-breadth workflows.
 
 ## Repository layout
 
@@ -183,11 +187,11 @@ See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report
 The current [formal workflow run #49](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430) passed the positive CVC5 proof and the deliberate subtract-mutant negative control; download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430/artifacts/13439043462). The [regression and library-backed STA run #336](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502) passed the 32-bit RTL regression, FIFO/MAC tests, Python checks, SDC lint, fault-injection benchmark and library-backed STA matrix. Its [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502/artifacts/13439247462) records 7/7 controlled static fault patterns detected; this is not a general SDC correctness score.
 
 - Bounded transaction-level equivalence checks all symbolic 3-bit input pairs, including zero/equal operands, with independent completion timing; CVC5 1.1.2 and Yosys 0.33, 26 SMT steps / 12 positive clock edges.
-- The formal miter checks mutual result equivalence between the two architectures; it does not compare either against an independent mathematical GCD specification. The 32-bit simulation testbench supplies a separate Euclidean-reference check over its finite directed/seeded corpus. See [formal proof scope and rationale](docs/PHASE2_FORMAL_SCOPE.md).
+- The updated bounded formal miter connects both architectures to an independent WIDTH=3 truth-table GCD oracle, while also checking transaction equivalence and protocol completion. The 64-entry truth table is cross-checked against Python's `math.gcd`; the updated formal proof is awaiting its dedicated CI result. See [formal proof scope and rationale](docs/PHASE2_FORMAL_SCOPE.md).
 - The negative control deliberately corrupts the combined subtract operation and is rejected by the same property set.
 - The 32-bit simulation includes directed cases and 250 deterministic constrained-random cases using seed `0x54462026`; 259 cases were checked on each architecture, with parity, zero/equal, high-bit, GCD-class and latency-bin coverage.
 - QoR snapshots record source SHA, tool versions, platform/corner, Liberty hash, scenario and SDC hashes. The comparator rejects environment or scenario mismatches. Snapshots are artifact-backed, not a persistent database/dashboard.
-- The proof is bounded at WIDTH=3, not a 32-bit or unbounded proof. The flow uses immediate assertions; concurrent `assert property` SVA syntax is not supported by this selected frontend path.
+- The proof is bounded at WIDTH=3, not a 32-bit or unbounded proof. Concurrent SVA protocol properties are checked separately with Verilator simulation; they are not part of the Yosys/CVC5 proof.
 - The OpenSTA mutation-impact report has 12 matched and 2 inconclusive cases; both inconclusive observations are hold-uncertainty cases. No aggregate accuracy score is claimed.
 
 ## Phase 3 physical-design evidence — Nangate45 typical
@@ -206,6 +210,10 @@ The current [physical-design workflow run #23](https://github.com/arshath-007/ti
 | Reported hold skew (worst reported path) | -0.06 ns | -0.06 ns |
 
 The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are typical-corner educational results, not signoff. Multi-corner analysis is deferred because a second, independently verified Liberty PVT model is not part of the selected platform. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
+
+## Phase 3 technology-breadth experiment — validation pending
+
+The implementation adds two separate experiments: (1) ASAP7 post-route MCMM for both architectures using distinct BC/TC/WC NLDM Liberty scenes, and (2) independent SKY130HD TT physical implementation and extracted-parasitic post-route STA. The ASAP7 experiment reuses one TC-extracted SPEF unchanged across scenes; it isolates cell-timing model changes under shared parasitics and is not corner-specific RC signoff. SKY130HD has only the verified TT model in the pinned platform; no fast/slow corners are invented. Absolute PPA rankings across ASAP7 and SKY130HD are not claimed. See [technology-breadth methodology](docs/PHASE3_TECHNOLOGY_BREADTH.md) and [measured results](docs/PHASE3_TECHNOLOGY_BREADTH_RESULTS.md). The dedicated [technology-breadth workflow](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/technology-breadth.yml) has not yet produced a validated result.
 
 ## Research questions
 
@@ -254,7 +262,8 @@ The intended project contribution is a **reproducible fault-injection benchmark 
 - [ ] Add generated-clock, multicycle, clock-group, and justified false-path scenarios.
 - [x] Add OpenROAD floorplanning, placement, CTS, routing, GDS generation, and SPEF-based post-route STA for both architectures at Nangate45 typical.
 - [x] Compare pre-layout and post-route metrics using the same baseline SDC and typical Liberty; archive raw logs and SHA-256 manifests.
-- [ ] Add additional corners and variation-aware experiments only after distinct Liberty PVT models are verified.
+- [ ] Validate the ASAP7 BC/TC/WC MCMM and SKY130HD TT experiments using the dedicated technology-breadth workflow and its artifact manifest.
+- [ ] Add variation-aware experiments (OCV/AOCV/POCV) only with appropriate validated models and methodology.
 - [ ] Validate findings with external contributors and maintainers.
 
 ## Contributing and citation
