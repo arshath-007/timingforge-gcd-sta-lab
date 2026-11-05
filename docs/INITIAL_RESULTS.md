@@ -22,6 +22,8 @@ The same 32-bit GCD top-level interface and illustrative SDC were used for both 
 | Worst hold slack | -0.002 ns | +0.005 ns |
 | Hold WNS | -0.002 ns | 0.000 ns |
 
+*The minimum clock periods are displayed to two decimal places; Fmax is calculated from the underlying unrounded period, so recomputing from the displayed value may differ slightly.*
+
 **Observed trade-off in this run:** the split architecture uses about 1.49% more Liberty cell area, while its reported minimum period is about 20.1% lower (reported Fmax about 24.9% higher). However, the self-checking RTL simulation also measured operation latency over the same 258-case corpus:
 
 | Latency measurement | Combined | Split |
