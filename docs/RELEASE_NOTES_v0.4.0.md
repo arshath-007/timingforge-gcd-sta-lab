@@ -12,11 +12,18 @@
 
 ## Verification and evidence
 
-The PR #8 regression and library-backed Nangate45 STA/QoR workflow passed on source commit `388958f7228b29262793cd01b7bc9561d4db1855` in [run #42094688499](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42094688499).
+All four required PR #8 workflows passed on source commit 6f5a9c1b9c73261005445a6fd941242e6dde54cb:
 
-The updated oracle-backed formal workflow [#42094688482](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42094688482) and technology-breadth workflow [#42094688423](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42094688423) were still in progress at the time this draft was prepared. Their results must be added only after successful completion and artifact inspection.
+- Regression and library-backed Nangate45 STA/QoR: [run #42098727056](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727056); [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727056/artifacts/13449670505), [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727056/artifacts/13449555421).
+- Updated WIDTH=3 oracle-backed formal proof and deliberate mutant rejection: [run #42098727465](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465); [formal artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465/artifacts/13449462598).
+- Nangate45 typical physical implementation: [run #42098727330](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727330); [physical artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727330/artifacts/13450410051).
+- ASAP7 BC/TC/WC MCMM and SKY130HD TT physical flow: [run #42098727158](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727158); [technology-breadth artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727158/artifacts/13449087689).
 
-The Nangate45 physical baseline remains documented with its original evidence in [Phase 3 results](PHASE3_RESULTS.md). It must not be conflated with the ASAP7 or SKY130HD experiments.
+The ASAP7 combined-design WC scene reported -3.225 ps minimum hold slack among its 100 emitted hold paths. This is retained as a warning, not hidden or described as full hold closure. The SKY130HD TT post-route all-path minimum periods were 4.96 ns (combined) and 5.06 ns (split). Full per-scene and per-platform measurements are in [Phase 3 technology-breadth results](PHASE3_TECHNOLOGY_BREADTH_RESULTS.md).
+
+These are PR-branch validation runs. The PR must still be merged and all four workflows must pass on the resulting main commit before a v0.4.0 tag/release is published.
+
+
 
 ## Scope and limitations
 
@@ -29,9 +36,9 @@ The Nangate45 physical baseline remains documented with its original evidence in
 
 ## Release publication checklist
 
-- [ ] Updated oracle-backed formal workflow passes and artifacts are reviewed.
-- [ ] ASAP7 MCMM + SKY130HD physical workflow passes and manifest/artifacts are reviewed.
-- [ ] All required workflows pass on the final merged `main` commit.
-- [ ] README, results and phase tracker are updated with final run IDs and measured values.
+- [x] Updated oracle-backed formal workflow passes and the proof artifact is reviewed.
+- [x] ASAP7 MCMM + SKY130HD physical workflow passes and its manifest/artifacts are reviewed.
+- [ ] PR #8 is merged and all required workflows pass on the resulting `main` commit.
+- [ ] README, results and phase tracker are confirmed against final main-branch run IDs.
 - [ ] Tag `v0.4.0` is created at the validated `main` commit.
 - [ ] GitHub release is published with these notes and evidence links.
