@@ -93,7 +93,7 @@ def lint_sdc(text):
         for line in lines:
             if not line.startswith("set_clock_uncertainty "):
                 continue
-            option = re.search(rf"-{mode}\\s+([-+0-9.eE]+)", line)
+            option = re.search(rf"-{mode}\s+([-+0-9.eE]+)", line)
             if not option:
                 continue
             try:
