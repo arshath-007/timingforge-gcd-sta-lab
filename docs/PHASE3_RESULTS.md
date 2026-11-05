@@ -45,7 +45,7 @@ These changes are observations from this one matched flow and constraint set. Th
 
 ## Physical evidence
 
-The successful [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) uploaded the [90-day physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211).
+The latest PR #8 [physical-design workflow run #42098727330](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727330) uploaded the [90-day physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727330/artifacts/13450410051).
 
 For each architecture the archive contains:
 - Final ODB, GDS, SPEF and SDC.
@@ -61,12 +61,14 @@ The source baseline SDC hash is `e16af6df47394c8f5ea3b5ad8cd8d1cbcfc8d3c5935b9bc
 
 ## Interpretation and limitations
 
-- The result is for Nangate45 typical only. No distinct slow/fast Liberty PVT models were verified, so multi-corner analysis is not claimed.
-- No second technology library, OCV/AOCV/POCV, crosstalk/SI, IR-drop/EM, DRC/LVS signoff, power measurement or manufacturing-readiness claim is made.
+- This measured result is for the Nangate45 typical baseline only. The separate ASAP7 BC/TC/WC and SKY130HD TT experiments are documented in [technology-breadth results](PHASE3_TECHNOLOGY_BREADTH_RESULTS.md); they use different platform assumptions and do not alter this table.
+- No corner-specific RC extraction/scaling, OCV/AOCV/POCV, crosstalk/SI, IR-drop/EM, DRC/LVS signoff, power measurement or manufacturing-readiness claim is made.
 - The baseline block-level SDC is illustrative, not a production timing contract.
 - The optional ORFS Kepler-based internal LEC subprocess is disabled in this container. The separate Phase 2 bounded RTL transaction-equivalence proof does not establish netlist-to-netlist equivalence across ORFS optimization stages.
 - Pre-layout golden STA quality findings remain visible: the combined design has -0.002 ns hold slack, and both architectures have reported transition and capacitance violation records. The post-route metrics are separate measurements and do not erase those baseline findings.
 - WNS/TNS can be zero when worst slack is positive; consult worst slack and detailed path reports rather than treating zero WNS as a zero-margin result.
+
+See the separate [Phase 3 technology-breadth results](PHASE3_TECHNOLOGY_BREADTH_RESULTS.md) for ASAP7 BC/TC/WC MCMM and SKY130HD TT experiments; those results are not mixed into this Nangate45 table.
 
 ## Reproduction
 
