@@ -55,6 +55,14 @@ class StaMatrixParserTests(unittest.TestCase):
             self.assertTrue(row["register_to_register_path_found"])
             self.assertEqual(row["register_to_register_startpoint"], "input_reg/Q")
 
+    def test_classifies_critical_path_types_from_gcd_interface_names(self):
+        from tools.parse_sta_matrix import classify_critical_path
+        self.assertEqual(classify_critical_path("a_in[3]", "state_reg/D"), "input_to_register")
+        self.assertEqual(classify_critical_path("state_reg/Q", "result_reg/D"), "register_to_register")
+        self.assertEqual(classify_critical_path("result_reg/Q", "gcd_out[0]"), "register_to_output")
+        self.assertEqual(classify_critical_path("a_in[0]", "gcd_out[0]"), "input_to_output")
+        self.assertEqual(classify_critical_path("unknown_start", "unknown_end"), "unknown")
+
     def test_derives_single_cycle_period_from_explicit_rising_edge_paths(self):
         derived_sample = SAMPLE.replace(
             "=== HOLD / MIN PATH DETAILS ===",
