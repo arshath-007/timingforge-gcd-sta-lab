@@ -81,5 +81,15 @@ class StaMatrixParserTests(unittest.TestCase):
             self.assertTrue((directory / "sta_matrix_summary.json").is_file())
 
 
+    def test_no_register_path_clock_period_is_not_infinite_fmax(self):
+        no_path = SAMPLE.replace("core_clk period_min = 2.250 fmax = 444.44", "core_clk period_min = 0.00 fmax = inf")
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "sta_gcd_binary_combined_gcd_baseline.log"
+            path.write_text(no_path, encoding="utf-8")
+            row = parse_log(path)
+            self.assertIsNone(row["register_to_register_min_period_ns"])
+            self.assertIsNone(row["register_to_register_fmax_mhz"])
+
+
 if __name__ == "__main__":
     unittest.main()
