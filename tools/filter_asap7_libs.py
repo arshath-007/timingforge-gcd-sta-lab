@@ -11,7 +11,7 @@ from pathlib import Path
 PROCESSES = ("FF", "TT", "SS")
 SIMPLE_VERSION = "211120"
 EXCLUDED_PATTERNS = ("^XOR", "^XNOR", "^HAxp5")
-CELL_RE = re.compile(r"(?m)^[ \\t]*cell\\s*\\(\\s*([^)]+)\\s*\\)\\s*\\{")
+CELL_RE = re.compile(r"(?m)^[ \t]*cell\s*\(\s*([^)]+)\s*\)\s*\{)
 
 
 def sha256(path: Path) -> str:
@@ -33,7 +33,7 @@ def matching_brace(text: str, open_index: int) -> int:
         ch = text[i]
         nxt = text[i + 1] if i + 1 < len(text) else ""
         if line_comment:
-            if ch == "\\n":
+            if ch == "\n":
                 line_comment = False
         elif block_comment:
             if ch == "*" and nxt == "/":
@@ -42,7 +42,7 @@ def matching_brace(text: str, open_index: int) -> int:
         elif in_string:
             if escaped:
                 escaped = False
-            elif ch == "\\\\":
+            elif ch == "\\":
                 escaped = True
             elif ch == '"':
                 in_string = False
@@ -127,7 +127,7 @@ def main() -> int:
     args = parser.parse_args()
     manifest = build_filtered_libraries(args.lib_dir, args.output_dir)
     args.manifest.parent.mkdir(parents=True, exist_ok=True)
-    args.manifest.write_text(json.dumps(manifest, indent=2) + "\\n", encoding="utf-8")
+    args.manifest.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"PASS: filtered ASAP7 SIMPLE Liberty libraries written to {args.output_dir}")
     for corner, record in manifest["corners"].items():
         print(f"{corner}: excluded {len(record['removed_cells'])} cells")
