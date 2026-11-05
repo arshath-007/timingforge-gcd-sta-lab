@@ -5,8 +5,8 @@
 **Platform source revision:** `11aa833a11488c3a540a1d8eb4caa23fd22df703`  
 **Synthesis:** Yosys 0.68+post with Liberty mapping through ABC  
 **Timing engine:** OpenROAD-integrated OpenSTA  
-**CI evidence:** [Successful library-backed run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41997662485)  
-**Source commit for the run:** `2f0e252ae962a37a8a4e08fced782dbffbc28a2b`
+**CI evidence:** [Successful library-backed run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41998374664)  
+**Source commit for the run:** `82fc7c66ba3b17126e02088d7553e3dbd2f91b08`
 
 ## Baseline architecture comparison
 
@@ -33,8 +33,8 @@ The successful matrix ran 8 SDC scenarios for each architecture (16 STA log file
 | Mutation | Observed STA evidence | Interpretation |
 |---|---|---|
 | M01 — missing primary clock | No minimum clock period can be reported; the logs report 138 and 140 unconstrained endpoints for the two architectures. | Without a clock, clocked timing analysis is not meaningful. |
-| M02 — missing input delay on `a_in` | The combined design's reported minimum period changes from 2.94 ns to 2.33 ns and the selected setup path shifts to another input (for example, `b_in[19]`). | Removing an input budget can make the reported timing look better by excluding the intended input path. |
-| M03 — missing output delay on `gcd_out` | 32 unconstrained endpoints are reported for each architecture. | Output timing coverage is incomplete even though internal clocked paths can still be analysed. |
+| M02 — missing input delay on `a_in` | The combined design's reported minimum period changes from 2.94 ns to 2.33 ns and the selected setup path shifts to another input (for example, `b_in[19]`). The explicit OpenSTA setup check lists all 32 `a_in` bits as missing `set_input_delay`. | Removing an input budget can make the reported timing look better by excluding the intended input path. |
+| M03 — missing output delay on `gcd_out` | 32 unconstrained endpoints are reported for each architecture; the explicit setup check is also configured to report missing output-delay constraints. | Output timing coverage is incomplete even though internal clocked paths can still be analysed. |
 | M04 — broad register-to-register false path | The dedicated register-to-register setup report says `No paths found.` for the mutated case; the golden report contains register-to-register paths. | A broad exception can remove an entire path class from timing analysis. This mutation is deliberately invalid and exists only in the test suite. |
 | M05 — near-match port typo | OpenSTA reports that `a_input*` does not match a design port. | Similar-looking names are not valid substitutes for the actual `a_in` bus. |
 | M06 — missing hold uncertainty | Worst hold slack improves by exactly 0.050 ns in both architectures relative to baseline: combined -0.002 to +0.048 ns; split +0.005 to +0.055 ns. | Removing a hold-margin assumption makes the apparent hold result more optimistic. |
