@@ -30,6 +30,8 @@ jobs:
           else
             echo "PASS: self-check rejected deliberately broken RTL"
           fi
+      - name: Run FIFO and MAC extension block tests
+        run: make ip-block-test
       - name: Run Python regression
         run: make python-test
       - name: Run golden SDC lint
