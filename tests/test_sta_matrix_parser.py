@@ -61,10 +61,10 @@ class StaMatrixParserTests(unittest.TestCase):
             """=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===
 Startpoint: launch_reg/Q
 Endpoint: capture_reg/D
-slack (MET) 8.414
+8.414 slack (MET)
 Startpoint: launch_reg2/Q
 Endpoint: capture_reg2/D
-slack (MET) 8.700
+8.700 slack (MET)
 === CLOCK PROPERTIES ===
 Clock                   Period          Waveform
 core_clk                 10.00        0.00      5.00
