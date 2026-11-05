@@ -49,12 +49,12 @@ The checker is interface-specific and uses simple line-oriented pattern checks. 
 
 ## Published evidence
 
-The v0.2 baseline and all seven controlled mutations have been evaluated in the successful library-backed CI run:
+The v0.2 baseline measurements and seven controlled mutations are sourced from baseline run ID `41999231060` (workflow run #69). The latest CI validation is run ID `42007925745` (workflow run #82):
 
-- [GitHub Actions run #41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060) — both the RTL/Python regression job and the Nangate45 library-backed STA job completed successfully.
+- [Baseline measurement run ID 41999231060 (workflow run #69)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060) — source of the published numerical results and baseline artifacts.
 - [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413) — raw timing logs and parsed matrix evidence for both architectures and eight SDC scenarios each.
 - [Static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334) — generated static SDC fault-injection scorecard.
 - [Measured results and scenario interpretations](INITIAL_RESULTS.md).
-- [Latest CI validation — run #80](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007562314) — regression and library-backed STA both passed after documentation-only updates. This validates the current documentation revision; the numerical measurements and downloadable baseline artifacts remain sourced from run #41999231060.
+- [Latest CI validation — run ID 42007925745 (workflow run #82)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007925745) — regression and library-backed STA both passed. This validates the later repository revision; the numerical measurements and baseline artifacts remain sourced from run ID 41999231060.
 
 Keep scenario-level values sourced from the generated artifacts and measured-results report. Do not fill gaps with estimates or infer unreported WNS, hold, or unconstrained-path values.
