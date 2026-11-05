@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 SETUP_RE = re.compile(r"^set_clock_uncertainty -setup [0-9.]+ \[get_clocks core_clk\]$", re.MULTILINE)
-HOLD_RE = re.compile(r"^set_clock_uncertainty -hold [0-9.]+ \\[get_clocks core_clk\\]$", re.MULTILINE)
+HOLD_RE = re.compile(r"^set_clock_uncertainty -hold [0-9.]+ \[get_clocks core_clk\]$", re.MULTILINE)
 
 def generate_variants(baseline: str) -> list[dict]:
     """Return setup, hold, and source-latency variants derived from immutable text."""
