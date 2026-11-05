@@ -4,7 +4,7 @@
 
 **TimingForge — Constraint-Aware Static Timing Analysis Benchmark**
 
-Built a reproducible RTL-to-STA learning benchmark using SystemVerilog, Yosys, OpenROAD-integrated OpenSTA and the Nangate45 educational platform. Compared two 32-bit binary-GCD architectures, introduced seven controlled SDC fault patterns, and automated functional regression, constraint checks and a 16-run timing matrix.
+Built a reproducible RTL-to-STA learning benchmark using SystemVerilog, Yosys, OpenROAD-integrated OpenSTA and the Nangate45 educational platform. Compared two 32-bit binary-GCD architectures, introduced seven controlled SDC fault patterns, automated a 16-run timing matrix, added DRV violation reporting, scored mutation impact, and ran 18 clock-constraint sensitivity experiments.
 
 ### Skills demonstrated
 
@@ -13,11 +13,11 @@ Built a reproducible RTL-to-STA learning benchmark using SystemVerilog, Yosys, O
 - RTL architecture comparison and self-checking SystemVerilog
 - Yosys synthesis and standard-cell library-based analysis
 - Python automation, report parsing and regression testing
-- Evidence-based reporting and explicit disclosure of pre-layout limitations
+- Evidence-based reporting, mutation-impact analysis, clock-constraint sensitivity, and explicit disclosure of pre-layout limitations
 
 ### Honest project scope
 
-The GCD results use one typical Nangate45 Liberty corner, ideal clocks and no extracted SPEF parasitics. All-path Fmax includes I/O paths and is not an internal architecture-only speed comparison. The combined architecture's register-only minimum-period query is unresolved; do not claim a combined internal Fmax. The combined golden-SDC hold slack is -0.002 ns. This is an educational pre-layout benchmark, not production signoff.
+The GCD results use one typical Nangate45 Liberty corner, ideal clocks and no extracted SPEF parasitics. Baseline DRV records include max-slew and max-capacitance violations; the combined golden-SDC hold slack is -0.002 ns. Mutation scoring reports 12 matched, 0 mismatched and 2 inconclusive observations. All-path Fmax includes I/O paths and is not an internal architecture-only speed comparison. The combined architecture's register-only minimum-period query is unresolved; do not claim a combined internal Fmax. This is an educational pre-layout benchmark, not production signoff.
 
 ## Interview explanation (60–90 seconds)
 
