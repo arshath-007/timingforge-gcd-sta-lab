@@ -70,7 +70,7 @@ The input path no longer receives the intended external arrival budget. The repo
 It proves that this RTL and this illustrative SDC were synthesised and analysed in a reproducible educational library-backed flow. It does not prove production process timing, extracted interconnect timing, power, or signoff closure.
 
 **What would you do next?**  
-Add generated-clock, clock-group and carefully justified multicycle/false-path cases; measure latency over more workloads; add FIFO and MAC benchmarks; then run floorplanning, clock-tree synthesis, routing and extracted-parasitic timing. Finally add multiple process corners and variation assumptions.
+Add generated-clock, clock-group and carefully justified multicycle/false-path cases; measure latency over more workloads; and extend the library-backed STA matrix to the existing FIFO and MAC blocks only after defining suitable constraints and comparable measurement boundaries. Then investigate floorplanning, clock-tree synthesis, routing and extracted-parasitic timing, followed by multiple process corners and variation assumptions.
 
 ## Evidence to open during a walkthrough
 
