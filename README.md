@@ -190,7 +190,7 @@ The intended project contribution is a **reproducible fault-injection benchmark 
 - [x] Yosys synthesis against a documented/pinned Liberty platform.
 - [x] OpenROAD-integrated STA matrix for both architectures and all eight SDC scenarios.
 - [x] Parsed STA matrix report and initial measured results.
-- [ ] Add FIFO and MAC benchmark blocks.
+- [x] Add functional FIFO and MAC extension blocks with directed tests (not yet included in the GCD STA matrix).
 - [ ] Add generated-clock, multicycle, clock-group, and justified false-path scenarios.
 - [ ] Add additional corners and variation-aware experiments.
 - [ ] Add OpenROAD floorplanning, placement, CTS, routing, and parasitic-aware reports.
