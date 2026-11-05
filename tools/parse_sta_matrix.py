@@ -59,7 +59,7 @@ def parse_drv_check(text, heading, next_heading):
     unsupported = re.search(r'TIMINGFORGE_DRV_UNSUPPORTED:.*', body, re.IGNORECASE)
     if unsupported:
         return {'supported': False, 'violation_count': None, 'reported_lines': [unsupported.group(0).strip()]}
-    violations = [line.strip() for line in body.splitlines() if re.search(r'\\bVIOLATED\\b', line, re.IGNORECASE)]
+    violations = [line.strip() for line in body.splitlines() if re.search(r'\bVIOLATED\b', line, re.IGNORECASE)]
     return {'supported': True, 'violation_count': len(violations), 'reported_lines': violations}
 
 def cell_area(top, report_path):
