@@ -89,14 +89,35 @@ def lint_sdc(text):
             if not _has_delay(lines, "set_output_delay", port, mode, clock_names):
                 findings.append(f"TF201 ERROR: missing {mode} output delay for port '{port}'")
 
-    if not any(line.startswith("set_clock_uncertainty -setup ") for line in lines):
-        findings.append("TF401 ERROR: setup clock uncertainty is not defined")
-    if not any(line.startswith("set_clock_uncertainty -hold ") for line in lines):
-        findings.append("TF402 ERROR: hold clock uncertainty is not defined")
+    def has_positive_uncertainty(mode):
+        for line in lines:
+            if not line.startswith("set_clock_uncertainty "):
+                continue
+            option = re.search(rf"-{mode}\\s+([-+0-9.eE]+)", line)
+            if not option:
+                continue
+            try:
+                if float(option.group(1)) > 0:
+                    return True
+            except ValueError:
+                pass
+        return False
 
-    if any(line.startswith("set_false_path ") for line in lines):
-        findings.append("TF301 REVIEW: set_false_path requires design-intent review")
+    if not has_positive_uncertainty("setup"):
+        findings.append("TF401 ERROR: positive setup clock uncertainty is not defined")
+    if not has_positive_uncertainty("hold"):
+        findings.append("TF402 ERROR: positive hold clock uncertainty is not defined")
 
+    review_commands = {
+        "set_false_path": "TF301 REVIEW: set_false_path requires design-intent review",
+        "set_multicycle_path": "TF302 REVIEW: set_multicycle_path requires design-intent review",
+        "set_clock_groups": "TF303 REVIEW: set_clock_groups requires design-intent review",
+        "set_disable_timing": "TF304 REVIEW: set_disable_timing requires design-intent review",
+        "set_case_analysis": "TF305 REVIEW: set_case_analysis requires mode/design-intent review",
+    }
+    for command, finding in review_commands.items():
+        if any(line.startswith(command + " ") for line in lines):
+            findings.append(finding)
     if not findings:
         findings.append("TF000 PASS: expected clock, uncertainty, and GCD I/O delay patterns found; this is not proof of correctness")
     return findings
