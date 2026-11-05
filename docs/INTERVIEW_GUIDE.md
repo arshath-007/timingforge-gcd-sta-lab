@@ -44,7 +44,7 @@ This separation matters. A pattern checker can flag an obvious defect, but only 
 - **Combined:** The odd/odd compare and subtract decision/update occur in one processing state. This keeps the operation cycle count lower in the tested input corpus, but its combinational path can be longer.
 - **Split:** The compare result is registered and subtraction occurs in a later state. This can shorten the combinational timing path but costs an extra processing cycle for odd/odd iterations.
 
-In the measured 258-case corpus, combined averaged 63.63 cycles (maximum 93); split averaged 84.17 cycles (maximum 124). The split architecture's reported pre-layout minimum period was lower, but its cycle count was higher. Never say that higher Fmax alone proves higher operation throughput.
+In the measured 258-case corpus, combined averaged 63.63 cycles (maximum 93); split averaged 84.17 cycles (maximum 124). The reported minimum-period/Fmax values include port paths and are not a register-to-register-only comparison. The split architecture also used more cycles in the tested corpus. Do not claim that the reported all-path Fmax proves a faster internal datapath or higher operation throughput.
 
 ## Questions a reviewer may ask
 
@@ -79,11 +79,11 @@ Add generated-clock, clock-group and carefully justified multicycle/false-path c
 - [Fault catalog](FAULT_CATALOG.md)
 - [RTL architectures](../rtl/)
 - [Golden SDC](../constraints/gcd_baseline.sdc)
-- [Baseline measured-results CI run #41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060)
-- [Latest successful CI validation — run #78, documentation-only update](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42006568892)
+- [Baseline measurement run ID 41999231060 (workflow run #69)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060)
+- [Latest CI validation run ID 42007925745 (workflow run #82)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007925745)
 - [Downloadable baseline STA logs and matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413)
 
-Run #41999231060 generated the numerical measurements and downloadable STA artifacts. Run #78 reran regression and library-backed STA after documentation-only changes; it validates the final documentation revision but does not regenerate or supersede the baseline measurements.
+Run ID 41999231060 (workflow run #69) generated the numerical measurements and downloadable STA artifacts. Run ID 42007925745 (workflow run #82) is the latest successful CI validation; it does not regenerate or supersede the baseline measurements.
 
 ## Personal preparation checklist
 
