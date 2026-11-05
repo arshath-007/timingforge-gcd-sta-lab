@@ -16,7 +16,7 @@ The ORFS platform files are taken from the ORFS source revision pinned by the pr
 - ASAP7 platform configuration: [platform config](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/11aa833a11488c3a540a1d8eb4caa23fd22df703/flow/platforms/asap7/config.mk)
 - SKY130HD platform configuration: [platform config](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/11aa833a11488c3a540a1d8eb4caa23fd22df703/flow/platforms/sky130hd/config.mk)
 
-The manifest records hashes of every Liberty file used, plus the final ODB, GDS, SPEF and SDC files for both designs and platforms. It also records the units reported by OpenSTA and the upstream platform-license references.
+The manifest records hashes of every raw and filtered Liberty file used, plus the final ODB, Verilog netlist, GDS, SPEF and SDC files for both designs and platforms. It also records the units reported by OpenSTA and the upstream platform-license references.
 
 ## ASAP7 PVT scenes
 
