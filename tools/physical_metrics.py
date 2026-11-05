@@ -25,14 +25,14 @@ def parse_postroute_log(path: Path) -> dict:
     if len(clock) != 2:
         raise ValueError(f"{path}: post-route clock-period section missing")
     clock_text = clock[1].split("=== POST-ROUTE SETUP SUMMARY ===", 1)[0]
-    period = _number(r"^\\s*\\S+\\s+period_min\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", clock_text)
-    fmax = _number(r"^\\s*\\S+\\s+period_min\\s*=\\s*[-+]?(?:\\d+\\.?\\d*|\\.\\d+)\\s+fmax\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", clock_text)
-    setup = _number(r"^\\s*worst slack\\s+max\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
-    hold = _number(r"^\\s*worst slack\\s+min\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
-    setup_wns = _number(r"^\\s*wns\\s+max\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
-    setup_tns = _number(r"^\\s*tns\\s+max\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
-    hold_wns = _number(r"^\\s*wns\\s+min\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
-    hold_tns = _number(r"^\\s*tns\\s+min\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
+    period = _number(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", clock_text)
+    fmax = _number(r"^\s*\S+\s+period_min\s*=\s*[-+]?(?:\d+\.?\d*|\.\d+)\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", clock_text)
+    setup = _number(r"^\s*worst slack\s+max\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
+    hold = _number(r"^\s*worst slack\s+min\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
+    setup_wns = _number(r"^\s*wns\s+max\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
+    setup_tns = _number(r"^\s*tns\s+max\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
+    hold_wns = _number(r"^\s*wns\s+min\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
+    hold_tns = _number(r"^\s*tns\s+min\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
     skew_setup = text.split("=== POST-ROUTE SETUP CLOCK SKEW ===", 1)
     skew_hold = text.split("=== POST-ROUTE HOLD CLOCK SKEW ===", 1)
     setup_skew_text = skew_setup[1].split("=== POST-ROUTE HOLD CLOCK SKEW ===", 1)[0] if len(skew_setup) > 1 else ""
@@ -111,7 +111,7 @@ def main() -> int:
     args = parser.parse_args()
     result = compare(args.prelayout_matrix, args.physical_root)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, indent=2) + "\\n", encoding="utf-8")
+    args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "status": "PASS",
         "designs": [row["top"] for row in result["designs"]],
