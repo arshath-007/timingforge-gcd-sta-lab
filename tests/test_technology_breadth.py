@@ -1,15 +1,36 @@
 import unittest
-from tools.technology_breadth import (ASAP7_SCENES, ASAP7_LIB_VERSIONS, parse_scene_report, parse_units, parse_sky130_postroute_metrics)
+from pathlib import Path
+import gzip
+import tempfile
+from tools.technology_breadth import (ASAP7_SCENES, ASAP7_LIB_VERSIONS, parse_liberty_pvt, parse_scene_report, parse_units, parse_sky130_postroute_metrics)
 
 
 class TechnologyBreadthTests(unittest.TestCase):
     def test_asap7_pvt_scenes_are_distinct(self):
         self.assertEqual(ASAP7_SCENES["ASAP7_BC"]["process"], "FF")
+        self.assertEqual(ASAP7_SCENES["ASAP7_BC"]["temperature"], "0C")
+        self.assertEqual(ASAP7_SCENES["ASAP7_TC"]["temperature"], "25C")
         self.assertEqual(ASAP7_SCENES["ASAP7_TC"]["process"], "TT")
         self.assertEqual(ASAP7_SCENES["ASAP7_WC"]["process"], "SS")
         self.assertEqual(len({x["temperature"] for x in ASAP7_SCENES.values()}), 3)
         self.assertEqual(len({x["voltage_v"] for x in ASAP7_SCENES.values()}), 3)
 
+
+    def test_parses_nominal_pvt_from_plain_and_gzip_liberty(self):
+        content = """library (test) {
+ nom_voltage : 0.77;
+ nom_temperature : 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as directory:
+            plain = Path(directory) / "model.lib"
+            plain.write_text(content, encoding="utf-8")
+            expected = {"nom_voltage_v": 0.77, "nom_temperature_c": 0.0}
+            self.assertEqual(parse_liberty_pvt(plain), expected)
+            compressed = Path(directory) / "model.lib.gz"
+            with gzip.open(compressed, "wt", encoding="utf-8") as stream:
+                stream.write(content)
+            self.assertEqual(parse_liberty_pvt(compressed), expected)
 
     def test_asap7_uses_exact_pinned_nldm_revisions(self):
         self.assertEqual(ASAP7_LIB_VERSIONS, {

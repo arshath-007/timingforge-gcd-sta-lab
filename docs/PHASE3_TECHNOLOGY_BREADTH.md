@@ -16,7 +16,7 @@ The ORFS platform files are taken from the ORFS source revision pinned by the pr
 - ASAP7 platform configuration: [platform config](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/11aa833a11488c3a540a1d8eb4caa23fd22df703/flow/platforms/asap7/config.mk)
 - SKY130HD platform configuration: [platform config](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/11aa833a11488c3a540a1d8eb4caa23fd22df703/flow/platforms/sky130hd/config.mk)
 
-The manifest records hashes of every raw and filtered Liberty file used, plus the final ODB, Verilog netlist, GDS, SPEF and SDC files for both designs and platforms. It also records the units reported by OpenSTA and the upstream platform-license references.
+The manifest records hashes and parsed nominal PVT metadata for every raw and filtered Liberty file used, plus the final ODB, Verilog netlist, GDS, SPEF and SDC files for both designs and platforms. It also records the units reported by OpenSTA and the upstream platform-license references.
 
 ## ASAP7 PVT scenes
 
@@ -24,11 +24,11 @@ The ORFS ASAP7 NLDM configuration supplies three distinct PVT model groups:
 
 | Scene | Liberty process model | Temperature | Voltage |
 |---|---|---:|---:|
-| ASAP7_BC | FF | 25°C | 0.77 V |
-| ASAP7_TC | TT | 0°C | 0.70 V |
+| ASAP7_BC | FF | 0°C | 0.77 V |
+| ASAP7_TC | TT | 25°C | 0.70 V |
 | ASAP7_WC | SS | 100°C | 0.63 V |
 
-Each scene reads the five RVT NLDM libraries needed by the mapped design (AO, INVBUF, OA, SIMPLE and SEQ). The designs are physically implemented once at TC, with propagated clocks and extracted SPEF. OpenSTA then creates all three scenes in one MCMM session and reports setup, hold, clock skew and design-rule checks per scene. OpenSTA's scene model is documented in the [official OpenSTA examples](https://opensta.readthedocs.io/en/latest/Examples/).
+Each scene reads the five RVT NLDM libraries needed by the mapped design (AO, INVBUF, OA, SIMPLE and SEQ). The project parses `nom_temperature` and `nom_voltage` from every Liberty actually read (including the filtered SIMPLE file) and fails manifest generation if any model disagrees with the scene metadata. The designs are physically implemented once using the ORFS TC flow, with propagated clocks and extracted SPEF. **Pinned-library metadata audit:** the Liberty headers identify FF at 0°C, TT at 25°C and SS at 100°C. The ORFS `config.mk` environment variables label BC/TC temperatures as 25°C/0°C, respectively; those environment labels do not match the nominal temperatures inside the corresponding FF/TT Liberty files. For the explicit MCMM scenes, this project treats the actual Liberty `nom_temperature`/`nom_voltage` values as authoritative and records this upstream configuration discrepancy. The shared SPEF has no corner-specific temperature/RC scaling. OpenSTA then creates all three scenes in one MCMM session and reports setup, hold, clock skew and design-rule checks per scene. OpenSTA's scene model is documented in the [official OpenSTA examples](https://opensta.readthedocs.io/en/latest/Examples/).
 
 **RC assumption:** the single TC-extracted SPEF is reused unchanged for BC, TC and WC. There is no corner-specific RC extraction or RC scaling in this experiment. The MCMM results therefore isolate the effect of the distinct Liberty PVT timing models under a shared parasitic network; they are not a full foundry-qualified PVT/RC signoff flow.
 

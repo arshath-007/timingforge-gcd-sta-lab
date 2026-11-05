@@ -3,15 +3,17 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import gzip
 import json
 import re
 from pathlib import Path
 
 TOPS = ("gcd_binary_combined", "gcd_binary_split")
 ASAP7_LIB_VERSIONS = {"AO": "211120", "INVBUF": "220122", "OA": "211120", "SIMPLE": "211120", "SEQ": "220123"}
+# Read from pinned NLDM Liberty headers, not inferred from ORFS config.mk.
 ASAP7_SCENES = {
-    "ASAP7_BC": {"process": "FF", "temperature": "25C", "voltage_v": 0.77},
-    "ASAP7_TC": {"process": "TT", "temperature": "0C", "voltage_v": 0.70},
+    "ASAP7_BC": {"process": "FF", "temperature": "0C", "voltage_v": 0.77},
+    "ASAP7_TC": {"process": "TT", "temperature": "25C", "voltage_v": 0.70},
     "ASAP7_WC": {"process": "SS", "temperature": "100C", "voltage_v": 0.63},
 }
 REQUIRED = (
@@ -26,6 +28,22 @@ def sha256(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+
+def parse_liberty_pvt(path: Path) -> dict:
+    """Read nominal voltage and temperature from a pinned Liberty model."""
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "rt", encoding="utf-8", errors="replace") as stream:
+        text = stream.read()
+    voltage = re.search(r"(?m)^\\s*nom_voltage\\s*:\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*;", text)
+    temperature = re.search(r"(?m)^\\s*nom_temperature\\s*:\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*;", text)
+    if not voltage or not temperature:
+        raise ValueError(f"Liberty nominal PVT metadata missing in {path}")
+    return {
+        "nom_voltage_v": float(voltage.group(1)),
+        "nom_temperature_c": float(temperature.group(1)),
+    }
 
 
 def parse_scene_report(text: str, scene: str) -> dict:
@@ -191,9 +209,31 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
         if not seq.is_file():
             raise FileNotFoundError(f"missing pinned ASAP7 SEQ/{process} Liberty: {seq}")
         files.append(seq)
-        library_hashes[scene] = [
-            {"file": path.name, "sha256": sha256(path)} for path in files
-        ]
+        filtered_simple = root / "asap7/filtered_libs" / (
+            f"asap7sc7p5t_SIMPLE_RVT_{process}_nldm_211120.filtered.lib"
+        )
+        if not filtered_simple.is_file():
+            raise FileNotFoundError(filtered_simple)
+        used_files = [path for path in files if "_SIMPLE_" not in path.name]
+        used_files.append(filtered_simple)
+        expected = {
+            "nom_voltage_v": float(pvt["voltage_v"]),
+            "nom_temperature_c": float(pvt["temperature"].removesuffix("C")),
+        }
+        parsed_models = []
+        for path in used_files:
+            model_pvt = parse_liberty_pvt(path)
+            if model_pvt != expected:
+                raise ValueError(
+                    f"{scene} Liberty PVT mismatch in {path.name}: "
+                    f"expected {expected}, got {model_pvt}"
+                )
+            parsed_models.append({
+                "file": path.name,
+                **model_pvt,
+                "sha256": sha256(path),
+            })
+        library_hashes[scene] = parsed_models
 
     return {
         "schema_version": "1.0",
@@ -209,6 +249,10 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
             "FF/TT/SS models do not provide consistent timing groups for those cells."
         ),
         "asap7_pvt": ASAP7_SCENES,
+        "asap7_liberty_pvt_validation": (
+            "Every Liberty read by each MCMM scene (AO, INVBUF, OA, filtered SIMPLE, SEQ) "
+            "is parsed and checked against nom_temperature and nom_voltage in its own file."
+        ),
         "platform_licenses": {
             "asap7": {
                 "license": "BSD-3-Clause",

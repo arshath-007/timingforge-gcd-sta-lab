@@ -50,7 +50,7 @@ define_scene ASAP7_TC -mode functional -liberty $tc_libs -spef shared_tc_extract
 define_scene ASAP7_WC -mode functional -liberty $wc_libs -spef shared_tc_extracted
 
 puts "=== TIMINGFORGE ASAP7 MCMM METADATA ==="
-puts "ASAP7 PVT: BC=FF/25C/0.77V; TC=TT/0C/0.70V; WC=SS/100C/0.63V"
+puts "ASAP7 Liberty nominal PVT: BC=FF/0C/0.77V; TC=TT/25C/0.70V; WC=SS/100C/0.63V"
 puts "ASAP7 RC: same TC-extracted SPEF reused for BC, TC and WC; no corner-specific RC scaling"
 report_units
 report_clock_properties
