@@ -29,6 +29,23 @@ module tb_sync_fifo;
       pop_expect(8'h11); pop_expect(8'h22); pop_expect(8'h33); pop_expect(8'h44);
       if (!empty || count!=0) $fatal(1,"FIFO did not become empty");
       push(8'hA5); pop_expect(8'hA5);
+
+      // Simultaneous read/write at a non-empty, non-full occupancy.
+      push(8'hB1); push(8'hB2);
+      din=8'hB3; wr_en=1; rd_en=1; tick(); wr_en=0; rd_en=0;
+      if (count!=2 || dout!==8'hB2)
+        $fatal(1,"simultaneous read/write did not preserve FIFO occupancy/order");
+      pop_expect(8'hB2); pop_expect(8'hB3);
+      if (!empty || count!=0) $fatal(1,"FIFO failed after simultaneous read/write");
+
+      // At full, the current implementation accepts the read and rejects the write.
+      push(8'hC1); push(8'hC2); push(8'hC3); push(8'hC4);
+      din=8'hC5; wr_en=1; rd_en=1; tick(); wr_en=0; rd_en=0;
+      if (count!=3 || dout!==8'hC2)
+        $fatal(1,"full simultaneous read/write behavior changed");
+      pop_expect(8'hC2); pop_expect(8'hC3); pop_expect(8'hC4);
+      if (!empty) $fatal(1,"FIFO failed to drain after full simultaneous operation");
+
       $display("PASS: synchronous FIFO directed tests");
       $finish;
     end
