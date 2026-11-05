@@ -174,6 +174,15 @@ module tb_gcd_compare;
         for (i = 0; i < 250; i = i + 1) begin
             ra = $random(seed);
             rb = $random(seed);
+            // Deterministic constraint classes over seeded random base values.
+            case (i % 5)
+                0: begin ra = ra | 32'h0000_0001; rb = rb | 32'h0000_0001; end // odd/odd
+                1: begin ra = ra & 32'hffff_fffe; rb = rb | 32'h0000_0001; end // even/odd
+                2: begin ra = ra & 32'hffff_fffe; rb = rb & 32'hffff_fffe; end // even/even
+                3: begin ra = ra | 32'h8000_0000; rb = rb | 32'h8000_0000; end // high-bit operands
+                4: rb = ra; // equal operands
+                default: begin end
+            endcase
             check_case(ra, rb);
             random_cases = random_cases + 1;
         end
