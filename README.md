@@ -59,7 +59,7 @@ The static checker is a conservative, interface-specific prototype—not a full 
   - M07 non-positive clock period.
 - Static SDC coverage checker, fault generator, JSON/Markdown scorecard, and Python unit tests.
 - Yosys synthesis scripts and a library-backed OpenROAD-integrated STA matrix runner.
-- STA report parser that summarises area, minimum clock period, Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, and unconstrained endpoints.
+- STA report parser that summarises area, minimum clock period, Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, unconstrained endpoints, and heuristic critical-path classes.
 - Conservative golden-result quality checks that flag missing metrics, unconstrained endpoints, missing I/O delays, negative hold slack, and unavailable native register-only period without inventing a derived Fmax.
 - GitHub Actions regression and library-backed STA jobs.
 
