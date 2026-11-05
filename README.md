@@ -135,7 +135,7 @@ Review the raw Yosys/OpenSTA logs and tool versions. A successful script exit al
 The baseline numerical measurements and raw matrix artifacts originate from run ID `41999231060` (workflow run #69, source commit `bd29bcd96914f0415771aa5aa76949cf7163b66e`). The latest CI validation is run ID `42007925745` (workflow run #82, source commit `18121a4848825c23a878702712e1bf6b86099cf3`); both regression and library-backed STA jobs passed. The latter validates the documentation revision and workflow execution; it does not replace the original baseline measurements.
 
 - 258 directed/random GCD input pairs checked on **each** RTL architecture.
-- 19 Python unit tests passed in the expanded regression suite.
+- 20 Python unit tests passed in the expanded regression suite.
 - Seven controlled static SDC fault patterns detected by the prototype.
 - Both architectures synthesized against the pinned Nangate45 typical Liberty file.
 - Eight SDC scenarios analysed for each architecture (16 STA log files).
