@@ -28,6 +28,7 @@ ACTUAL_REV="$(git -C "$ORFS_SOURCE" rev-parse HEAD)"
   exit 2
 }
 FLOW_ROOT="$ORFS_SOURCE/flow"
+export FLOW_HOME="$FLOW_ROOT"
 [[ -f "$FLOW_ROOT/Makefile" ]] || { echo "ORFS flow Makefile missing: $FLOW_ROOT" >&2; exit 2; }
 
 PLATFORM_DIR="$FLOW_ROOT/platforms/nangate45"
