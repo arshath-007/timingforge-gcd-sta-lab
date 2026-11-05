@@ -82,6 +82,7 @@ jobs:
             build/reports/sta_matrix_summary.json
             build/reports/sta_quality_findings.json
             build/reports/sta_mutation_impact.json
+            build/sensitivity/**
             build/reports/sta_*.log
             build/yosys_*.log
             build/tool_versions.txt
