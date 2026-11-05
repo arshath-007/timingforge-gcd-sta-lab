@@ -47,7 +47,7 @@ The static checker is a conservative, interface-specific prototype—not a full 
 
 - Two synthesizable iterative binary-GCD microarchitectures: combined compare/subtract and split compare/subtract.
 - A self-checking SystemVerilog testbench using a Euclidean-algorithm reference model.
-- Additional parameterized synchronous FIFO and signed MAC accumulator blocks with directed SystemVerilog regression tests.
+- Additional parameterized synchronous FIFO and signed MAC accumulator blocks with directed SystemVerilog regression tests (functional extension; not yet part of the GCD STA matrix).
 - A documented 10 ns block-level SDC example with setup/hold uncertainty and min/max I/O delays.
 - Seven controlled SDC mutation cases:
   - M01 missing primary clock.
@@ -149,7 +149,7 @@ The v0.2.0 release was validated by [GitHub Actions run #160](https://github.com
 
 Download the [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408368824) and [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408887449).
 
-See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report walkthrough](docs/ARCHITECTURE_AND_STA_WALKTHROUGH.md), the [portfolio and interview guide](docs/PORTFOLIO_AND_INTERVIEW.md), and [final CI run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699).
+See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report walkthrough](docs/ARCHITECTURE_AND_STA_WALKTHROUGH.md), the [portfolio and interview guide](docs/PORTFOLIO_AND_INTERVIEW.md), [advanced SDC exercises](docs/ADVANCED_SDC_EXERCISES.md), and [final CI run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699).
 
 ## Research questions
 
