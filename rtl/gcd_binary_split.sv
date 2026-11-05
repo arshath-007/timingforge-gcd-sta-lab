@@ -1,3 +1,9 @@
+// Interface contract matches gcd_binary_combined:
+// - rst is synchronous, active high.
+// - start is accepted only in ST_IDLE; requests while busy are ignored.
+// - done is a one-cycle pulse. Zero-input requests complete on the acceptance edge.
+// - gcd_out retains the most recently completed result until the next completion or reset.
+// - busy is high only while an iterative operation is in progress.
 // Experiment architecture: register the odd-operand comparison, then use
 // one shared subtractor in the following cycle. The extra cycle may shorten
 // the combinational feedback path; PPA must be measured, not assumed.
