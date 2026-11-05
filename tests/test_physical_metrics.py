@@ -10,6 +10,14 @@ LOG = """=== POST-ROUTE PARASITICS LOADED ===
 SPEF=final.spef
 === POST-ROUTE ALL-PATH CLOCK PERIOD ===
 core_clk period_min = 3.500 fmax = 285.714
+=== POST-ROUTE SETUP CLOCK SKEW ===
+Clock skew report
+=== POST-ROUTE HOLD CLOCK SKEW ===
+Clock skew report
+=== POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ===
+core_clk period_min = 3.700 fmax = 270.270
+=== POST-ROUTE ALL-PATH CLOCK PERIOD ===
+core_clk period_min = 3.500 fmax = 285.714
 === POST-ROUTE SETUP SUMMARY ===
 worst slack max 6.100
 wns max 0.000
@@ -18,10 +26,6 @@ tns max 0.000
 worst slack min 0.020
 wns min 0.000
 tns min 0.000
-=== POST-ROUTE SETUP CLOCK SKEW ===
-Clock skew report
-=== POST-ROUTE HOLD CLOCK SKEW ===
-Clock skew report
 === POST-ROUTE SETUP PATHS ===
 """
 
