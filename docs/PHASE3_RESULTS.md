@@ -55,6 +55,10 @@ For each architecture the archive contains:
 
 The manifest reports 84 files per design. Tool provenance includes OpenROAD 26Q3-1080-gab6fd26351, Yosys 0.68+post, the pinned ORFS container digest, Nangate45 typical Liberty SHA-256, LEF hashes and baseline SDC hash.
 
+### Source SDC versus final exported SDC
+
+The source baseline SDC hash is `e16af6df47394c8f5ea3b5ad8cd8d1cbcfc8d3c5935b9bce40165eb25165279f`. The final `6_final.sdc` files are **not byte-identical** to that source file: OpenROAD's `write_sdc` exports a normalized, expanded constraint view of the implemented design. The archived final-SDC hashes are `17a98c9147a7b576cac50336f34cee4fdfef66ea3d52b3e5baca7c23f1ac4012` (combined) and `a14698163c50396ac5440f716ad493fad05edd7a5f1b82fe232a5337093de802` (split). The exported files expand bus wildcards into individual bit-level input/output delay and load commands and include implementation-stage clock/transition and design-rule settings. This is expected export normalization, not a claim that the source SDC and final SDC have identical hashes. Both the source hash and each final exported-SDC hash are retained in the physical manifest so the exact input and post-implementation constraint artifact remain distinguishable.
+
 ## Interpretation and limitations
 
 - The result is for Nangate45 typical only. No distinct slow/fast Liberty PVT models were verified, so multi-corner analysis is not claimed.
