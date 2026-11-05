@@ -5,8 +5,8 @@
 **Platform source revision:** `11aa833a11488c3a540a1d8eb4caa23fd22df703`  
 **Synthesis:** Yosys 0.68+post with Liberty mapping through ABC  
 **Timing engine:** OpenROAD-integrated OpenSTA  
-**CI evidence:** [Successful library-backed run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999002017)  
-**Source commit for the run:** `9683dc22d4e7311c5bed2726d07935b19d881a5f`
+**CI evidence:** [Successful library-backed run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060)  
+**Source commit for the run:** `bd29bcd96914f0415771aa5aa76949cf7163b66e`
 
 ## Baseline architecture comparison
 
@@ -35,7 +35,7 @@ WNS is zero for the positive setup margins because the report command returns ze
 
 ## What the injected faults demonstrated
 
-The successful matrix ran 8 SDC scenarios for each architecture (16 STA log files total). Download the [raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999002017/artifacts/13401941145) or the [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999002017/artifacts/13401089041).
+The successful matrix ran 8 SDC scenarios for each architecture (16 STA log files total). Download the [raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413) or the [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334).
 
 | Mutation | Observed STA evidence | Interpretation |
 |---|---|---|
