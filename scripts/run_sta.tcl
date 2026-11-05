@@ -6,6 +6,14 @@ if {![info exists ::env(SDC)]} { error "Set SDC to an SDC file" }
 set top "gcd_binary_combined"
 if {[info exists ::env(TOP)]} { set top $::env(TOP) }
 
+# OpenROAD's database also needs technology and standard-cell LEF files.
+# Standalone OpenSTA can omit these LEFs and use Liberty/Verilog/SDC only.
+if {[info exists ::env(TECH_LEF)]} {
+    read_lef $::env(TECH_LEF)
+}
+if {[info exists ::env(SC_LEF)]} {
+    read_lef $::env(SC_LEF)
+}
 read_liberty $::env(LIBERTY)
 read_verilog $::env(NETLIST)
 link_design $top
