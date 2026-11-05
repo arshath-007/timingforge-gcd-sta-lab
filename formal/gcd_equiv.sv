@@ -1,4 +1,4 @@
-// Bounded sequential equivalence miter for all 8-bit input pairs.
+// Bounded sequential equivalence miter for all 6-bit input pairs.
 // The proof compares transaction results, not cycle-by-cycle latency.
 module gcd_equiv_formal;
     localparam integer WIDTH = 6;
