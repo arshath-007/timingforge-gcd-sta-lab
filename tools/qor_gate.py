@@ -49,7 +49,8 @@ def evaluate(reference: dict, candidate: dict, policy: dict) -> dict:
                 if before <= 0:
                     raise ValueError(f"baseline {metric} must be positive")
                 delta = (after / before - 1.0) * 100.0
-                limit = float(limits[metric + "_growth_percent"])
+                limit_key = "cell_area_growth_percent" if metric == "cell_area" else "all_path_min_period_growth_percent"
+                limit = float(limits[limit_key])
                 passed = delta <= limit
                 check = {
                     "top": key[0], "metric": metric, "baseline": before,
