@@ -49,10 +49,10 @@ The checker is interface-specific and uses simple line-oriented pattern checks. 
 
 ## Published evidence
 
-The corrected-load v0.2 baseline is sourced from [GitHub Actions run #131 (ID 42013425609)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609), source commit `39e6f88d19f739394989697b7c06ecf2ebf24e1b`. Both regression and library-backed STA jobs passed.
+The corrected-load v0.2 baseline is sourced from [GitHub Actions run #136 (ID 42013708525)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013708525), source commit `66885ced80f9cea43977b576ba187dac671ff4e9`. Both regression and library-backed STA jobs passed.
 
-- [Corrected-load STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609/artifacts/13407338484) — 16 raw timing logs and parsed JSON/Markdown summary for two architectures × eight SDC scenarios.
-- [Static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609/artifacts/13407224487) — golden SDC passed and all seven defined fault patterns were detected.
+- [Corrected-load STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013708525/artifacts/13406904777) — 16 raw timing logs and parsed JSON/Markdown summary for two architectures × eight SDC scenarios.
+- [Static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013708525/artifacts/13408252094) — golden SDC passed and all seven defined fault patterns were detected.
 - [Corrected measured results and scenario interpretations](INITIAL_RESULTS.md).
 - The earlier run ID `41999231060` used 0.02/0.03 fF output loads and is superseded for numerical baseline claims.
 
