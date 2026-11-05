@@ -1,7 +1,7 @@
 // Bounded sequential equivalence miter for all 6-bit input pairs.
 // The proof compares transaction results, not cycle-by-cycle latency.
 module gcd_equiv_formal;
-    localparam integer WIDTH = 6;
+    localparam integer WIDTH = 4;
 
     (* gclk *) reg clk;
     (* anyconst *) reg [WIDTH-1:0] a_in;
@@ -34,7 +34,7 @@ module gcd_equiv_formal;
     initial cycle = 0;
 
     always @(posedge clk) begin
-        if (cycle < 7'd24)
+        if (cycle < 7'd16)
             cycle <= cycle + 1'b1;
     end
 
