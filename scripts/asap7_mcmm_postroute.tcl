@@ -12,18 +12,20 @@ read_lef $::env(SC_LEF)
 set libdir $::env(ASAP7_LIB_DIR)
 proc corner_libs {libdir process_tag} {
     set libs {}
+    set versions [dict create AO 211120 INVBUF 220122 OA 211120 SIMPLE 211120]
     foreach group {AO INVBUF OA SIMPLE} {
-        set matches [glob -nocomplain "$libdir/asap7sc7p5t_${group}_RVT_${process_tag}_nldm_*.lib.gz"]
-        if {[llength $matches] != 1} {
-            error "Expected one ASAP7 ${group} library for ${process_tag}; found [llength $matches]"
+        set version [dict get $versions $group]
+        set path "$libdir/asap7sc7p5t_${group}_RVT_${process_tag}_nldm_${version}.lib.gz"
+        if {![file isfile $path]} {
+            error "Missing pinned ASAP7 ${group}/${process_tag} Liberty: $path"
         }
-        lappend libs [lindex $matches 0]
+        lappend libs $path
     }
-    set seq [glob -nocomplain "$libdir/asap7sc7p5t_SEQ_RVT_${process_tag}_nldm_*.lib"]
-    if {[llength $seq] != 1} {
-        error "Expected one ASAP7 sequential library for ${process_tag}; found [llength $seq]"
+    set seq "$libdir/asap7sc7p5t_SEQ_RVT_${process_tag}_nldm_220123.lib"
+    if {![file isfile $seq]} {
+        error "Missing pinned ASAP7 sequential Liberty: $seq"
     }
-    lappend libs [lindex $seq 0]
+    lappend libs $seq
     return [lsort $libs]
 }
 
