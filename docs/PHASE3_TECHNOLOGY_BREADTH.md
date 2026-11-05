@@ -16,7 +16,7 @@ The ORFS platform files are taken from the ORFS source revision pinned by the pr
 - ASAP7 platform configuration: [platform config](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/11aa833a11488c3a540a1d8eb4caa23fd22df703/flow/platforms/asap7/config.mk)
 - SKY130HD platform configuration: [platform config](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/11aa833a11488c3a540a1d8eb4caa23fd22df703/flow/platforms/sky130hd/config.mk)
 
-The manifest records hashes of every Liberty file used, plus the final ODB, GDS, SPEF and SDC files for both designs and platforms.
+The manifest records hashes of every Liberty file used, plus the final ODB, GDS, SPEF and SDC files for both designs and platforms. It also records the units reported by OpenSTA and the upstream platform-license references.
 
 ## ASAP7 PVT scenes
 
@@ -32,15 +32,15 @@ Each scene reads the five RVT NLDM libraries needed by the mapped design (AO, IN
 
 **RC assumption:** the single TC-extracted SPEF is reused unchanged for BC, TC and WC. There is no corner-specific RC extraction or RC scaling in this experiment. The MCMM results therefore isolate the effect of the distinct Liberty PVT timing models under a shared parasitic network; they are not a full foundry-qualified PVT/RC signoff flow.
 
-ASAP7 is a predictive academic platform. These experiments are educational and do not represent a production 7 nm process or silicon signoff.
+ASAP7 is a predictive academic platform. Its upstream PDK repository declares BSD-3-Clause licensing ([license](https://github.com/The-OpenROAD-Project/asap7/blob/main/LICENSE)). These experiments are educational and do not represent a production 7 nm process or silicon signoff.
 
 ## SKY130HD second-library experiment
 
 Both RTL architectures are independently synthesized, placed, clock-tree synthesized, routed, extracted and exported to GDS on the ORFS SKY130HD platform. Post-route OpenSTA uses the platform's `sky130_fd_sc_hd__tt_025C_1v80.lib` typical model and the corresponding final ODB, exported SDC and extracted SPEF.
 
-SKY130HD has one verified typical model in the pinned ORFS platform used here. This extension does not invent fast/slow corners or claim SKY130HD MCMM.
+SKY130HD has one verified typical model in the pinned ORFS platform used here. The upstream SkyWater PDK declares Apache-2.0 licensing ([license](https://github.com/google/skywater-pdk/blob/main/LICENSE)). This extension does not invent fast/slow corners or claim SKY130HD MCMM.
 
-The SKY130HD SDC expresses the same intended interface timing budget as the baseline, with the platform's units made explicit: ns for time and pF for output load (20 fF = 0.020 pF; 30 fF = 0.030 pF).
+The SKY130HD SDC expresses the same intended interface timing budget as the baseline, with the platform's units made explicit: ns for time and pF for output load (20 fF = 0.020 pF; 30 fF = 0.030 pF). The ASAP7 library units are ps and fF. The run manifest checks these units from OpenSTA's `report_units` output instead of relying only on assumptions.
 
 ## Reproducibility and artifacts
 
