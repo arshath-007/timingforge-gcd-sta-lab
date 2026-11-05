@@ -20,3 +20,7 @@ This is a bounded sequential-equivalence property set for WIDTH=4. It is not a p
 | Concurrent `assert property` SVA syntax | Not used in this flow; the selected open-source frontend path does not provide the required concurrent-SVA support | Explicit limitation |
 
 The property set is deliberately written in the immediate-assertion subset supported by the pinned Yosys flow. Do not describe the current result as a concurrent-SVA proof.
+
+## Clock and bound semantics
+
+The formal harness uses a `(* gclk *)` clock initialized low and preserves native positive-edge sequential semantics. Do not apply `clk2fflogic` to this harness: lowering the clock to a global-step FF model changes the sampling relationship between the DUT's registered `done` pulse and the miter's `seen` flags. The 34-step SMT bound provides at least 16 positive clock edges, which is sufficient for the explicit 16-cycle completion assertion at WIDTH=4.
