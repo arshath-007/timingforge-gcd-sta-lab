@@ -1,4 +1,4 @@
-// Bounded sequential equivalence miter for all 6-bit input pairs.
+// Bounded sequential equivalence miter for all 4-bit input pairs.
 // The proof compares transaction results, not cycle-by-cycle latency.
 module gcd_equiv_formal;
     localparam integer WIDTH = 4;
@@ -59,7 +59,7 @@ module gcd_equiv_formal;
             end
             if (combined_seen && split_seen)
                 assert(combined_result == split_result);
-            if (cycle == 7'd24) begin
+            if (cycle == 7'd16) begin
                 assert(combined_seen);
                 assert(split_seen);
             end
