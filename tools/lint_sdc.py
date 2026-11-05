@@ -1,38 +1,92 @@
 #!/usr/bin/env python3
-"""Conservative pattern-based SDC lint for the GCD benchmark interface.
+"""Conservative, interface-aware SDC coverage lint for the GCD benchmark.
 
-This is NOT a full SDC parser and does not prove constraint correctness.
+This is a small first-pass checker, NOT a complete Tcl/SDC parser and not a
+proof that constraints are semantically correct or suitable for signoff.
 """
 import argparse
 from pathlib import Path
+import re
 
 INPUTS = ("start", "rst", "a_in", "b_in")
 OUTPUTS = ("gcd_out", "busy", "done")
+GET_PORTS = re.compile(r"\[\s*get_ports\s+(?:\{([^}]*)\}|([^\]\s]+))\s*\]")
+
+
+def _active_lines(text):
+    """Return non-empty, non-comment SDC lines (one command per line in v0.1)."""
+    return [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
+
+def _port_patterns(line):
+    """Extract simple get_ports patterns; deliberately avoid substring matching."""
+    return [match.group(1) or match.group(2) for match in GET_PORTS.finditer(line)]
+
+
+def _covers_port(pattern, port):
+    """Accept an exact scalar name or an explicit whole-bus wildcard."""
+    return pattern in {port, port + "*", port + "[*]"}
+
+
+def _has_delay(lines, command, port, mode):
+    for line in lines:
+        if not line.startswith(command + " "):
+            continue
+        if not re.search(r"-clock\s+\S+", line):
+            continue
+        if not re.search(rf"-{mode}\s+[-+0-9.eE]+", line):
+            continue
+        if any(_covers_port(pattern, port) for pattern in _port_patterns(line)):
+            return True
+    return False
 
 
 def lint_sdc(text):
-    lines = [line.strip() for line in text.splitlines()
-             if line.strip() and not line.lstrip().startswith("#")]
+    lines = _active_lines(text)
     findings = []
 
-    if not any(line.startswith("create_clock ") for line in lines):
+    clocks = [line for line in lines if line.startswith("create_clock ")]
+    valid_clock = False
+    for line in clocks:
+        period = re.search(r"-period\s+([-+0-9.eE]+)", line)
+        clock_port = any(_covers_port(pattern, "clk") for pattern in _port_patterns(line))
+        try:
+            positive_period = period is not None and float(period.group(1)) > 0
+        except ValueError:
+            positive_period = False
+        if positive_period and clock_port:
+            valid_clock = True
+            break
+
+    if not clocks:
         findings.append("TF001 ERROR: no create_clock command found")
+    elif not valid_clock:
+        findings.append("TF002 ERROR: create_clock must define a positive period on port 'clk'")
 
     for port in INPUTS:
-        covered = any(line.startswith("set_input_delay ") and port in line for line in lines)
-        if not covered:
-            findings.append("TF101 ERROR: no input delay pattern for " + port)
+        for mode in ("max", "min"):
+            if not _has_delay(lines, "set_input_delay", port, mode):
+                findings.append(f"TF101 ERROR: missing {mode} input delay for port '{port}'")
 
     for port in OUTPUTS:
-        covered = any(line.startswith("set_output_delay ") and port in line for line in lines)
-        if not covered:
-            findings.append("TF201 ERROR: no output delay pattern for " + port)
+        for mode in ("max", "min"):
+            if not _has_delay(lines, "set_output_delay", port, mode):
+                findings.append(f"TF201 ERROR: missing {mode} output delay for port '{port}'")
+
+    if not any(line.startswith("set_clock_uncertainty -setup ") for line in lines):
+        findings.append("TF401 ERROR: setup clock uncertainty is not defined")
+    if not any(line.startswith("set_clock_uncertainty -hold ") for line in lines):
+        findings.append("TF402 ERROR: hold clock uncertainty is not defined")
 
     if any(line.startswith("set_false_path ") for line in lines):
         findings.append("TF301 REVIEW: set_false_path requires design-intent review")
 
     if not findings:
-        findings.append("TF000 PASS: expected text patterns found; this is not proof of correctness")
+        findings.append("TF000 PASS: expected clock, uncertainty, and GCD I/O delay patterns found; this is not proof of correctness")
     return findings
 
 
