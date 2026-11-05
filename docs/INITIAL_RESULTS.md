@@ -8,6 +8,12 @@
 **v0.2.0 release validation:** [GitHub Actions run #160 / ID 42015328699](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699) — both regression and library-backed STA jobs passed.  
 **Validated source commit:** `bdd42621749035fa088e326c766f3af8031af337`  
 **Release evidence:** [STA matrix ZIP](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.0) · [Static benchmark ZIP](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.0)
+## Latest reproducibility check — 5 November 2026
+
+The latest main-branch validation is [GitHub Actions run #196](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42029353553), source commit `30b7a7bcf862762627935813a31330efa85a1eff`. Both the RTL/Python regression job and the library-backed STA job passed. The [run #196 STA artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42029353553/artifacts/13415850763) contains all 16 raw logs, the parsed Markdown/JSON matrix, Yosys logs, and tool-version record.
+
+The regenerated golden rows reproduce the v0.2.0 baseline measurements: combined area 1657.180, all-path period 2.940 ns, worst setup slack +7.065 ns, worst hold slack -0.002 ns; split area 1681.918, all-path period 2.350 ns, worst setup slack +7.650 ns, worst hold slack +0.005 ns. The explicit same-clock rising-edge path inventory reports 104 combined paths and 106 split paths. The native register-to-register minimum-period query remains unavailable for combined and 0.740 ns for split. These latest results confirm reproducibility of the existing baseline; they do not change the scope or limitations described below.
+
 ## Corrected-load baseline architecture comparison
 
 The golden SDC now uses output loads of 20 fF on scalar control outputs and 30 fF on the GCD bus, consistent with the capacitance unit declared by the pinned Nangate45 Liberty. The earlier run used 0.02/0.03 fF and is superseded; its values are retained only as historical evidence.
