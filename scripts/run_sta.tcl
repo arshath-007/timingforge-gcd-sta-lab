@@ -48,15 +48,15 @@ report_clock_properties
 puts "=== HOLD / MIN PATH DETAILS ==="
 report_checks -path_delay min -format full_clock_expanded -digits 3
 puts "=== DRV MAX SLEW ==="
-if {[catch {report_check_types -max_slew -verbose -max_count 10000 -digits 3} drv_error]} {
+if {[catch {report_check_types -max_slew -violators -verbose -digits 3} drv_error]} {
     puts "TIMINGFORGE_DRV_UNSUPPORTED: max_slew: $drv_error"
 }
 puts "=== DRV MAX CAPACITANCE ==="
-if {[catch {report_check_types -max_capacitance -verbose -max_count 10000 -digits 3} drv_error]} {
+if {[catch {report_check_types -max_capacitance -violators -verbose -digits 3} drv_error]} {
     puts "TIMINGFORGE_DRV_UNSUPPORTED: max_capacitance: $drv_error"
 }
 puts "=== DRV MAX FANOUT ==="
-if {[catch {report_check_types -max_fanout -verbose -max_count 10000 -digits 3} drv_error]} {
+if {[catch {report_check_types -max_fanout -violators -verbose -digits 3} drv_error]} {
     puts "TIMINGFORGE_DRV_UNSUPPORTED: max_fanout: $drv_error"
 }
 puts "=== UNCONSTRAINED PATH DETAILS ==="
