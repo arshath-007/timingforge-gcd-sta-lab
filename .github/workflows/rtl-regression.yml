@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install Icarus Verilog
-        run: sudo apt-get update && sudo apt-get install -y iverilog verilator verilator
+      - name: Install Icarus Verilog and Verilator
+        run: sudo apt-get update && sudo apt-get install -y iverilog verilator
       - name: Run RTL self-check
         run: make rtl-test
       - name: Sweep parameterized GCD widths (8, 16, 32)
