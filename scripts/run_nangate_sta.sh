@@ -5,7 +5,11 @@ cd "$ROOT"
 
 LIB_DIR="build/platform/nangate45"
 LIBERTY="${LIBERTY:-$LIB_DIR/NangateOpenCellLibrary_typical.lib}"
+TECH_LEF="${TECH_LEF:-$LIB_DIR/NangateOpenCellLibrary.tech.lef}"
+SC_LEF="${SC_LEF:-$LIB_DIR/NangateOpenCellLibrary.macro.mod.lef}"
 LIBERTY_URL="https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/master/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib"
+TECH_LEF_URL="https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/master/flow/platforms/nangate45/lef/NangateOpenCellLibrary.tech.lef"
+SC_LEF_URL="https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD-flow-scripts/master/flow/platforms/nangate45/lef/NangateOpenCellLibrary.macro.mod.lef"
 STA="${STA:-openroad}"
 
 if ! command -v yosys >/dev/null 2>&1; then
@@ -18,15 +22,23 @@ if ! command -v "$STA" >/dev/null 2>&1; then
 fi
 
 mkdir -p "$LIB_DIR" build/netlists build/reports
+if ! command -v curl >/dev/null 2>&1 && { [[ ! -s "$LIBERTY" ]] || [[ ! -s "$TECH_LEF" ]] || [[ ! -s "$SC_LEF" ]]; }; then
+  echo "curl is required to download the Nangate45 platform files." >&2
+  exit 2
+fi
 if [[ ! -s "$LIBERTY" ]]; then
   echo "Downloading the educational Nangate45 typical Liberty file..."
-  if ! command -v curl >/dev/null 2>&1; then
-    echo "curl is required to download the library, or set LIBERTY to a local file." >&2
-    exit 2
-  fi
   curl --fail --location --silent --show-error "$LIBERTY_URL" --output "$LIBERTY"
 fi
-export LIBERTY
+if [[ ! -s "$TECH_LEF" ]]; then
+  echo "Downloading the Nangate45 technology LEF..."
+  curl --fail --location --silent --show-error "$TECH_LEF_URL" --output "$TECH_LEF"
+fi
+if [[ ! -s "$SC_LEF" ]]; then
+  echo "Downloading the Nangate45 standard-cell LEF..."
+  curl --fail --location --silent --show-error "$SC_LEF_URL" --output "$SC_LEF"
+fi
+export LIBERTY TECH_LEF SC_LEF
 
 python3 -m tools.make_mutants
 SDCS=("constraints/gcd_baseline.sdc")
