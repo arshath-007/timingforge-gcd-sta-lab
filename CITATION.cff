@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use TimingForge in research or teaching, please cite this repository."
+type: software
+title: "TimingForge: An Open Benchmark for Trustworthy Static Timing Analysis"
+authors:
+  - family-names: "arshath-007"
+    given-names: ""
+repository-code: "https://github.com/arshath-007/timingforge-gcd-sta-lab"
+license: MIT
+version: "0.2.0"
+date-released: "2026-11-05"
+abstract: "An educational, reproducible RTL and SDC fault-injection benchmark that explores static timing constraint coverage using Yosys and the OpenROAD-integrated OpenSTA engine."
