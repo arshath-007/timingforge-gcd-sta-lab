@@ -3,7 +3,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.2.2 · **License:** MIT
+**Status:** Research prototype · **Version:** 0.3.0 · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -43,7 +43,7 @@ flowchart TD
 
 The static checker is a conservative, interface-specific prototype—not a full SDC Tcl parser. The library-backed matrix uses Yosys, the OpenROAD-integrated OpenSTA engine, and the educational Nangate45 typical Liberty platform.
 
-## First release
+## Core features
 
 - Two synthesizable iterative binary-GCD microarchitectures: combined compare/subtract and split compare/subtract.
 - A self-checking SystemVerilog testbench using a Euclidean-algorithm reference model.
@@ -59,7 +59,8 @@ The static checker is a conservative, interface-specific prototype—not a full 
   - M07 non-positive clock period.
 - Static SDC coverage checker, fault generator, JSON/Markdown scorecard, and Python unit tests.
 - Yosys synthesis scripts and a library-backed OpenROAD-integrated STA matrix runner.
-- STA report parser that summarises area, minimum clock period, Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, unconstrained endpoints, and heuristic critical-path classes.
+- STA report parser that summarises area, minimum clock period, Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, unconstrained endpoints, heuristic critical-path classes, and OpenSTA max-slew/max-capacitance/max-fanout violation records.
+- Phase 1 quality findings, SDC mutation impact scoring, and reproducible clock-uncertainty/source-latency sensitivity experiments.
 - Conservative golden-result quality checks that flag missing metrics, unconstrained endpoints, missing I/O delays, negative hold slack, and unavailable native register-only period without inventing a derived Fmax.
 - GitHub Actions regression and library-backed STA jobs.
 
@@ -109,6 +110,7 @@ Requirements: OpenROAD Flow Scripts environment with Yosys, OpenROAD-integrated 
 ```bash
 source /OpenROAD-flow-scripts/env.sh
 make sta-matrix
+make sensitivity
 python3 -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
 ```
 
@@ -116,7 +118,10 @@ The script downloads the Nangate45 typical Liberty and two LEF files from a pinn
 
 - `build/reports/sta_matrix_summary.md`
 - `build/reports/sta_matrix_summary.json`
-- Raw STA logs in `build/reports/`
+- `build/reports/sta_quality_findings.json`
+- `build/reports/sta_mutation_impact.json`
+- `build/sensitivity/sensitivity_summary.json` plus generated SDC variants
+- Raw baseline and sensitivity STA logs in `build/reports/`
 - Yosys synthesis logs in `build/`
 
 The summary separates register-to-register minimum period/Fmax from all-path minimum period/Fmax (which includes I/O port paths), and includes Yosys cell area, worst setup/hold slack, WNS/TNS, path presence, missing I/O-delay warnings, and unconstrained endpoints. The supported matrix flow uses the OpenROAD-integrated OpenSTA executable (`openroad`) and its LEF-aware setup.
@@ -151,6 +156,18 @@ The v0.2.0 release was validated by [GitHub Actions run #160](https://github.com
 - Latency figures are finite-corpus observations, not proven worst-case bounds.
 
 Download the [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408368824) and [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408887449).
+
+## Phase 1 reliability evidence — v0.3.0 candidate
+
+The Phase 1 implementation is merged to `main`. The final feature-branch validation [run #257](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42046659049) and post-merge main validation [run #258](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600) both passed regression and library-backed STA. The [run #258 STA artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600/artifacts/13425391627) contains raw logs and machine-readable results.
+
+- 18 clock-sensitivity experiments completed: nine constraint variants for each GCD architecture.
+- SDC mutation impact: 12 matched, 0 mismatched, 2 inconclusive. Both inconclusive observations are M06 because the current reports do not directly expose whether hold uncertainty was applied.
+- Baseline DRV violation records: combined GCD — 10 max-slew and 15 max-capacitance; split GCD — 9 max-slew and 15 max-capacitance. No max-fanout violation records were emitted; the violator-only report does not enumerate total applicable checks.
+- Golden quality findings: REVIEW, with five warnings and three informational findings. The combined design retains -0.002 ns hold slack, and its native register-only minimum-period metric remains unavailable.
+- These are pre-layout Nangate45 typical-corner results with ideal clocks and no SPEF. No physical-design or signoff claim is made.
+
+See [Phase 1 diagnostics and measured sensitivity](docs/PHASE1_DIAGNOSTICS.md) and the [updated interview guide](docs/INTERVIEW_GUIDE.md).
 
 The current main-branch extension and diagnostic changes passed both CI jobs in [run #196](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42029353553) at commit `30b7a7bcf862762627935813a31330efa85a1eff`. Its [latest STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42029353553/artifacts/13415850763) contains the 16 raw logs, parsed report, and explicit register-path inventory. The original v0.2.0 baseline values remain traceable to [release validation run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699); reproducibility is documented in [initial results](docs/INITIAL_RESULTS.md).
 
@@ -196,6 +213,9 @@ The intended project contribution is a **reproducible fault-injection benchmark 
 - [x] OpenROAD-integrated STA matrix for both architectures and all eight SDC scenarios.
 - [x] Parsed STA matrix report and initial measured results.
 - [x] Add functional FIFO and MAC extension blocks with directed tests (not yet included in the GCD STA matrix).
+- [x] Add OpenSTA DRV violation reporting and conservative quality findings.
+- [x] Add reproducible setup/hold uncertainty and source-latency sensitivity experiments.
+- [x] Add expected-versus-observed SDC mutation impact scoring with inconclusive outcomes preserved.
 - [ ] Add generated-clock, multicycle, clock-group, and justified false-path scenarios.
 - [ ] Add additional corners and variation-aware experiments.
 - [ ] Add OpenROAD floorplanning, placement, CTS, routing, and parasitic-aware reports.
