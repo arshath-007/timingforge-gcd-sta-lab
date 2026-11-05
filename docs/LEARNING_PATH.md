@@ -30,3 +30,7 @@ After the single-clock experiment works, study generated clocks, clock groups, m
 ## Beginner rule
 
 A tool reporting no violation is not the same as proving the design is correctly constrained. Always inspect unconstrained endpoints and constraint coverage.
+
+## Stage 6 — Reproducible library-backed run
+
+Use the OpenROAD Flow Scripts environment with its Yosys and OpenROAD binaries. Run `make sta-matrix` to map both GCD architectures to the educational Nangate45 typical Liberty library and inspect the baseline and injected-constraint timing logs. Record the tool versions and platform. Do not compare measurements from different libraries or corners as if they were the same experiment.
