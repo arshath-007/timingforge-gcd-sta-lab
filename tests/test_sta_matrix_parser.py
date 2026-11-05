@@ -4,7 +4,9 @@ from pathlib import Path
 
 from tools.parse_sta_matrix import parse_log, summarise
 
-SAMPLE = """=== CLOCK PERIOD / FREQUENCY ===
+SAMPLE = """=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===
+core_clk period_min = 2.250 fmax = 444.44
+=== ALL-PATH CLOCK PERIOD / FREQUENCY (INCLUDING PORT PATHS) ===
 core_clk period_min = 2.500 fmax = 400.00
 === SETUP SUMMARY ===
 worst slack max 0.750
@@ -43,8 +45,10 @@ class StaMatrixParserTests(unittest.TestCase):
             self.assertEqual(row["worst_setup_slack_ns"], 0.750)
             self.assertEqual(row["setup_wns_ns"], 0.000)
             self.assertEqual(row["hold_wns_ns"], -0.025)
-            self.assertEqual(row["clock_period_min_ns"], 2.500)
-            self.assertEqual(row["clock_fmax_mhz"], 400.00)
+            self.assertEqual(row["register_to_register_min_period_ns"], 2.250)
+            self.assertEqual(row["register_to_register_fmax_mhz"], 444.44)
+            self.assertEqual(row["all_path_min_period_ns"], 2.500)
+            self.assertEqual(row["all_path_fmax_mhz"], 400.00)
             self.assertEqual(row["unconstrained_endpoints_reported"], 3)
             self.assertEqual(row["missing_input_delay_ports"], 2)
             self.assertEqual(row["missing_output_delay_ports"], 1)
