@@ -1,0 +1,38 @@
+name: TimingForge formal equivalence
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  formal-equivalence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Yosys and Z3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yosys z3
+          command -v yosys-smtbmc
+          command -v z3
+      - name: Run bounded GCD transaction-equivalence proof
+        shell: bash
+        run: bash scripts/run_formal.sh
+      - name: Upload formal proof evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timingforge-formal-proof
+          path: |
+            build/formal/**
+          retention-days: 90
