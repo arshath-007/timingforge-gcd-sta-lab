@@ -22,7 +22,14 @@ The same 32-bit GCD top-level interface and illustrative SDC were used for both 
 | Worst hold slack | -0.002 ns | +0.005 ns |
 | Hold WNS | -0.002 ns | 0.000 ns |
 
-**Observed trade-off in this run:** the split architecture uses about 1.49% more Liberty cell area, while its reported minimum period is about 20.1% lower (reported Fmax about 24.9% higher). The split architecture adds a dedicated subtraction state for odd/odd iterations, so this is a timing-versus-area-and-cycle-count trade-off, not a universal winner. Operation latency/throughput should be separately measured before making a throughput claim.
+**Observed trade-off in this run:** the split architecture uses about 1.49% more Liberty cell area, while its reported minimum period is about 20.1% lower (reported Fmax about 24.9% higher). However, the self-checking RTL simulation also measured operation latency over the same 258-case corpus:
+
+| Latency measurement | Combined | Split |
+|---|---:|---:|
+| Average cycles from accepted start to done | 63.63 | 84.17 |
+| Maximum cycles in the corpus | 93 | 124 |
+
+The split architecture averages about 32.3% more cycles because it registers the comparison and performs subtraction in a separate state. Multiplying the sample-average cycle count by each architecture's reported minimum clock period gives a rough timing-budget proxy of about 187.1 ns (combined) versus 197.8 ns (split), roughly 5.7% longer for split. This product is only an illustrative proxy—not measured silicon latency—and assumes the same ideal-clock, pre-layout timing model. The key conclusion is that a higher Fmax does not automatically mean lower operation latency.
 
 WNS is zero for the positive setup margins because the report command returns zero when there is no negative slack; the positive margin is shown in the worst-setup-slack column. The combined architecture's baseline hold result is a small negative slack (-0.002 ns), while the split architecture has a small positive margin (+0.005 ns). These are educational pre-layout values, not signoff conclusions.
 
