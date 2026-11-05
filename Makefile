@@ -5,7 +5,7 @@ VVP ?= vvp
 .PHONY: help rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity clean
 
 help:
-	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality clean"
+	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity clean"
 
 ip-block-test:
 	mkdir -p build
