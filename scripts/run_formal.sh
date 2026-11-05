@@ -13,7 +13,7 @@ command -v "$FORMAL_SOLVER" >/dev/null
   echo "Proof: bounded transaction-level equivalence, WIDTH=4, depth=18"
 } | tee build/formal/tool_versions.txt
 
-yosys -p "read_verilog -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; write_smt2 -wires build/formal/gcd_equiv.smt2" \
+yosys -p "read_verilog -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; clk2fflogic; write_smt2 -wires build/formal/gcd_equiv.smt2" \
   | tee build/formal/yosys.log
 
 # Prove assertions in the miter; --dump-vcd only selects the trace output file.
