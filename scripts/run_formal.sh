@@ -10,7 +10,7 @@ command -v "$FORMAL_SOLVER" >/dev/null
 {
   echo "Yosys: $(yosys -V)"
   echo "Solver: $FORMAL_SOLVER ($("$FORMAL_SOLVER" --version 2>&1 | head -n 1))"
-  echo "Proof: bounded transaction-level equivalence, WIDTH=4, depth=34"
+  echo "Proof: bounded transaction-level equivalence, WIDTH=3, depth=26"
 } | tee build/formal/tool_versions.txt
 
 yosys -p "read_verilog -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; write_smt2 -wires build/formal/gcd_equiv.smt2" \
