@@ -141,7 +141,7 @@ The repository has a successful GitHub Actions regression and a successful libra
 - Eight SDC scenarios analysed for each architecture (16 STA log files).
 - A parsed matrix and raw timing reports produced by the CI run.
 
-**Measured first baseline results:** the combined architecture reported 1657.180 Yosys Liberty area units, 2.94 ns minimum period, 340.67 MHz corresponding Fmax, +7.065 ns worst setup slack, and -0.002 ns worst hold slack. The split architecture reported 1681.918 area units, 2.35 ns minimum period, 425.57 MHz Fmax, +7.650 ns worst setup slack, and +0.005 ns worst hold slack. The split version is faster in this pre-layout measurement but uses more area and performs an extra subtract state in odd/odd iterations. These are not production or post-route PPA figures.
+**Measured first baseline results:** the combined architecture reported 1657.180 Yosys Liberty area units, 2.94 ns minimum period, 340.67 MHz corresponding Fmax, +7.065 ns worst setup slack, and -0.002 ns worst hold slack. The split architecture reported 1681.918 area units, 2.35 ns minimum period, 425.57 MHz Fmax, +7.650 ns worst setup slack, and +0.005 ns worst hold slack. In the same 258-case RTL test corpus, average operation latency was 63.63 cycles combined versus 84.17 cycles split (maximum 93 vs 124). This makes the trade-off visible: split improves the reported pre-layout clock limit, but the extra processing state means more cycles per operation. These are not production or post-route PPA figures.
 
 See [Initial measured results](docs/INITIAL_RESULTS.md) and the [successful library-backed CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41997662485).
 
