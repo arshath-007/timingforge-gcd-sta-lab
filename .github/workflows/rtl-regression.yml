@@ -66,6 +66,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y boolector
+          source /OpenROAD-flow-scripts/env.sh
           command -v yosys-smtbmc
           command -v boolector
       - name: Run bounded GCD transaction-equivalence proof
