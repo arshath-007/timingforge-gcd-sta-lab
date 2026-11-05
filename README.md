@@ -65,7 +65,7 @@ make lint-sdc
 make python-test
 ```
 
-Generated SDC files are written under `build/mutants/`. The linter reports missing clocks, missing I/O delay coverage, and timing exceptions that require human justification. This initial checker is intentionally conservative and interface-specific to the GCD example.
+Generated SDC files are written under `build/mutants/`. The linter reports missing clocks, missing I/O delay coverage, and timing exceptions that require human justification. This initial checker is intentionally conservative and interface-specific to the GCD example. The benchmark target also writes `build/benchmark_report.json` and `build/benchmark_report.md`; its score covers only four controlled static text-pattern mutations, not general SDC correctness or STA signoff.
 
 ### 3. Synthesis and STA (optional)
 
