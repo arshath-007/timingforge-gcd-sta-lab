@@ -4,39 +4,27 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 ORFS_ROOT="${ORFS_ROOT:-/OpenROAD-flow-scripts}"
-ORFS_REV="11aa833a11488c3a540a1d8eb4caa23fd22df703"
-if [[ ! -f "$ORFS_ROOT/env.sh" ]]; then
-  echo "OpenROAD Flow Scripts environment not found under $ORFS_ROOT" >&2
+ORFS_IMAGE_DIGEST="sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e"
+if [[ ! -f "$ORFS_ROOT/env.sh" || ! -f "$ORFS_ROOT/flow/Makefile" ]]; then
+  echo "OpenROAD Flow Scripts environment/Makefile not found under $ORFS_ROOT" >&2
   exit 2
 fi
 
-# Load the tool binaries from the pinned ORFS container image.
+# The pinned container supplies a matched ORFS source tree and its tool binaries.
+# Keep the flow source and executable versions together; do not mix another ORFS revision.
 # shellcheck disable=SC1090
 source "$ORFS_ROOT/env.sh"
-
-# Use the exact ORFS source revision used to pin the pre-layout Nangate45 files.
-mkdir -p build/physical
-ORFS_SOURCE="$ROOT/build/physical/OpenROAD-flow-scripts"
-if [[ ! -d "$ORFS_SOURCE/.git" ]]; then
-  git clone --filter=blob:none --no-checkout https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts.git "$ORFS_SOURCE"
-fi
-git -C "$ORFS_SOURCE" fetch --depth=1 origin "$ORFS_REV"
-git -C "$ORFS_SOURCE" checkout --detach FETCH_HEAD
-ACTUAL_REV="$(git -C "$ORFS_SOURCE" rev-parse HEAD)"
-[[ "$ACTUAL_REV" == "$ORFS_REV" ]] || {
-  echo "ORFS revision mismatch: expected $ORFS_REV, got $ACTUAL_REV" >&2
-  exit 2
-}
-FLOW_ROOT="$ORFS_SOURCE/flow"
+FLOW_ROOT="$ORFS_ROOT/flow"
 export FLOW_HOME="$FLOW_ROOT"
-# The source-only checkout does not include the prebuilt tools; use the binaries from the pinned container.
 export YOSYS_EXE="$(command -v yosys)"
 export OPENROAD_EXE="$(command -v openroad)"
 export OPENSTA_EXE="$(command -v sta || true)"
 export PYTHON_EXE="$(command -v python3)"
 export KLAYOUT_CMD="$(command -v klayout)"
-[[ -x "$YOSYS_EXE" && -x "$OPENROAD_EXE" && -x "$PYTHON_EXE" && -x "$KLAYOUT_CMD" ]] || { echo "Yosys/OpenROAD executable missing from PATH" >&2; exit 2; }
-[[ -f "$FLOW_ROOT/Makefile" ]] || { echo "ORFS flow Makefile missing: $FLOW_ROOT" >&2; exit 2; }
+[[ -x "$YOSYS_EXE" && -x "$OPENROAD_EXE" && -x "$PYTHON_EXE" && -x "$KLAYOUT_CMD" ]] || {
+  echo "Required Yosys/OpenROAD/Python/KLayout executable missing from PATH" >&2
+  exit 2
+}
 
 PLATFORM_DIR="$FLOW_ROOT/platforms/nangate45"
 LIBERTY="$PLATFORM_DIR/lib/NangateOpenCellLibrary_typical.lib"
@@ -46,17 +34,26 @@ for file in "$LIBERTY" "$TECH_LEF" "$SC_LEF"; do
   [[ -s "$file" ]] || { echo "Required Nangate45 file missing: $file" >&2; exit 2; }
 done
 
-# Run the 16-scenario pre-layout matrix using this same pinned platform.
+ORFS_SOURCE_REV="container-image-pinned"
+if git -C "$ORFS_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  ORFS_SOURCE_REV="$(git -C "$ORFS_ROOT" rev-parse HEAD)"
+fi
+
+mkdir -p build/physical
+# Run the 16-scenario pre-layout matrix using the exact Liberty/LEF files used by ORFS.
 export LIBERTY TECH_LEF SC_LEF
 bash scripts/run_nangate_sta.sh
 
 {
   echo "OpenROAD: $(openroad -version)"
   echo "Yosys: $(yosys -V)"
-  echo "ORFS revision: $ACTUAL_REV"
+  echo "ORFS source revision: $ORFS_SOURCE_REV"
+  echo "ORFS container image digest: $ORFS_IMAGE_DIGEST"
   echo "Platform: Nangate45"
   echo "Corner: typical"
   echo "Liberty SHA256: $(sha256sum "$LIBERTY" | awk '{print $1}')"
+  echo "Tech LEF SHA256: $(sha256sum "$TECH_LEF" | awk '{print $1}')"
+  echo "Std-cell LEF SHA256: $(sha256sum "$SC_LEF" | awk '{print $1}')"
   echo "SDC SHA256: $(sha256sum constraints/gcd_baseline.sdc | awk '{print $1}')"
 } | tee build/physical/tool_versions.txt
 
@@ -67,7 +64,7 @@ for TOP in gcd_binary_combined gcd_binary_split; do
   rm -rf "$WORK_HOME"
   echo "=== OpenROAD RTL-to-GDS flow: $TOP ==="
   make -C "$FLOW_ROOT" DESIGN_CONFIG="$CONFIG" WORK_HOME="$WORK_HOME" all
-  # ORFS 'all' completes routing and extraction; GDS is a separate KLayout target.
+  # The GDS target is explicit for clarity; all also depends on the final GDS artifact.
   make -C "$FLOW_ROOT" DESIGN_CONFIG="$CONFIG" WORK_HOME="$WORK_HOME" gds
 
   RESULTS="$WORK_HOME/results/nangate45/$TOP/base"
