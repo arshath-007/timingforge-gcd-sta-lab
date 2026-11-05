@@ -75,7 +75,7 @@ def classify_critical_path(startpoint, endpoint):
     def is_port(name, port):
         return bool(re.fullmatch(rf"{re.escape(port)}(?:\[[^\]]+\])?", name.strip()))
 
-    start = re.sub(r"\\s+\\(.*\\)$", "", startpoint.strip())
+    start = re.sub(r"\s+\(.*\)$", "", startpoint.strip())
     end = re.sub(r"\\s+\\(.*\\)$", "", endpoint.strip())
     start_input = is_port(start, "a_in") or is_port(start, "b_in")
     end_output = is_port(end, "gcd_out")
