@@ -35,6 +35,30 @@ Warning: There are 1 output ports missing set_output_delay.
 
 
 class StaMatrixParserTests(unittest.TestCase):
+    def test_parses_supported_drv_violation_counts(self):
+        from tools.parse_sta_matrix import parse_drv_check
+        report = """=== DRV MAX SLEW ===
+Pin pin_a ^
+Slack -0.020 (VIOLATED)
+=== DRV MAX CAPACITANCE ===
+"""
+        slew = parse_drv_check(report, "=== DRV MAX SLEW ===", "=== DRV MAX CAPACITANCE ===")
+        self.assertTrue(slew["supported"])
+        self.assertEqual(slew["violation_count"], 1)
+        cap = parse_drv_check(report, "=== DRV MAX CAPACITANCE ===", "=== DRV MAX FANOUT ===")
+        self.assertTrue(cap["supported"])
+        self.assertEqual(cap["violation_count"], 0)
+
+    def test_keeps_unsupported_drv_report_as_null(self):
+        from tools.parse_sta_matrix import parse_drv_check
+        report = """=== DRV MAX FANOUT ===
+TIMINGFORGE_DRV_UNSUPPORTED: max_fanout: command unavailable
+=== UNCONSTRAINED PATH DETAILS ===
+"""
+        result = parse_drv_check(report, "=== DRV MAX FANOUT ===", "=== UNCONSTRAINED PATH DETAILS ===")
+        self.assertFalse(result["supported"])
+        self.assertIsNone(result["violation_count"])
+
     def test_parses_architecture_metrics_and_path_types(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "sta_gcd_binary_combined_gcd_baseline.log"

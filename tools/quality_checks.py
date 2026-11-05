@@ -73,6 +73,20 @@ def inspect_golden_row(row: dict) -> list[dict]:
     if reported is not None and complete is False:
         add("INFO", "TFQ106", "Rising-edge register-path inventory reached its reporting cap")
 
+    for metric, label in (
+        ("max_slew", "maximum transition/slew"),
+        ("max_capacitance", "maximum capacitance"),
+        ("max_fanout", "maximum fanout"),
+    ):
+        supported = row.get(f"drv_{metric}_supported")
+        violations = row.get(f"drv_{metric}_violation_count")
+        if supported is False:
+            add("INFO", "TFQ108", f"OpenSTA {label} report is unsupported in this build")
+        elif violations is not None and violations > 0:
+            add("WARNING", "TFQ110", f"OpenSTA reports {violations} {label} violation records")
+        elif violations == 0:
+            add("INFO", "TFQ109", f"No {label} violation records were reported; total applicable check count is not enumerated")
+
     if row.get("register_to_register_min_period_ns") is None:
         add("INFO", "TFQ107", "Native register-only minimum period is unavailable; no derived Fmax is inferred")
 
