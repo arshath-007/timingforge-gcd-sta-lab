@@ -11,7 +11,7 @@ from pathlib import Path
 PROCESSES = ("FF", "TT", "SS")
 SIMPLE_VERSION = "211120"
 EXCLUDED_PATTERNS = ("^XOR", "^XNOR", "^HAxp5")
-CELL_RE = re.compile(r"(?m)^[ \t]*cell\s*\(\s*([^)]+)\s*\)\s*\{)
+CELL_RE = re.compile(r"(?m)^[ \t]*cell\s*\(\s*([^)]+)\s*\)\s*\{")
 
 
 def sha256(path: Path) -> str:
