@@ -1,3 +1,10 @@
+// Interface contract:
+// - rst is synchronous, active high.
+// - start is accepted only in ST_IDLE; requests while busy are ignored.
+// - done is a one-cycle pulse. Zero-input requests complete on the acceptance edge.
+// - gcd_out retains the most recently completed result until the next completion or reset.
+// - busy is high only while an iterative operation is in progress.
+// The same contract applies to gcd_binary_split.
 // TimingForge baseline: compare/decision/subtract occur in one RUN cycle.
 // Do not assume this architecture is faster or smaller; measure it.
 module gcd_binary_combined #(
