@@ -1,6 +1,6 @@
 [options]
 mode bmc
-depth 36
+depth 26
 
 [engines]
 smtbmc z3
