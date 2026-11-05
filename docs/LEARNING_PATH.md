@@ -34,3 +34,7 @@ A tool reporting no violation is not the same as proving the design is correctly
 ## Stage 6 — Reproducible library-backed run
 
 Use the OpenROAD Flow Scripts environment with its Yosys and OpenROAD binaries. Run `make sta-matrix` to map both GCD architectures to the educational Nangate45 typical Liberty library and inspect the baseline and injected-constraint timing logs. Record the tool versions and platform. Do not compare measurements from different libraries or corners as if they were the same experiment.
+
+## Stage 7 — Compare timing with operation latency
+
+A higher reported maximum clock frequency is not automatically higher application throughput. The TimingForge testbench measures cycle count from accepted start to done for both GCD architectures. Compare cycle count with the reported clock limit, and label any cycle-count × period calculation as an illustrative pre-layout proxy rather than silicon latency.
