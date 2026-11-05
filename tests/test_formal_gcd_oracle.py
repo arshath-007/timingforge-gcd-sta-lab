@@ -9,7 +9,7 @@ class FormalGcdOracleTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         source = (root / "formal" / "gcd_oracle_3bit.sv").read_text(encoding="utf-8")
         rows = re.findall(
-            r"6'b([01]{6}):\\s*expected_gcd\\s*=\\s*3'd([0-7]);",
+            r"6'b([01]{6}):\s*expected_gcd\s*=\s*3'd([0-7]);",
             source,
         )
         actual = {}
