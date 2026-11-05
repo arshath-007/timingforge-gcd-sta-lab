@@ -1,4 +1,6 @@
 [![TimingForge regression](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/rtl-regression.yml/badge.svg)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/rtl-regression.yml)
+[![TimingForge formal](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/formal-equivalence.yml/badge.svg)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/formal-equivalence.yml)
+[![TimingForge physical design](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/physical-design.yml/badge.svg)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/workflows/physical-design.yml)
 
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
