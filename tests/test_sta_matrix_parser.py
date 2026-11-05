@@ -38,8 +38,10 @@ class StaMatrixParserTests(unittest.TestCase):
     def test_parses_supported_drv_violation_counts(self):
         from tools.parse_sta_matrix import parse_drv_check
         report = """=== DRV MAX SLEW ===
-pin_a slack -0.020 (VIOLATED)
-pin_b slack 0.010 (MET)
+Pin pin_a ^
+Slack -0.020 (VIOLATED)
+Pin pin_b ^
+Slack 0.010 (MET)
 === DRV MAX CAPACITANCE ===
 """
         slew = parse_drv_check(report, "=== DRV MAX SLEW ===", "=== DRV MAX CAPACITANCE ===")
