@@ -65,10 +65,10 @@ jobs:
         shell: bash
         run: |
           apt-get update
-          apt-get install -y boolector
+          apt-get install -y z3
           source /OpenROAD-flow-scripts/env.sh
           command -v yosys-smtbmc
-          command -v boolector
+          command -v z3
       - name: Run bounded GCD transaction-equivalence proof
         shell: bash
         run: |
