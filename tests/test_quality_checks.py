@@ -47,18 +47,18 @@ class QualityCheckTests(unittest.TestCase):
 
     def test_drv_violations_are_reported_as_review_findings(self):
         findings = inspect_golden_row(self.baseline(
-            drv_max_slew_supported=True, drv_max_slew_check_count=10, drv_max_slew_violation_count=2,
-            drv_max_capacitance_supported=True, drv_max_capacitance_check_count=10, drv_max_capacitance_violation_count=0,
+            drv_max_slew_supported=True, drv_max_slew_violation_count=2,
+            drv_max_capacitance_supported=True, drv_max_capacitance_violation_count=0,
         ))
         item = next(x for x in findings if x["code"] == "TFQ110")
         self.assertEqual(item["severity"], "WARNING")
 
-    def test_no_fanout_checks_is_not_misreported_as_zero_violations(self):
+    def test_no_fanout_violation_records_do_not_claim_full_check_coverage(self):
         findings = inspect_golden_row(self.baseline(
-            drv_max_fanout_supported=True, drv_max_fanout_check_count=0, drv_max_fanout_violation_count=0,
+            drv_max_fanout_supported=True, drv_max_fanout_violation_count=0,
         ))
         item = next(x for x in findings if x["code"] == "TFQ109")
-        self.assertIn("cannot be inferred", item["message"])
+        self.assertIn("total applicable check count is not enumerated", item["message"])
     def test_mutation_rows_are_not_judged_as_golden_failures(self):
         matrix = {"records": [
             self.baseline(),
