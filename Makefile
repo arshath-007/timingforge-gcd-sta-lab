@@ -2,10 +2,10 @@ PYTHON ?= python3
 IVERILOG ?= iverilog
 VVP ?= vvp
 
-.PHONY: help rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity formal clean
+.PHONY: help rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity formal physical clean
 
 help:
-	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity formal clean"
+	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality sensitivity formal physical clean"
 
 ip-block-test:
 	mkdir -p build
