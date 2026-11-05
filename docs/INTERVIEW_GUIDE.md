@@ -48,6 +48,9 @@ In the measured 258-case corpus, combined averaged 63.63 cycles (maximum 93); sp
 
 ## Questions a reviewer may ask
 
+**Your combined architecture shows -0.002 ns hold slack—isn't that a failing design?**  
+Yes. Under this specific ideal-clock, pre-layout model, the combined architecture has a small negative hold slack, so that hold check is a violation; I report it rather than hiding it. The result is not signoff evidence. A physical implementation would need hold analysis with the actual clock-tree and parasitic assumptions, followed by appropriate hold repair and re-verification. I cannot claim that the design is hold-clean from this pre-layout result.
+
 **Why did you choose GCD?**  
 It is small enough to understand and verify with a reference algorithm, yet contains comparison, subtraction, shifts, control logic and register feedback. That gives the timing experiment an understandable RTL test vehicle.
 
