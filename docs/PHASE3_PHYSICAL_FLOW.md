@@ -33,6 +33,8 @@ For each architecture the flow must produce:
 
 `tools.physical_manifest` checks these files and writes a SHA-256 manifest. CI retains the raw physical outputs and reports as a 90-day artifact.
 
+The runner uses `set -euo pipefail` and invokes the ORFS `make all` target followed by the explicit `gds` target for each design; a nonzero Make/ORFS stage result aborts the script. It then checks that the required intermediate/final databases, GDS, SPEF and SDC exist and verifies the post-route log's SPEF-loaded marker. In the archived run, the ORFS stage JSON reports zero flow errors for the recorded floorplan/place/CTS/global-route/detail-route/final stages, and detailed routing's internal DRC error count converges to zero by its final iteration. These are flow-completion and router checks, **not** foundry DRC/LVS signoff or proof of manufacturing rule closure.
+
 ## Interpretation limits
 
 This is an educational Nangate45 typical-corner implementation, not foundry signoff. A successful flow does not establish manufacturing readiness, multi-corner closure, IR-drop/EM closure, DRC/LVS signoff, or silicon quality. The baseline block-level SDC is retained to support a controlled pre-layout/post-layout experiment; it is an illustrative interface budget, not a production timing contract.
