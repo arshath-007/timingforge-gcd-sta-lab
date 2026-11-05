@@ -65,6 +65,8 @@ def parse_log(path):
     rr_start = re.search(r"^Startpoint:\s*(.+)$", reg2reg, re.MULTILINE)
     rr_end = re.search(r"^Endpoint:\s*(.+)$", reg2reg, re.MULTILINE)
     warning = re.search(r"There are\s+(\d+)\s+unconstrained endpoints", text, re.IGNORECASE)
+    missing_input_warnings = re.findall(r"^Warning:.*(?:no input delay|without input delay|missing input delay).*$", text, re.MULTILINE | re.IGNORECASE)
+    missing_output_warnings = re.findall(r"^Warning:.*(?:no output delay|without output delay|missing output delay).*$", text, re.MULTILINE | re.IGNORECASE)
     period, fmax = clock_metrics(text)
     try:
         log_path = str(path.relative_to(ROOT))
@@ -86,6 +88,8 @@ def parse_log(path):
         "register_to_register_startpoint": rr_start.group(1).strip() if rr_start else None,
         "register_to_register_endpoint": rr_end.group(1).strip() if rr_end else None,
         "unconstrained_endpoints_reported": int(warning.group(1)) if warning else None,
+        "missing_input_delay_warnings": missing_input_warnings,
+        "missing_output_delay_warnings": missing_output_warnings,
         "unconstrained_paths_listed": len(re.findall(r"^Startpoint:", unconstrained, re.MULTILINE)),
     }
 
@@ -118,7 +122,7 @@ def summarise(report_dir=REPORT_DIR):
         "- Library: " + output["platform"],
         "- Parasitics: " + output["parasitics"],
         "- Logs parsed: " + str(len(records)), "",
-        "| Architecture | SDC scenario | Yosys cell area | Min period (ns) | Fmax (MHz) | Worst setup slack (ns) | Setup WNS (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
+        "| Architecture | SDC scenario | Yosys cell area | Min period (ns) | Fmax (MHz) | Worst setup slack (ns) | Setup WNS (ns) | Worst hold slack (ns) | Reg-to-reg path | Missing input-delay warnings | Missing output-delay warnings | Unconstrained endpoints |",
         "|---|---|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
     fmt = lambda v: "n/a" if v is None else f"{v:.3f}"
@@ -129,6 +133,7 @@ def summarise(report_dir=REPORT_DIR):
             f"{fmt(row['worst_setup_slack_ns'])} | {fmt(row['setup_wns_ns'])} | "
             f"{fmt(row['worst_hold_slack_ns'])} | "
             f"{'found' if row['register_to_register_path_found'] else 'none reported'} | "
+            f"{len(row['missing_input_delay_warnings'])} | {len(row['missing_output_delay_warnings'])} | "
             f"{fmt(row['unconstrained_endpoints_reported'])} |"
         )
     rows.extend([
