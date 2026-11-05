@@ -37,7 +37,7 @@ def run_benchmark(source=SOURCE, output=OUTPUT):
     scenarios = [
         {
             "id": "GOLDEN",
-            "description": "Known-good illustrative baseline",
+            "description": "Golden reference SDC; timing results and any violations are documented separately",
             "expected_finding": "TF000 PASS",
             "findings": golden_findings,
             "detected": has_code(golden_findings, "TF000 PASS"),
