@@ -4,6 +4,7 @@
 // - done is a one-cycle pulse. Zero-input requests complete on the acceptance edge.
 // - gcd_out retains the most recently completed result until the next completion or reset.
 // - busy is high only while an iterative operation is in progress.
+// Requests with either input zero complete on the accepted clock edge; busy does not assert for them.
 // The same contract applies to gcd_binary_split.
 // TimingForge baseline: compare/decision/subtract occur in one RUN cycle.
 // Do not assume this architecture is faster or smaller; measure it.
