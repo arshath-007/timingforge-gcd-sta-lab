@@ -64,7 +64,8 @@ def evaluate(reference: dict, candidate: dict, policy: dict) -> dict:
                 }
             else:
                 delta = before - after
-                limit = float(limits[metric + "_drop_ns"])
+                limit_key = "worst_setup_slack_drop_ns" if metric == "worst_setup_slack_ns" else "worst_hold_slack_drop_ns"
+                limit = float(limits[limit_key])
                 passed = delta <= limit
                 check = {
                     "top": key[0], "metric": metric, "baseline": before,
