@@ -8,10 +8,12 @@ from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIR = ROOT / "build" / "reports"
+TOPS = ("gcd_binary_combined", "gcd_binary_split")
 
 
 def _metric(text, name, mode):
-    match = re.search(rf"^\\s*{name}\\s+{mode}\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*$", text, re.MULTILINE | re.IGNORECASE)
+    pattern = rf"^\s*{name}\s+{mode}\s+([-+]?(?:\d+\.?\d*|\.\d+))\s*$"
+    match = re.search(pattern, text, re.MULTILINE | re.IGNORECASE)
     return float(match.group(1)) if match else None
 
 
@@ -29,15 +31,21 @@ def _section(text, heading, next_heading=None):
 def parse_log(path):
     text = path.read_text(encoding="utf-8", errors="replace")
     stem = path.stem
-    # sta_<top>_<scenario>
-    rest = stem.removeprefix("sta_")
-    top, _, scenario = rest.partition("_")
-    if scenario.endswith(".sdc"):
-        scenario = scenario[:-4]
+    top = None
+    scenario = None
+    for candidate in TOPS:
+        prefix = "sta_" + candidate + "_"
+        if stem.startswith(prefix):
+            top = candidate
+            scenario = stem[len(prefix):]
+            break
+    if top is None:
+        raise ValueError(f"Unrecognised STA log filename: {path.name}")
+
     setup_section = _section(text, "=== SETUP / MAX PATH DETAILS ===", "=== HOLD / MIN PATH DETAILS ===")
     unconstrained_section = _section(text, "=== UNCONSTRAINED PATH DETAILS ===")
-    setup_start = re.search(r"^Startpoint:\\s*(.+)$", setup_section, re.MULTILINE)
-    setup_end = re.search(r"^Endpoint:\\s*(.+)$", setup_section, re.MULTILINE)
+    setup_start = re.search(r"^Startpoint:\s*(.+)$", setup_section, re.MULTILINE)
+    setup_end = re.search(r"^Endpoint:\s*(.+)$", setup_section, re.MULTILINE)
     unconstrained_count = len(re.findall(r"^Startpoint:", unconstrained_section, re.MULTILINE))
     return {
         "top": top,
@@ -80,7 +88,7 @@ def summarise(report_dir=REPORT_DIR):
 
     out = Path(report_dir)
     out.mkdir(parents=True, exist_ok=True)
-    (out / "sta_matrix_summary.json").write_text(json.dumps(output, indent=2) + "\\n", encoding="utf-8")
+    (out / "sta_matrix_summary.json").write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
 
     rows = [
         "# TimingForge library-backed STA matrix",
@@ -107,7 +115,7 @@ def summarise(report_dir=REPORT_DIR):
         "The experiment is pre-layout and uses a single typical Liberty file. It is not MMMC, extracted-parasitic analysis, or production signoff.",
         "",
     ])
-    (out / "sta_matrix_summary.md").write_text("\\n".join(rows), encoding="utf-8")
+    (out / "sta_matrix_summary.md").write_text("\n".join(rows), encoding="utf-8")
     print("Parsed STA logs: " + str(len(records)))
     print("Summary: " + str(out / "sta_matrix_summary.md"))
     return output
