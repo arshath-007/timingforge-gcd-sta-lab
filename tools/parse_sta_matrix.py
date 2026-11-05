@@ -83,7 +83,7 @@ def parse_log(path):
     clock_period = float(clock_period_match.group(1)) if clock_period_match else None
     derived_reg_period = (
         round(clock_period - min(rising_slacks), 6)
-        if clock_period is not None and clock_period > 0 and rising_slacks else None
+        if clock_period is not None and clock_period > 0 and rising_slacks and len(rising_slacks) < 1000 else None
     )
     derived_reg_fmax = round(1000.0 / derived_reg_period, 3) if derived_reg_period and derived_reg_period > 0 else None
     unconstrained = section(text, "=== UNCONSTRAINED PATH DETAILS ===")
@@ -117,6 +117,7 @@ def parse_log(path):
         "worst_setup_endpoint": end.group(1).strip() if end else None,
         "register_to_register_path_found": bool(rr_start and rr_end),
         "register_to_register_rising_paths_reported": len(rising_slacks),
+        "register_to_register_rising_path_inventory_complete": len(rising_slacks) < 1000,
         "register_to_register_rising_worst_slack_ns": min(rising_slacks) if rising_slacks else None,
         "clock_period_ns": clock_period,
         "register_to_register_derived_min_period_ns": derived_reg_period,
@@ -158,7 +159,7 @@ def summarise(report_dir=REPORT_DIR):
         "- Library: " + output["platform"],
         "- Parasitics: " + output["parasitics"],
         "- Logs parsed: " + str(len(records)), "",
-        "| Architecture | SDC scenario | Cell area | Native reg-to-reg period (ns) | Native reg-to-reg Fmax (MHz) | Derived reg-to-reg period (ns) | Derived reg-to-reg Fmax (MHz) | All-path min period (ns) | All-path Fmax (MHz) | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
+        "| Architecture | SDC scenario | Cell area | Native reg-to-reg period (ns) | Native reg-to-reg Fmax (MHz) | Derived period from complete reg-to-reg path set (ns) | Derived Fmax (MHz) | All-path min period (ns) | All-path Fmax (MHz) | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
     fmt = lambda value: "n/a" if value is None else f"{value:.3f}"
