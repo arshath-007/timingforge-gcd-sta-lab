@@ -63,6 +63,36 @@ def cell_area(top, report_path):
     return None
 
 
+def classify_critical_path(startpoint, endpoint):
+    """Classify a GCD critical path from explicit port/pin endpoint names.
+
+    Unknown naming is deliberately retained as 'unknown'; this is a heuristic
+    for the documented GCD top-level interface, not a general netlist parser.
+    """
+    if not startpoint or not endpoint:
+        return "unknown"
+
+    def is_port(name, port):
+        return bool(re.fullmatch(rf"{re.escape(port)}(?:\\[[^\\]]+\\])?", name.strip()))
+
+    start = startpoint.strip()
+    end = endpoint.strip()
+    start_input = is_port(start, "a_in") or is_port(start, "b_in")
+    end_output = is_port(end, "gcd_out")
+    start_reg = bool(re.search(r"/(?:Q|QN)$", start))
+    end_reg = bool(re.search(r"/D$", end))
+
+    if start_input and end_reg:
+        return "input_to_register"
+    if start_reg and end_reg:
+        return "register_to_register"
+    if start_reg and end_output:
+        return "register_to_output"
+    if start_input and end_output:
+        return "input_to_output"
+    return "unknown"
+
+
 def parse_log(path):
     path = Path(path)
     text = path.read_text(encoding="utf-8", errors="replace")
@@ -111,6 +141,7 @@ def parse_log(path):
         "hold_tns_ns": metric(text, "tns", "min"),
         "worst_setup_startpoint": start.group(1).strip() if start else None,
         "worst_setup_endpoint": end.group(1).strip() if end else None,
+        "critical_path_class": classify_critical_path(start.group(1).strip() if start else None, end.group(1).strip() if end else None),
         "register_to_register_path_found": bool(rr_start and rr_end),
         "register_to_register_rising_paths_reported": len(rising_slacks),
         "register_to_register_rising_path_inventory_complete": len(rising_slacks) < 1000,
