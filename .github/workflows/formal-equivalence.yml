@@ -22,9 +22,9 @@ jobs:
       - name: Install Yosys and Z3
         run: |
           sudo apt-get update
-          sudo apt-get install -y yosys z3
+          sudo apt-get install -y yosys boolector
           command -v yosys-smtbmc
-          command -v z3
+          command -v boolector
       - name: Run bounded GCD transaction-equivalence proof
         shell: bash
         run: bash scripts/run_formal.sh
