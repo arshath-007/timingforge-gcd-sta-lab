@@ -132,7 +132,7 @@ Review the raw Yosys/OpenSTA logs and tool versions. A successful script exit al
 
 ## Verified evidence
 
-The corrected-load baseline is reproducible from [GitHub Actions run #116](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266), source commit `e3d529618c80a59123bb16a2271289d41ce1b961`. Both the RTL/Python regression and the 16-run Nangate45 library-backed STA matrix passed.
+The corrected-load baseline is reproducible from [GitHub Actions run #131](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609), source commit `39e6f88d19f739394989697b7c06ecf2ebf24e1b`. Both the RTL/Python regression and the 16-run Nangate45 library-backed STA matrix passed.
 
 - 258 directed/random GCD input pairs checked on each RTL architecture by the functional testbench.
 - 20 Python unit tests passed in the expanded regression suite.
@@ -144,7 +144,7 @@ The corrected-load baseline is reproducible from [GitHub Actions run #116](https
 - The split architecture reports a 0.740 ns register-to-register minimum period / 1353.86 MHz. The equivalent combined-design query returned 0.00 ns / infinity, so the parser correctly records it as n/a; a separate path-presence report still finds register-to-register paths.
 - Historical finite-corpus latency observations (63.63 average / 93 max observed combined; 84.17 average / 124 max observed split) are not proven worst-case bounds and are not newly remeasured by the STA matrix.
 
-Download the [corrected-load raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266/artifacts/13407377245) and the [static benchmark scorecard](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266/artifacts/13406973684). See [corrected initial results](docs/INITIAL_RESULTS.md) and [CI run #116](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42012354266).
+Download the [corrected-load raw STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609/artifacts/13407338484) and the [static benchmark scorecard](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609/artifacts/13407224487). See [corrected initial results](docs/INITIAL_RESULTS.md) and [CI run #131](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42013425609).
 
 The testbench uses a finite set of directed cases and 250 randomized pairs per run. The random stimulus is not explicitly seeded, so exact corpus averages and maxima may vary by simulator/run; they are observations, not worst-case bounds.
 
