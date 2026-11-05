@@ -44,7 +44,7 @@ This separation matters. A pattern checker can flag an obvious defect, but only 
 - **Combined:** The odd/odd compare and subtract decision/update occur in one processing state. This keeps the operation cycle count lower in the tested input corpus, but its combinational path can be longer.
 - **Split:** The compare result is registered and subtraction occurs in a later state. This can shorten the combinational timing path but costs an extra processing cycle for odd/odd iterations.
 
-In the historical 258-case corpus, combined averaged 63.63 cycles (maximum observed 93); split averaged 84.17 cycles (maximum observed 124). These are finite-corpus observations with a fixed random seed, not proven worst-case latency bounds. In the corrected-load STA run, all-path minimum period/Fmax were 2.940 ns / 340.67 MHz combined and 2.350 ns / 425.57 MHz split. The split design's register-to-register query reported 0.740 ns / 1353.86 MHz; the combined query returned 0.00 ns / infinity and is therefore recorded as n/a. A separate path report still finds register-to-register paths in the combined design. Do not claim the reported all-path Fmax proves a faster internal datapath or higher operation throughput.
+The combined architecture reports an all-path Fmax of 340.67 MHz, while the split architecture reports 425.57 MHz. These figures include I/O port paths and depend on the external timing constraints. They must not be interpreted as a direct comparison of internal register-to-register operating speed. The combined architecture's register-to-register minimum-period query returned no usable measurement, so its internal Fmax is unavailable.
 
 ## Questions a reviewer may ask
 
