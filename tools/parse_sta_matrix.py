@@ -1,127 +1,143 @@
 #!/usr/bin/env python3
-"""Summarise TimingForge OpenSTA/OpenROAD-integrated timing logs."""
+"""Summarise TimingForge OpenROAD-integrated OpenSTA logs and synthesis area."""
 from pathlib import Path
-import json
-import re
 import argparse
 from datetime import datetime, timezone
+import json
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIR = ROOT / "build" / "reports"
 TOPS = ("gcd_binary_combined", "gcd_binary_split")
 
 
-def _metric(text, name, mode):
+def metric(text, name, mode):
     pattern = rf"^\s*{name}\s+{mode}\s+([-+]?(?:\d+\.?\d*|\.\d+))\s*$"
     match = re.search(pattern, text, re.MULTILINE | re.IGNORECASE)
     return float(match.group(1)) if match else None
 
 
-def _section(text, heading, next_heading=None):
+def worst_slack(text, mode):
+    pattern = rf"^\s*worst slack\s+{mode}\s+([-+]?(?:\d+\.?\d*|\.\d+))\s*$"
+    match = re.search(pattern, text, re.MULTILINE | re.IGNORECASE)
+    return float(match.group(1)) if match else None
+
+
+def clock_metrics(text):
+    match = re.search(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", text, re.MULTILINE | re.IGNORECASE)
+    return (float(match.group(1)), float(match.group(2))) if match else (None, None)
+
+
+def section(text, heading, next_heading):
     start = text.find(heading)
     if start < 0:
         return ""
     start += len(heading)
-    if next_heading:
-        end = text.find(next_heading, start)
-        return text[start:end] if end >= 0 else text[start:]
-    return text[start:]
+    end = text.find(next_heading, start)
+    return text[start:end] if end >= 0 else text[start:]
+
+
+def cell_area(top, report_path):
+    candidates = (report_path.parent.parent / f"yosys_{top}.log", ROOT / "build" / f"yosys_{top}.log")
+    for candidate in candidates:
+        if candidate.is_file():
+            data = candidate.read_text(encoding="utf-8", errors="replace")
+            matches = re.findall(r"Chip area for module .*?:\s*([-+]?(?:\d+\.?\d*|\.\d+))", data)
+            if matches:
+                return float(matches[-1])
+    return None
 
 
 def parse_log(path):
+    path = Path(path)
     text = path.read_text(encoding="utf-8", errors="replace")
-    stem = path.stem
-    top = None
-    scenario = None
-    for candidate in TOPS:
-        prefix = "sta_" + candidate + "_"
-        if stem.startswith(prefix):
-            top = candidate
-            scenario = stem[len(prefix):]
-            break
+    top = next((name for name in TOPS if path.stem.startswith("sta_" + name + "_")), None)
     if top is None:
-        raise ValueError(f"Unrecognised STA log filename: {path.name}")
-
-    setup_section = _section(text, "=== SETUP / MAX PATH DETAILS ===", "=== HOLD / MIN PATH DETAILS ===")
-    unconstrained_section = _section(text, "=== UNCONSTRAINED PATH DETAILS ===")
-    setup_start = re.search(r"^Startpoint:\s*(.+)$", setup_section, re.MULTILINE)
-    setup_end = re.search(r"^Endpoint:\s*(.+)$", setup_section, re.MULTILINE)
-    unconstrained_count = len(re.findall(r"^Startpoint:", unconstrained_section, re.MULTILINE))
+        raise ValueError(f"Unrecognised STA log: {path.name}")
+    scenario = path.stem[len("sta_" + top + "_"):]
+    setup = section(text, "=== SETUP / MAX PATH DETAILS ===", "=== REGISTER-TO-REGISTER SETUP PATHS ===")
+    reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== HOLD / MIN PATH DETAILS ===")
+    unconstrained = section(text, "=== UNCONSTRAINED PATH DETAILS ===")
+    start = re.search(r"^Startpoint:\s*(.+)$", setup, re.MULTILINE)
+    end = re.search(r"^Endpoint:\s*(.+)$", setup, re.MULTILINE)
+    rr_start = re.search(r"^Startpoint:\s*(.+)$", reg2reg, re.MULTILINE)
+    rr_end = re.search(r"^Endpoint:\s*(.+)$", reg2reg, re.MULTILINE)
+    warning = re.search(r"There are\s+(\d+)\s+unconstrained endpoints", text, re.IGNORECASE)
+    period, fmax = clock_metrics(text)
     try:
-        log_name = str(path.relative_to(ROOT))
+        log_path = str(path.relative_to(ROOT))
     except ValueError:
-        log_name = str(path)
+        log_path = str(path)
     return {
-        "top": top,
-        "scenario": scenario,
-        "log_file": log_name,
-        "setup_wns": _metric(text, "wns", "max"),
-        "setup_tns": _metric(text, "tns", "max"),
-        "hold_wns": _metric(text, "wns", "min"),
-        "hold_tns": _metric(text, "tns", "min"),
-        "worst_setup_startpoint": setup_start.group(1).strip() if setup_start else None,
-        "worst_setup_endpoint": setup_end.group(1).strip() if setup_end else None,
-        "unconstrained_path_count_reported": unconstrained_count,
-        "timing_report_present": setup_start is not None,
+        "top": top, "scenario": scenario, "log_file": log_path,
+        "yosys_cell_area": cell_area(top, path),
+        "clock_period_min_ns": period, "clock_fmax_mhz": fmax,
+        "worst_setup_slack_ns": worst_slack(text, "max"),
+        "setup_wns_ns": metric(text, "wns", "max"),
+        "setup_tns_ns": metric(text, "tns", "max"),
+        "worst_hold_slack_ns": worst_slack(text, "min"),
+        "hold_wns_ns": metric(text, "wns", "min"),
+        "hold_tns_ns": metric(text, "tns", "min"),
+        "worst_setup_startpoint": start.group(1).strip() if start else None,
+        "worst_setup_endpoint": end.group(1).strip() if end else None,
+        "register_to_register_path_found": bool(rr_start and rr_end),
+        "register_to_register_startpoint": rr_start.group(1).strip() if rr_start else None,
+        "register_to_register_endpoint": rr_end.group(1).strip() if rr_end else None,
+        "unconstrained_endpoints_reported": int(warning.group(1)) if warning else None,
+        "unconstrained_paths_listed": len(re.findall(r"^Startpoint:", unconstrained, re.MULTILINE)),
     }
 
 
 def summarise(report_dir=REPORT_DIR):
-    paths = sorted(Path(report_dir).glob("sta_*.log"))
-    records = [parse_log(path) for path in paths]
+    report_dir = Path(report_dir)
+    records = [parse_log(p) for p in sorted(report_dir.glob("sta_*.log"))]
     records.sort(key=lambda row: (row["top"], row["scenario"]))
-    by_key = {(row["top"], row["scenario"]): row for row in records}
-
+    baselines = {row["top"]: row for row in records if row["scenario"] == "gcd_baseline"}
     for row in records:
-        baseline = by_key.get((row["top"], "gcd_baseline"))
-        row["setup_wns_delta_vs_golden"] = (
-            round(row["setup_wns"] - baseline["setup_wns"], 6)
-            if baseline and row["setup_wns"] is not None and baseline["setup_wns"] is not None
-            else None
+        base = baselines.get(row["top"])
+        row["worst_setup_slack_delta_vs_golden_ns"] = (
+            round(row["worst_setup_slack_ns"] - base["worst_setup_slack_ns"], 6)
+            if base and row["worst_setup_slack_ns"] is not None and base["worst_setup_slack_ns"] is not None else None
         )
-
     output = {
-        "schema_version": "0.1",
+        "schema_version": "0.2",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "analysis_engine": "OpenROAD-integrated OpenSTA (or standalone OpenSTA when configured)",
+        "analysis_engine": "OpenROAD-integrated OpenSTA",
         "platform": "Nangate45 typical Liberty",
-        "parasitics": "No SPEF supplied; report is pre-layout/cell-based and does not include extracted interconnect parasitics.",
-        "logs_found": len(records),
-        "records": records,
+        "parasitics": "No SPEF; pre-layout/cell-based; no extracted interconnect parasitics.",
+        "logs_found": len(records), "records": records,
     }
-
-    out = Path(report_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    (out / "sta_matrix_summary.json").write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
-
+    report_dir.mkdir(parents=True, exist_ok=True)
+    (report_dir / "sta_matrix_summary.json").write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
     rows = [
-        "# TimingForge library-backed STA matrix",
-        "",
+        "# TimingForge library-backed STA matrix", "",
         "- Generated UTC: " + output["generated_at_utc"],
         "- Engine: " + output["analysis_engine"],
         "- Library: " + output["platform"],
         "- Parasitics: " + output["parasitics"],
-        "- Log files parsed: " + str(len(records)),
-        "",
-        "| RTL architecture | SDC scenario | Setup WNS | Setup TNS | Hold WNS | Hold TNS | Setup WNS Δ vs golden | Unconstrained paths reported |",
-        "|---|---|---:|---:|---:|---:|---:|---:|",
+        "- Logs parsed: " + str(len(records)), "",
+        "| Architecture | SDC scenario | Yosys cell area | Min period (ns) | Fmax (MHz) | Worst setup slack (ns) | Setup WNS (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
-    fmt = lambda value: "n/a" if value is None else f"{value:.3f}"
+    fmt = lambda v: "n/a" if v is None else f"{v:.3f}"
     for row in records:
         rows.append(
-            f"| {row['top']} | {row['scenario']} | {fmt(row['setup_wns'])} | {fmt(row['setup_tns'])} | "
-            f"{fmt(row['hold_wns'])} | {fmt(row['hold_tns'])} | {fmt(row['setup_wns_delta_vs_golden'])} | "
-            f"{row['unconstrained_path_count_reported']} |"
+            f"| {row['top']} | {row['scenario']} | {fmt(row['yosys_cell_area'])} | "
+            f"{fmt(row['clock_period_min_ns'])} | {fmt(row['clock_fmax_mhz'])} | "
+            f"{fmt(row['worst_setup_slack_ns'])} | {fmt(row['setup_wns_ns'])} | "
+            f"{fmt(row['worst_hold_slack_ns'])} | "
+            f"{'found' if row['register_to_register_path_found'] else 'none reported'} | "
+            f"{fmt(row['unconstrained_endpoints_reported'])} |"
         )
     rows.extend([
         "",
-        "A missing metric is shown as n/a and must be investigated in its raw log. A zero WNS means no negative slack was reported; it does not mean every constraint is correct.",
-        "The experiment is pre-layout and uses a single typical Liberty file. It is not MMMC, extracted-parasitic analysis, or production signoff.",
+        "WNS can be zero when slack is positive; the worst-slack column retains the positive timing margin. Missing metrics require raw-log investigation.",
+        "Register-to-register paths are reported separately so the false-path mutation is evaluated against the path class it targets. Pre-layout, single typical library, no SPEF; not MMMC or signoff.",
         "",
     ])
-    (out / "sta_matrix_summary.md").write_text("\n".join(rows), encoding="utf-8")
+    (report_dir / "sta_matrix_summary.md").write_text("\n".join(rows), encoding="utf-8")
     print("Parsed STA logs: " + str(len(records)))
-    print("Summary: " + str(out / "sta_matrix_summary.md"))
+    print("Summary: " + str(report_dir / "sta_matrix_summary.md"))
     return output
 
 
