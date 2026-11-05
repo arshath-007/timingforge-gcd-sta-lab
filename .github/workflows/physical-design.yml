@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           source /OpenROAD-flow-scripts/env.sh
-          bash scripts/run_physical.sh
+          bash scripts/run_physical.sh\n          python3 -m tools.physical_metrics build/reports/sta_matrix_summary.json build/physical --output build/physical/physical_comparison.json
       - name: Upload physical design evidence
         if: always()
         uses: actions/upload-artifact@v4
