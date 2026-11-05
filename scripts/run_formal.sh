@@ -32,7 +32,7 @@ yosys -p "read_verilog -formal -sv build/formal/gcd_binary_combined_broken.sv rt
   | tee build/formal/yosys_negative.log
 
 set +e
-yosys-smtbmc -s z3 -t 26 --dump-vcd build/formal/gcd_equiv_negative.vcd build/formal/gcd_equiv_broken.smt2 \
+yosys-smtbmc -s "$FORMAL_SOLVER" -t 26 --dump-vcd build/formal/gcd_equiv_negative.vcd build/formal/gcd_equiv_broken.smt2 \
   > build/formal/smtbmc_negative.log 2>&1
 negative_status=$?
 set -e
