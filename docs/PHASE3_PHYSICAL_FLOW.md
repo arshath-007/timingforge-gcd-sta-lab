@@ -38,3 +38,8 @@ For each architecture the flow must produce:
 This is an educational Nangate45 typical-corner implementation, not foundry signoff. A successful flow does not establish manufacturing readiness, multi-corner closure, IR-drop/EM closure, DRC/LVS signoff, or silicon quality. The baseline block-level SDC is retained to support a controlled pre-layout/post-layout experiment; it is an illustrative interface budget, not a production timing contract.
 
 No second library or multi-corner result is claimed. Add those only after independently validating distinct Liberty corner models, units, licenses, and platform mappings.
+
+
+### Internal ORFS LEC boundary
+
+The physical CI sets `LEC_CHECK=0` because the container's optional Kepler-based LEC child process intermittently terminates with an illegal-instruction signal during CTS timing repair. This does not disable CTS, timing repair, SPEF extraction, or post-route STA. The project runs a separate bounded RTL transaction-equivalence proof in Phase 2. Consequently, the physical flow does not claim a netlist-to-netlist LEC result across ORFS optimization stages; that check remains a documented limitation.
