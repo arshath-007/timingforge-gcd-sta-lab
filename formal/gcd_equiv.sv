@@ -1,5 +1,5 @@
-// Bounded sequential equivalence miter for all 3-bit input pairs.
-// The proof compares transaction results, not cycle-by-cycle latency.
+// Bounded sequential miter: architecture equivalence plus an independent GCD oracle.
+// The symbolic input space is exhaustive for WIDTH=3 only.
 module gcd_equiv_formal;
     localparam integer WIDTH = 3;
 
@@ -15,11 +15,30 @@ module gcd_equiv_formal;
     wire [WIDTH-1:0] gcd_split;
     wire busy_combined, done_combined;
     wire busy_split, done_split;
+    wire [WIDTH-1:0] expected_gcd;
 
     reg combined_seen = 0;
     reg split_seen = 0;
     reg [WIDTH-1:0] combined_result = 0;
     reg [WIDTH-1:0] split_result = 0;
+
+    // Independent Euclidean specification. This is intentionally separate
+    // from the binary-GCD datapaths under comparison.
+    function automatic [WIDTH-1:0] gcd_reference(
+        input [WIDTH-1:0] a,
+        input [WIDTH-1:0] b
+    );
+        reg [WIDTH-1:0] remainder;
+        begin
+            while (b != 0) begin
+                remainder = a % b;
+                a = b;
+                b = remainder;
+            end
+            gcd_reference = a;
+        end
+    endfunction
+    assign expected_gcd = gcd_reference(a_in, b_in);
 
     gcd_binary_combined #(.WIDTH(WIDTH)) u_combined (
         .clk(clk), .rst(rst), .start(start), .a_in(a_in), .b_in(b_in),
@@ -48,12 +67,14 @@ module gcd_equiv_formal;
             if (done_combined) begin
                 assert(!combined_seen);
                 assert(!busy_combined);
+                assert(gcd_combined == expected_gcd);
                 combined_seen <= 1;
                 combined_result <= gcd_combined;
             end
             if (done_split) begin
                 assert(!split_seen);
                 assert(!busy_split);
+                assert(gcd_split == expected_gcd);
                 split_seen <= 1;
                 split_result <= gcd_split;
             end
