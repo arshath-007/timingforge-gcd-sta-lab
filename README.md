@@ -209,7 +209,7 @@ The current [physical-design workflow run #23](https://github.com/arshath-007/ti
 | Reported setup skew (worst reported path) | +0.16 ns | +0.16 ns |
 | Reported hold skew (worst reported path) | -0.06 ns | -0.06 ns |
 
-The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are typical-corner educational results, not signoff. Multi-corner analysis is deferred because a second, independently verified Liberty PVT model is not part of the selected platform. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
+The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are Nangate45 typical-corner educational results, not signoff. The separate ASAP7/SKY130HD technology-breadth experiment is documented below and remains subject to its own CI validation; it does not retroactively change these Nangate45 measurements. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
 
 ## Phase 3 technology-breadth experiment — validation pending
 
