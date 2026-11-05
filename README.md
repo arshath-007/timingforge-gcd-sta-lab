@@ -149,7 +149,7 @@ The v0.2.0 release was validated by [GitHub Actions run #160](https://github.com
 
 Download the [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408368824) and [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408887449).
 
-See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report walkthrough](docs/ARCHITECTURE_AND_STA_WALKTHROUGH.md), the [portfolio and interview guide](docs/PORTFOLIO_AND_INTERVIEW.md), [advanced SDC exercises](docs/ADVANCED_SDC_EXERCISES.md), and [final CI run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699).
+The current main-branch extension and diagnostic changes passed both CI jobs in [run #195](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42028475826) at commit `d1abd1d1a71515d733c595fb7a180d94b963b8f9`. Its [latest STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42028475826/artifacts/13415236270) contains the 16 raw logs and the updated report with explicit register-path inventory. The original v0.2.0 baseline values remain traceable to [release validation run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699).\n\nSee [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report walkthrough](docs/ARCHITECTURE_AND_STA_WALKTHROUGH.md), the [portfolio and interview guide](docs/PORTFOLIO_AND_INTERVIEW.md), and [advanced SDC exercises](docs/ADVANCED_SDC_EXERCISES.md).
 
 ## Research questions
 
