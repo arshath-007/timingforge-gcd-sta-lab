@@ -39,7 +39,7 @@ The runner uses `set -euo pipefail` and invokes the ORFS `make all` target follo
 
 This is an educational Nangate45 typical-corner implementation, not foundry signoff. A successful flow does not establish manufacturing readiness, multi-corner closure, IR-drop/EM closure, DRC/LVS signoff, or silicon quality. The baseline block-level SDC is retained to support a controlled pre-layout/post-layout experiment; it is an illustrative interface budget, not a production timing contract.
 
-No second library or multi-corner result is claimed. Add those only after independently validating distinct Liberty corner models, units, licenses, and platform mappings.
+This document describes only the Nangate45 typical baseline. The separately validated ASAP7 BC/TC/WC MCMM and SKY130HD TT experiments are documented in [Phase 3 technology-breadth methodology](PHASE3_TECHNOLOGY_BREADTH.md) and [measured results](PHASE3_TECHNOLOGY_BREADTH_RESULTS.md); they use separate platform assumptions and do not change the Nangate45 baseline or constitute foundry signoff.
 
 
 ### Internal ORFS LEC boundary
@@ -48,6 +48,6 @@ The physical CI sets `LEC_CHECK=0` because the container's optional Kepler-based
 
 ## Latest validated run
 
-The current implementation was exercised successfully in [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456). Its [90-day evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211) contains the raw stage outputs, final databases, GDS, extracted SPEF, post-route timing logs, comparison JSON and SHA-256 manifest.
+The current implementation was exercised successfully in PR #8 [physical-design workflow run #42098727330](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727330). Its [90-day evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727330/artifacts/13450410051) contains the raw stage outputs, final databases, GDS, extracted SPEF, post-route timing logs, comparison JSON and SHA-256 manifest.
 
 See [Phase 3 measured results](PHASE3_RESULTS.md) for the post-route timing table, matched pre-layout comparison, and interpretation limits.
