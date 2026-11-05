@@ -23,6 +23,8 @@ export PYTHON_EXE="$(command -v python3)"
 export KLAYOUT_CMD="$(command -v klayout)"
 # Keep the small Nangate45 implementation deterministic on heterogeneous hosted runners.
 export NUM_CORES=1
+# Disable ORFS' optional Kepler-based internal LEC subprocess; separate RTL formal equivalence is run in Phase 2.
+export LEC_CHECK=0
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 [[ -x "$YOSYS_EXE" && -x "$OPENROAD_EXE" && -x "$PYTHON_EXE" && -x "$KLAYOUT_CMD" ]] || {
