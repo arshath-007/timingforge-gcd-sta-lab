@@ -43,6 +43,9 @@ sta-matrix:
 formal:
 	bash scripts/run_formal.sh
 
+physical:
+	bash scripts/run_physical.sh
+
 sta-quality: sta-matrix
 	$(PYTHON) -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
 
