@@ -77,8 +77,9 @@ core_clk                 10.00        0.00      5.00
             self.assertIsNone(row["register_to_register_min_period_ns"])
             self.assertEqual(row["register_to_register_rising_paths_reported"], 2)
             self.assertEqual(row["register_to_register_rising_worst_slack_ns"], 8.414)
-            self.assertEqual(row["register_to_register_derived_min_period_ns"], 1.586)
-            self.assertEqual(row["register_to_register_derived_fmax_mhz"], 630.517)
+            self.assertEqual(row["register_to_register_rising_path_inventory_complete"], True)
+            self.assertEqual(row["register_to_register_rising_best_slack_ns"], 8.700)
+            self.assertNotIn("register_to_register_derived_fmax_mhz", row)
 
     def test_false_path_scenario_can_report_no_register_paths(self):
         with tempfile.TemporaryDirectory() as temp:
