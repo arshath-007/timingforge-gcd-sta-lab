@@ -2,7 +2,7 @@
 
 The first formal property set compares the two GCD architectures at the transaction boundary. It does not require their `done` pulses to occur on the same cycle because the split architecture intentionally has additional processing latency.
 
-- Width: 4 bits.
+- Width: 3 bits.
 - Inputs: symbolic constants, so the proof considers every 3-bit input pair, including zero and equal operands.
 - Stimulus: one reset followed by one accepted start request.
 - Assertions: each implementation completes once, reports `done` with `busy` low, both complete within the 12-cycle bound, and their captured GCD results match.
