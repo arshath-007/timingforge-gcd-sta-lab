@@ -24,21 +24,24 @@ module gcd_equiv_formal;
 
     // Independent Euclidean specification. This is intentionally separate
     // from the binary-GCD datapaths under comparison.
-    function automatic [WIDTH-1:0] gcd_reference(
-        input [WIDTH-1:0] a,
-        input [WIDTH-1:0] b
-    );
-        reg [WIDTH-1:0] remainder;
-        begin
-            while (b != 0) begin
-                remainder = a % b;
-                a = b;
-                b = remainder;
+    reg [WIDTH-1:0] reference_a, reference_b, reference_remainder;
+    integer reference_step;
+    // Fixed-depth unrolling avoids unsupported dynamic function evaluation in
+    // the pinned Yosys 0.33 formal frontend. WIDTH*2 iterations exceed the
+    // maximum Euclidean remainder steps for the exhaustive 3-bit domain.
+    always @* begin
+        reference_a = a_in;
+        reference_b = b_in;
+        reference_remainder = 0;
+        for (reference_step = 0; reference_step < WIDTH*2; reference_step = reference_step + 1) begin
+            if (reference_b != 0) begin
+                reference_remainder = reference_a % reference_b;
+                reference_a = reference_b;
+                reference_b = reference_remainder;
             end
-            gcd_reference = a;
         end
-    endfunction
-    assign expected_gcd = gcd_reference(a_in, b_in);
+        expected_gcd = reference_a;
+    end
 
     gcd_binary_combined #(.WIDTH(WIDTH)) u_combined (
         .clk(clk), .rst(rst), .start(start), .a_in(a_in), .b_in(b_in),
