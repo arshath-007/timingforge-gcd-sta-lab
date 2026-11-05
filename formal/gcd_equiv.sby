@@ -1,0 +1,15 @@
+[options]
+mode bmc
+depth 82
+
+[engines]
+smtbmc boolector
+
+[script]
+read -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv
+prep -top gcd_equiv_formal
+
+[files]
+rtl/gcd_binary_combined.sv
+rtl/gcd_binary_split.sv
+formal/gcd_equiv.sv
