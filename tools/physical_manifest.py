@@ -68,7 +68,7 @@ def build_manifest(root: Path) -> dict:
         "flow": "OpenROAD Flow Scripts",
         "platform": "Nangate45",
         "corner": "typical",
-        "timing_stage": "post-route with propagated clocks and extracted SPEF",
+        "timing_stage": "post-route with propagated clocks and extracted SPEF",\n        "source_sdc_sha256": sha256(root.parent.parent / "constraints/gcd_baseline.sdc") if (root.parent.parent / "constraints/gcd_baseline.sdc").is_file() else None,
         "signoff_claim": False,
         "tool_versions_file": str(versions.relative_to(root)),
         "designs": designs,
