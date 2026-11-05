@@ -173,7 +173,34 @@ def main():
         if unexpected:
             print("Unexpected matrix entries: " + repr(unexpected))
         return 1
+
+    # Golden rows are the reference measurements. Missing values must fail loudly,
+    # not silently become "n/a" in a supposedly complete benchmark.
+    required_golden = (
+        "yosys_cell_area",
+        "register_to_register_min_period_ns",
+        "register_to_register_fmax_mhz",
+        "all_path_min_period_ns",
+        "all_path_fmax_mhz",
+        "worst_setup_slack_ns",
+        "worst_hold_slack_ns",
+        "unconstrained_endpoints_reported",
+    )
+    failures = []
+    for row in result["records"]:
+        if row["scenario"] != "gcd_baseline":
+            continue
+        for field in required_golden:
+            if row[field] is None:
+                failures.append(f"{row['top']} golden metric missing: {field}")
+    if failures:
+        print("ERROR: incomplete golden STA evidence")
+        for failure in failures:
+            print(failure)
+        return 1
+
     print("Validated complete STA matrix: 16/16 architecture/scenario combinations")
+    print("Validated required golden metrics for both architectures")
     return 0
 
 
