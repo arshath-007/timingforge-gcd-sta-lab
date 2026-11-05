@@ -22,6 +22,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y iverilog
       - name: Run RTL self-check
         run: make rtl-test
+      - name: Sweep parameterized GCD widths (8, 16, 32)
+        run: make width-sweep
       - name: Verify RTL regression rejects a deliberately broken design
         shell: bash
         run: |
@@ -75,6 +77,7 @@ jobs:
           { echo "Yosys: $(yosys -V)"; echo "OpenROAD: $(openroad -version)"; } | tee build/tool_versions.txt
           make sta-matrix
           python3 -m tools.qor_history snapshot build/reports/sta_matrix_summary.json --output build/reports/qor_snapshot.json
+          python3 -m tools.qor_gate build/reports/qor_snapshot.json --baseline baselines/nangate45_qor_baseline.json --policy config/qor_gate_policy.json --output build/reports/qor_gate.json
           python3 -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
           python3 -m tools.mutation_impact build/reports/sta_matrix_summary.json --output build/reports/sta_mutation_impact.json
           python3 -m tools.run_sensitivity
@@ -87,6 +90,7 @@ jobs:
             build/reports/sta_matrix_summary.md
             build/reports/sta_matrix_summary.json
             build/reports/qor_snapshot.json
+            build/reports/qor_gate.json
             build/reports/sta_quality_findings.json
             build/reports/sta_mutation_impact.json
             build/sensitivity/**
