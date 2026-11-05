@@ -21,7 +21,7 @@ def parse_postroute_log(path: Path) -> dict:
         raise ValueError(f"{path}: extracted parasitics marker missing")
     if "SPEF=" not in text:
         raise ValueError(f"{path}: SPEF path not recorded")
-    clock = text.split("=== POST-ROUTE CLOCK PERIOD ===", 1)
+    clock = text.split("=== POST-ROUTE ALL-PATH CLOCK PERIOD ===", 1)
     if len(clock) != 2:
         raise ValueError(f"{path}: post-route clock-period section missing")
     clock_text = clock[1].split("=== POST-ROUTE SETUP SUMMARY ===", 1)[0]
@@ -50,7 +50,7 @@ def parse_postroute_log(path: Path) -> dict:
         "postroute_hold_tns_ns": hold_tns,
         "setup_clock_skew_report": setup_skew_text.strip(),
         "hold_clock_skew_report": hold_skew_text.strip(),
-        "clock_skew_supported": "TIMINGFORGE_CLOCK_SKEW_UNSUPPORTED" not in setup_skew_text + hold_skew_text,
+        "clock_skew_supported": bool(setup_skew_text.strip() and hold_skew_text.strip()) and "TIMINGFORGE_CLOCK_SKEW_UNSUPPORTED" not in setup_skew_text + hold_skew_text,
         "postroute_log": str(path),
     }
 
