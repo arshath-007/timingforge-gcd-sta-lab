@@ -55,6 +55,31 @@ class StaMatrixParserTests(unittest.TestCase):
             self.assertTrue(row["register_to_register_path_found"])
             self.assertEqual(row["register_to_register_startpoint"], "input_reg/Q")
 
+    def test_derives_single_cycle_period_from_explicit_rising_edge_paths(self):
+        derived_sample = SAMPLE.replace(
+            "=== HOLD / MIN PATH DETAILS ===",
+            """=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===
+Startpoint: launch_reg/Q
+Endpoint: capture_reg/D
+slack (MET) 8.414
+Startpoint: launch_reg2/Q
+Endpoint: capture_reg2/D
+slack (MET) 8.700
+=== CLOCK PROPERTIES ===
+Clock                   Period          Waveform
+core_clk                 10.00        0.00      5.00
+=== HOLD / MIN PATH DETAILS ===""",
+        ).replace("core_clk period_min = 2.250 fmax = 444.44", "core_clk period_min = 0.00 fmax = inf")
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "sta_gcd_binary_combined_gcd_baseline.log"
+            path.write_text(derived_sample, encoding="utf-8")
+            row = parse_log(path)
+            self.assertIsNone(row["register_to_register_min_period_ns"])
+            self.assertEqual(row["register_to_register_rising_paths_reported"], 2)
+            self.assertEqual(row["register_to_register_rising_worst_slack_ns"], 8.414)
+            self.assertEqual(row["register_to_register_derived_min_period_ns"], 1.586)
+            self.assertEqual(row["register_to_register_derived_fmax_mhz"], 630.517)
+
     def test_false_path_scenario_can_report_no_register_paths(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "sta_gcd_binary_combined_M04_unjustified_false_path.log"
