@@ -33,9 +33,11 @@ library (test) {
             ["HAxp5_ASAP7_75t_R", "XNOR2x2_ASAP7_75t_R", "XOR2x1_ASAP7_75t_R"],
         )
 
-    def test_requires_at_least_one_excluded_cell(self):
-        with self.assertRaisesRegex(ValueError, "no excluded"):
-            filter_liberty("library (test) { cell (AND2x2) { area : 1.0; } }")
+    def test_keeps_library_unchanged_when_no_excluded_cells_exist(self):
+        source = "library (test) { cell (AND2x2) { area : 1.0; } }"
+        filtered, removed = filter_liberty(source)
+        self.assertEqual(filtered, source)
+        self.assertEqual(removed, [])
 
 
 if __name__ == "__main__":
