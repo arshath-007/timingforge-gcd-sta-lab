@@ -10,31 +10,27 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIR = ROOT / "build" / "reports"
 TOPS = ("gcd_binary_combined", "gcd_binary_split")
 SCENARIOS = (
-    "gcd_baseline",
-    "M01_missing_clock",
-    "M02_missing_input_delay",
-    "M03_missing_output_delay",
-    "M04_unjustified_false_path",
-    "M05_near_match_wrong_port",
-    "M06_missing_hold_uncertainty",
+    "gcd_baseline", "M01_missing_clock", "M02_missing_input_delay",
+    "M03_missing_output_delay", "M04_unjustified_false_path",
+    "M05_near_match_wrong_port", "M06_missing_hold_uncertainty",
     "M07_nonpositive_clock_period",
 )
 
 
 def metric(text, name, mode):
-    pattern = rf"^\s*{name}\s+{mode}\s+([-+]?(?:\d+\.?\d*|\.\d+))\s*$"
+    pattern = rf"^\\s*{name}\\s+{mode}\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*$"
     match = re.search(pattern, text, re.MULTILINE | re.IGNORECASE)
     return float(match.group(1)) if match else None
 
 
 def worst_slack(text, mode):
-    pattern = rf"^\s*worst slack\s+{mode}\s+([-+]?(?:\d+\.?\d*|\.\d+))\s*$"
+    pattern = rf"^\\s*worst slack\\s+{mode}\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*$"
     match = re.search(pattern, text, re.MULTILINE | re.IGNORECASE)
     return float(match.group(1)) if match else None
 
 
 def clock_metrics(text):
-    match = re.search(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", text, re.MULTILINE | re.IGNORECASE)
+    match = re.search(r"^\\s*\\S+\\s+period_min\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s+fmax\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text, re.MULTILINE | re.IGNORECASE)
     return (float(match.group(1)), float(match.group(2))) if match else (None, None)
 
 
@@ -54,7 +50,7 @@ def cell_area(top, report_path):
     for candidate in candidates:
         if candidate.is_file():
             data = candidate.read_text(encoding="utf-8", errors="replace")
-            matches = re.findall(r"Chip area for module .*?:\s*([-+]?(?:\d+\.?\d*|\.\d+))", data)
+            matches = re.findall(r"Chip area for module .*?:\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", data)
             if matches:
                 return float(matches[-1])
     return None
@@ -70,16 +66,15 @@ def parse_log(path):
     setup = section(text, "=== SETUP / MAX PATH DETAILS ===", "=== REGISTER-TO-REGISTER SETUP PATHS ===")
     reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== HOLD / MIN PATH DETAILS ===")
     unconstrained = section(text, "=== UNCONSTRAINED PATH DETAILS ===")
-    start = re.search(r"^Startpoint:\s*(.+)$", setup, re.MULTILINE)
-    end = re.search(r"^Endpoint:\s*(.+)$", setup, re.MULTILINE)
-    rr_start = re.search(r"^Startpoint:\s*(.+)$", reg2reg, re.MULTILINE)
-    rr_end = re.search(r"^Endpoint:\s*(.+)$", reg2reg, re.MULTILINE)
-    warning = re.search(r"There are\s+(\d+)\s+unconstrained endpoints", text, re.IGNORECASE)
-    input_missing = re.search(r"There are\s+(\d+)\s+input ports missing set_input_delay", text, re.IGNORECASE)
-    output_missing = re.search(r"There are\s+(\d+)\s+output ports missing set_output_delay", text, re.IGNORECASE)
-    missing_input_ports = int(input_missing.group(1)) if input_missing else 0
-    missing_output_ports = int(output_missing.group(1)) if output_missing else 0
-    period, fmax = clock_metrics(text)
+    start = re.search(r"^Startpoint:\\s*(.+)$", setup, re.MULTILINE)
+    end = re.search(r"^Endpoint:\\s*(.+)$", setup, re.MULTILINE)
+    rr_start = re.search(r"^Startpoint:\\s*(.+)$", reg2reg, re.MULTILINE)
+    rr_end = re.search(r"^Endpoint:\\s*(.+)$", reg2reg, re.MULTILINE)
+    warning = re.search(r"There are\\s+(\\d+)\\s+unconstrained endpoints", text, re.IGNORECASE)
+    input_missing = re.search(r"There are\\s+(\\d+)\\s+input ports missing set_input_delay", text, re.IGNORECASE)
+    output_missing = re.search(r"There are\\s+(\\d+)\\s+output ports missing set_output_delay", text, re.IGNORECASE)
+    rr_period, rr_fmax = clock_metrics(section(text, "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===", "=== ALL-PATH CLOCK PERIOD / FREQUENCY"))
+    all_period, all_fmax = clock_metrics(section(text, "=== ALL-PATH CLOCK PERIOD / FREQUENCY (INCLUDING PORT PATHS) ===", "=== SETUP SUMMARY ==="))
     try:
         log_path = str(path.relative_to(ROOT))
     except ValueError:
@@ -87,7 +82,10 @@ def parse_log(path):
     return {
         "top": top, "scenario": scenario, "log_file": log_path,
         "yosys_cell_area": cell_area(top, path),
-        "clock_period_min_ns": period, "clock_fmax_mhz": fmax,
+        "register_to_register_min_period_ns": rr_period,
+        "register_to_register_fmax_mhz": rr_fmax,
+        "all_path_min_period_ns": all_period, "all_path_fmax_mhz": all_fmax,
+        "clock_period_min_ns": all_period, "clock_fmax_mhz": all_fmax,
         "worst_setup_slack_ns": worst_slack(text, "max"),
         "setup_wns_ns": metric(text, "wns", "max"),
         "setup_tns_ns": metric(text, "tns", "max"),
@@ -100,8 +98,8 @@ def parse_log(path):
         "register_to_register_startpoint": rr_start.group(1).strip() if rr_start else None,
         "register_to_register_endpoint": rr_end.group(1).strip() if rr_end else None,
         "unconstrained_endpoints_reported": int(warning.group(1)) if warning else None,
-        "missing_input_delay_ports": missing_input_ports,
-        "missing_output_delay_ports": missing_output_ports,
+        "missing_input_delay_ports": int(input_missing.group(1)) if input_missing else 0,
+        "missing_output_delay_ports": int(output_missing.group(1)) if output_missing else 0,
         "unconstrained_paths_listed": len(re.findall(r"^Startpoint:", unconstrained, re.MULTILINE)),
     }
 
@@ -118,7 +116,7 @@ def summarise(report_dir=REPORT_DIR):
             if base and row["worst_setup_slack_ns"] is not None and base["worst_setup_slack_ns"] is not None else None
         )
     output = {
-        "schema_version": "0.2",
+        "schema_version": "0.3",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "analysis_engine": "OpenROAD-integrated OpenSTA",
         "platform": "Nangate45 typical Liberty",
@@ -126,7 +124,7 @@ def summarise(report_dir=REPORT_DIR):
         "logs_found": len(records), "records": records,
     }
     report_dir.mkdir(parents=True, exist_ok=True)
-    (report_dir / "sta_matrix_summary.json").write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
+    (report_dir / "sta_matrix_summary.json").write_text(json.dumps(output, indent=2) + "\\n", encoding="utf-8")
     rows = [
         "# TimingForge library-backed STA matrix", "",
         "- Generated UTC: " + output["generated_at_utc"],
@@ -134,27 +132,26 @@ def summarise(report_dir=REPORT_DIR):
         "- Library: " + output["platform"],
         "- Parasitics: " + output["parasitics"],
         "- Logs parsed: " + str(len(records)), "",
-        "| Architecture | SDC scenario | Yosys cell area | Min period (ns) | Fmax (MHz) | Worst setup slack (ns) | Setup WNS (ns) | Worst hold slack (ns) | Reg-to-reg path | Input ports missing delay | Output ports missing delay | Unconstrained endpoints |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|",
+        "| Architecture | SDC scenario | Cell area | Reg-to-reg min period (ns) | Reg-to-reg Fmax (MHz) | All-path min period (ns) | All-path Fmax (MHz) | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
-    fmt = lambda v: "n/a" if v is None else f"{v:.3f}"
+    fmt = lambda value: "n/a" if value is None else f"{value:.3f}"
     for row in records:
         rows.append(
             f"| {row['top']} | {row['scenario']} | {fmt(row['yosys_cell_area'])} | "
-            f"{fmt(row['clock_period_min_ns'])} | {fmt(row['clock_fmax_mhz'])} | "
-            f"{fmt(row['worst_setup_slack_ns'])} | {fmt(row['setup_wns_ns'])} | "
-            f"{fmt(row['worst_hold_slack_ns'])} | "
+            f"{fmt(row['register_to_register_min_period_ns'])} | {fmt(row['register_to_register_fmax_mhz'])} | "
+            f"{fmt(row['all_path_min_period_ns'])} | {fmt(row['all_path_fmax_mhz'])} | "
+            f"{fmt(row['worst_setup_slack_ns'])} | {fmt(row['worst_hold_slack_ns'])} | "
             f"{'found' if row['register_to_register_path_found'] else 'none reported'} | "
-            f"{row['missing_input_delay_ports']} | {row['missing_output_delay_ports']} | "
             f"{fmt(row['unconstrained_endpoints_reported'])} |"
         )
     rows.extend([
         "",
-        "WNS can be zero when slack is positive; the worst-slack column retains the positive timing margin. Missing metrics require raw-log investigation.",
-        "Register-to-register paths are reported separately so the false-path mutation is evaluated against the path class it targets. Pre-layout, single typical library, no SPEF; not MMMC or signoff.",
+        "Register-to-register minimum period uses report_clock_min_period without -include_port_paths. All-path period includes port paths. Treat the two metrics separately; neither is post-route or signoff timing.",
+        "WNS may be zero when slack is positive; worst slack retains the margin. Missing metrics require raw-log investigation.",
         "",
     ])
-    (report_dir / "sta_matrix_summary.md").write_text("\n".join(rows), encoding="utf-8")
+    (report_dir / "sta_matrix_summary.md").write_text("\\n".join(rows), encoding="utf-8")
     print("Parsed STA logs: " + str(len(records)))
     print("Summary: " + str(report_dir / "sta_matrix_summary.md"))
     return output
