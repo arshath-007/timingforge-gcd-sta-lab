@@ -33,6 +33,8 @@ def section(text, heading, next_heading=None):
     if start < 0:
         return ""
     start += len(heading)
+    if next_heading is None:
+        return text[start:]
     end = text.find(next_heading, start)
     return text[start:end] if end >= 0 else text[start:]
 
