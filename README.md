@@ -93,7 +93,7 @@ source /OpenROAD-flow-scripts/env.sh
 make sta-matrix
 ```
 
-The script downloads the Nangate45 typical Liberty file from the OpenROAD Flow Scripts platform repository when it is not already present, synthesises both GCD architectures, and runs the baseline plus each generated SDC mutation through the OpenROAD-integrated STA engine. Set `STA=sta` to use a standalone OpenSTA executable instead of the default `openroad` command. Nangate45 is an educational platform; results are not portable to a production process or signoff flow.
+The script downloads the Nangate45 typical Liberty file from the OpenROAD Flow Scripts platform repository when it is not already present, synthesises both GCD architectures, and runs the golden SDC plus seven generated mutations through the OpenROAD-integrated STA engine. It then writes `build/reports/sta_matrix_summary.md` and `.json`, including setup/hold WNS/TNS, setup-WNS deltas against the golden case, and unconstrained paths reported. Set `STA=sta` to use a standalone OpenSTA executable instead of the default `openroad` command. Nangate45 is an educational platform; the run is pre-layout without SPEF and is not portable to a production process or signoff flow.
 
 ### 4. Manual synthesis and STA
 
