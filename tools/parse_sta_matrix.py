@@ -9,6 +9,16 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIR = ROOT / "build" / "reports"
 TOPS = ("gcd_binary_combined", "gcd_binary_split")
+SCENARIOS = (
+    "gcd_baseline",
+    "M01_missing_clock",
+    "M02_missing_input_delay",
+    "M03_missing_output_delay",
+    "M04_unjustified_false_path",
+    "M05_near_match_wrong_port",
+    "M06_missing_hold_uncertainty",
+    "M07_nonpositive_clock_period",
+)
 
 
 def metric(text, name, mode):
@@ -155,7 +165,19 @@ def main():
     parser.add_argument("--reports", type=Path, default=REPORT_DIR)
     args = parser.parse_args()
     result = summarise(args.reports)
-    return 0 if result["logs_found"] >= 2 else 1
+    observed = {(row["top"], row["scenario"]) for row in result["records"]}
+    expected = {(top, scenario) for top in TOPS for scenario in SCENARIOS}
+    missing = sorted(expected - observed)
+    unexpected = sorted(observed - expected)
+    if missing or unexpected or result["logs_found"] != 16:
+        print("ERROR: expected exactly 16 STA logs (2 architectures x 8 scenarios)")
+        if missing:
+            print("Missing matrix entries: " + repr(missing))
+        if unexpected:
+            print("Unexpected matrix entries: " + repr(unexpected))
+        return 1
+    print("Validated complete STA matrix: 16/16 architecture/scenario combinations")
+    return 0
 
 
 if __name__ == "__main__":
