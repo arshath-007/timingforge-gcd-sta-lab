@@ -58,6 +58,43 @@ def parse_scene_report(text: str, scene: str) -> dict:
     return result
 
 
+def parse_units(text: str, expected_time: str, expected_capacitance: str) -> dict:
+    time_match = re.search(r"^\\s*time\\s+1(\\w+)\\s*$", text, re.IGNORECASE | re.MULTILINE)
+    cap_match = re.search(r"^\\s*capacitance\\s+1(\\w+)\\s*$", text, re.IGNORECASE | re.MULTILINE)
+    if not time_match or not cap_match:
+        raise ValueError("OpenSTA report_units output is missing time/capacitance units")
+    actual = {"time": time_match.group(1).lower(), "capacitance": cap_match.group(1).lower()}
+    if actual != {"time": expected_time.lower(), "capacitance": expected_capacitance.lower()}:
+        raise ValueError(f"Liberty units mismatch: expected {expected_time}/{expected_capacitance}, got {actual}")
+    return actual
+
+
+def parse_sky130_postroute_metrics(text: str) -> dict:
+    def period(marker: str) -> dict:
+        section = text.split(marker, 1)[1]
+        match = re.search(r"core_clk period_min = ([0-9.]+) fmax = ([0-9.]+)", section)
+        if not match:
+            raise ValueError(f"missing post-route period metrics after {marker}")
+        return {"minimum_period_ns": float(match.group(1)), "fmax_mhz": float(match.group(2))}
+
+    def summary(marker: str, kind: str) -> dict:
+        section = text.split(marker, 1)[1]
+        match = re.search(
+            rf"worst slack {kind} ([-+]?[0-9.]+)\\s+wns {kind} ([-+]?[0-9.]+)\\s+tns {kind} ([-+]?[0-9.]+)",
+            section,
+        )
+        if not match:
+            raise ValueError(f"missing post-route {kind} slack summary after {marker}")
+        return {"worst_slack_ns": float(match.group(1)), "wns_ns": float(match.group(2)), "tns_ns": float(match.group(3))}
+
+    return {
+        "register_to_register": period("=== POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ==="),
+        "all_path": period("=== POST-ROUTE ALL-PATH CLOCK PERIOD ==="),
+        "setup": summary("=== POST-ROUTE SETUP SUMMARY ===", "max"),
+        "hold": summary("=== POST-ROUTE HOLD SUMMARY ===", "min"),
+    }
+
+
 def build_manifest(root: Path, orfs_root: Path) -> dict:
     versions_path = root / "tool_versions.txt"
     if not versions_path.is_file():
@@ -90,6 +127,7 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
                 if not log.is_file():
                     raise FileNotFoundError(log)
                 log_text = log.read_text(encoding="utf-8", errors="replace")
+                record["units"] = parse_units(log_text, "ps", "fF")
                 record["mcmm"] = {
                     "engine": "OpenROAD-integrated OpenSTA MCMM scenes",
                     "scenes": [
@@ -111,7 +149,9 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
                 log_text = log.read_text(encoding="utf-8", errors="replace")
                 if "POST-ROUTE PARASITICS LOADED" not in log_text:
                     raise ValueError(f"SKY130HD post-route SPEF marker missing for {top}")
+                record["units"] = parse_units(log_text, "ns", "pF")
                 record["postroute_sta"] = {
+                    "metrics": parse_sky130_postroute_metrics(log_text),
                     "corner": "TT, 25C, 1.80V",
                     "liberty": "sky130_fd_sc_hd__tt_025C_1v80.lib",
                     "liberty_sha256": sha256(
@@ -154,6 +194,18 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
         "experiments": platforms,
         "asap7_liberty_sha256": library_hashes,
         "asap7_pvt": ASAP7_SCENES,
+        "platform_licenses": {
+            "asap7": {
+                "license": "BSD-3-Clause",
+                "upstream": "https://github.com/The-OpenROAD-Project/asap7",
+                "license_url": "https://github.com/The-OpenROAD-Project/asap7/blob/main/LICENSE",
+            },
+            "sky130hd": {
+                "license": "Apache-2.0",
+                "upstream": "https://github.com/google/skywater-pdk",
+                "license_url": "https://github.com/google/skywater-pdk/blob/main/LICENSE",
+            },
+        },
         "asap7_spef_policy": (
             "One TC physical implementation per architecture; its extracted SPEF is reused "
             "unchanged in the BC/TC/WC MCMM scenes. No corner-specific RC extraction or scaling."
