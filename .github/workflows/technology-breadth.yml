@@ -31,7 +31,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: technology-breadth-${{ github.ref }}
+  group: technology-breadth-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
