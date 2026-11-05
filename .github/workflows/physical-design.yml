@@ -1,6 +1,17 @@
 name: TimingForge physical design
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "rtl/gcd_binary_*.sv"
+      - "constraints/gcd_baseline.sdc"
+      - "physical/**"
+      - "scripts/run_physical.sh"
+      - "scripts/postroute_sta.tcl"
+      - "tools/physical_manifest.py"
+      - "tools/physical_metrics.py"
+      - ".github/workflows/physical-design.yml"
   pull_request:
     branches: [main]
     paths:
