@@ -13,7 +13,7 @@ This document is the execution tracker for the proposed expansion roadmap. A che
 - [x] Run the quality checker in the library-backed STA CI job and upload its JSON findings.
 
 ### Remaining Phase 1 work
-- [ ] Add critical-path class labels (input-to-register, register-to-register, register-to-output, input-to-output) using raw OpenSTA startpoint/endpoint evidence and explicit confidence/unknown handling.
+- [x] Add heuristic critical-path class labels (input-to-register, register-to-register, register-to-output, input-to-output, or unknown) from OpenSTA startpoint/endpoint names, with unknown fallback and unit tests.
 - [ ] Add a DRV summary for max transition, max capacitance, max fanout, and violations only where the selected OpenSTA build exposes the relevant reports reliably.
 - [ ] Add clock-uncertainty and clock-latency sensitivity experiments with immutable baseline constraints and explicit deltas.
 - [ ] Add mutation impact scoring that distinguishes expected effects from unexplained changes; never collapse it into a single accuracy percentage.
