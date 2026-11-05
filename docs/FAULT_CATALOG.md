@@ -25,6 +25,10 @@ The command writes:
 
 The detection score is a **static coverage score for these seven controlled examples only**. It does not measure arbitrary SDC correctness, prove that a false-path exception is invalid, or quantify timing impact. It must not be described as an STA signoff result.
 
+## Completed v0.2 library-backed experiment
+
+In v0.2, each mutation is run through the same mapped netlist, Liberty model, OpenROAD-integrated OpenSTA flow, and analysis options as the golden baseline for both GCD architectures. The generated matrix parses setup/hold summaries, unconstrained endpoints, missing I/O-delay coverage, and register-to-register path presence. Keep the static checker finding separate from the observed STA result.
+
 ## Next research extension
 
-Run each mutation through the same mapped netlist, Liberty model, OpenSTA version, and analysis options as the golden baseline. Parse setup/hold reports and unconstrained endpoints. Record whether a path disappears or changes, while keeping the static checker finding separate.
+Add more mutation classes (generated clocks, clock groups, multicycle paths, and design-intent-reviewed exceptions), additional libraries/corners, and post-placement or parasitic-aware experiments. Improve quantitative separation of all-path and register-to-register timing metrics.
