@@ -1,7 +1,7 @@
 # True OpenSTA MCMM post-route analysis for ASAP7 BC/TC/WC Liberty scenes.
 # One TC-routed design and one extracted SPEF are reused across scenes; the
 # parasitics are NOT corner-specific and no RC-corner scaling is applied.
-foreach name {TECH_LEF SC_LEF ODB SDC SPEF ASAP7_LIB_DIR} {
+foreach name {TECH_LEF SC_LEF ODB SDC SPEF ASAP7_LIB_DIR ASAP7_FILTERED_LIB_DIR} {
     if {![info exists ::env($name)]} {
         error "Set $name for ASAP7 MCMM post-route analysis"
     }
@@ -13,7 +13,7 @@ set libdir $::env(ASAP7_LIB_DIR)
 proc corner_libs {libdir process_tag} {
     set libs {}
     set versions [dict create AO 211120 INVBUF 220122 OA 211120 SIMPLE 211120]
-    foreach group {AO INVBUF OA SIMPLE} {
+    foreach group {AO INVBUF OA} {
         set version [dict get $versions $group]
         set path "$libdir/asap7sc7p5t_${group}_RVT_${process_tag}_nldm_${version}.lib.gz"
         if {![file isfile $path]} {
@@ -21,6 +21,11 @@ proc corner_libs {libdir process_tag} {
         }
         lappend libs $path
     }
+    set simple "$::env(ASAP7_FILTERED_LIB_DIR)/asap7sc7p5t_SIMPLE_RVT_${process_tag}_nldm_211120.filtered.lib"
+    if {![file isfile $simple]} {
+        error "Missing filtered ASAP7 SIMPLE Liberty: $simple"
+    }
+    lappend libs $simple
     set seq "$libdir/asap7sc7p5t_SEQ_RVT_${process_tag}_nldm_220123.lib"
     if {![file isfile $seq]} {
         error "Missing pinned ASAP7 sequential Liberty: $seq"
