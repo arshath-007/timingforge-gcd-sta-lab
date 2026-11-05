@@ -97,7 +97,7 @@ make mutants
 make lint-sdc
 make python-test
 make benchmark
-python3 -m unittest tests.test_quality_checks -v
+python3 -m unittest discover -s tests -p 'test_quality_checks.py' -v
 ```
 
 Generated SDC files are written under `build/mutants/`. The checker validates simple expected clock, setup/hold uncertainty, and min/max I/O-delay patterns for the GCD interface. The benchmark writes JSON and Markdown scorecards under `build/`; its score covers seven controlled pattern/coverage mutations only, not general SDC correctness or signoff.
