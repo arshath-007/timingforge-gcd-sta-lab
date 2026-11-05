@@ -61,7 +61,7 @@ jobs:
           git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
           git fetch --depth=1 origin "$GITHUB_SHA"
           git checkout --detach FETCH_HEAD
-      - name: Install Boolector formal solver
+      - name: Install Z3 formal solver
         shell: bash
         run: |
           apt-get update
