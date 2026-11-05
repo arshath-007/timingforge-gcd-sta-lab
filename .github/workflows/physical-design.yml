@@ -51,7 +51,15 @@ jobs:
         shell: bash
         run: |
           source /OpenROAD-flow-scripts/env.sh
-          bash scripts/run_physical.sh
+          mkdir -p build/physical
+          if ! bash scripts/run_physical.sh > build/physical/physical_flow_console.log 2>&1; then
+            echo "Physical flow failed. Last 250 console lines:"
+            tail -n 250 build/physical/physical_flow_console.log
+            echo "Latest stage logs:"
+            find build/physical -type f -name "*.log" -printf "%T@ %p\\n" | sort -nr | head -n 20
+            exit 1
+          fi
+          tail -n 100 build/physical/physical_flow_console.log
           python3 -m tools.physical_metrics build/reports/sta_matrix_summary.json build/physical --output build/physical/physical_comparison.json
       - name: Upload physical design evidence
         if: always()
