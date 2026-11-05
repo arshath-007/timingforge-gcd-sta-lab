@@ -35,7 +35,7 @@ Test whether a timing-constraint review flow identifies a small, explicitly defi
 | M06 | Remove hold uncertainty | TF402 ERROR | Hold analysis assumptions are incomplete |
 | M07 | Set period to zero | TF002 ERROR | A clock period must be positive |
 
-The checker is interface-specific and uses simple line-oriented pattern checks. It requires a positive period on the named clock, setup and hold uncertainty, and both min/max I/O delay patterns; exact/simple wildcard matching is used for the known GCD top-level ports. A PASS means only that its expected patterns were found. It does not prove that the SDC is complete, semantically correct, or appropriate for a real design.
+The checker is interface-specific and uses simple line-oriented pattern checks. It requires a positive period on the named clock, setup and hold uncertainty, and both min/max I/O delay patterns; exact/simple wildcard matching is used for the known GCD top-level ports. The checker recognises a deliberately limited, line-oriented subset of SDC syntax and canonical option ordering. It is not a general Tcl parser: valid alternative command orderings or Tcl constructs may be rejected, and unsupported constraint classes may not be detected. A PASS means only that its expected patterns were found. It does not prove that the SDC is complete, semantically correct, or appropriate for a real design.
 
 ## Experimental protocol
 
@@ -49,7 +49,7 @@ The checker is interface-specific and uses simple line-oriented pattern checks. 
 
 ## Published evidence
 
-The v0.2 baseline measurements and seven controlled mutations are sourced from baseline run ID `41999231060` (workflow run #69). The latest CI validation is run ID `42007925745` (workflow run #82):
+The historical v0.2 measurements and seven controlled mutations are sourced from baseline run ID `41999231060` (workflow run #69). The original SDC load values were later found to be 0.02/0.03 fF rather than the intended 20/30 fF; a corrected-load matrix is being regenerated, so the historical numbers are not the corrected-load baseline. The latest CI validation is run ID `42007925745` (workflow run #82):
 
 - [Baseline measurement run ID 41999231060 (workflow run #69)](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060) — source of the published numerical results and baseline artifacts.
 - [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413) — raw timing logs and parsed matrix evidence for both architectures and eight SDC scenarios each.
