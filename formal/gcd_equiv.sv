@@ -24,24 +24,79 @@ module gcd_equiv_formal;
 
     // Independent Euclidean specification. This is intentionally separate
     // from the binary-GCD datapaths under comparison.
-    reg [WIDTH-1:0] reference_a, reference_b, reference_remainder;
-    integer reference_step;
-    // Fixed-depth unrolling avoids unsupported dynamic function evaluation in
-    // the pinned Yosys 0.33 formal frontend. WIDTH*2 iterations exceed the
-    // maximum Euclidean remainder steps for the exhaustive 3-bit domain.
+    // Exhaustive 64-entry specification table for WIDTH=3. Values are
+    // generated independently from the Euclidean GCD definition. This avoids
+    // adding a second divider network to the already bounded sequential proof.
     always @* begin
-        reference_a = a_in;
-        reference_b = b_in;
-        reference_remainder = 0;
-        for (reference_step = 0; reference_step < WIDTH*2; reference_step = reference_step + 1) begin
-            if (reference_b != 0) begin
-                reference_remainder = reference_a % reference_b;
-                reference_a = reference_b;
-                reference_b = reference_remainder;
-            end
-        end
-        expected_gcd = reference_a;
+        case ({a_in, b_in})
+            6'b000000: expected_gcd = 3'd0;
+            6'b000001: expected_gcd = 3'd1;
+            6'b000010: expected_gcd = 3'd2;
+            6'b000011: expected_gcd = 3'd3;
+            6'b000100: expected_gcd = 3'd4;
+            6'b000101: expected_gcd = 3'd5;
+            6'b000110: expected_gcd = 3'd6;
+            6'b000111: expected_gcd = 3'd7;
+            6'b001000: expected_gcd = 3'd1;
+            6'b001001: expected_gcd = 3'd1;
+            6'b001010: expected_gcd = 3'd1;
+            6'b001011: expected_gcd = 3'd1;
+            6'b001100: expected_gcd = 3'd1;
+            6'b001101: expected_gcd = 3'd1;
+            6'b001110: expected_gcd = 3'd1;
+            6'b001111: expected_gcd = 3'd1;
+            6'b010000: expected_gcd = 3'd2;
+            6'b010001: expected_gcd = 3'd1;
+            6'b010010: expected_gcd = 3'd2;
+            6'b010011: expected_gcd = 3'd1;
+            6'b010100: expected_gcd = 3'd2;
+            6'b010101: expected_gcd = 3'd1;
+            6'b010110: expected_gcd = 3'd2;
+            6'b010111: expected_gcd = 3'd1;
+            6'b011000: expected_gcd = 3'd3;
+            6'b011001: expected_gcd = 3'd1;
+            6'b011010: expected_gcd = 3'd1;
+            6'b011011: expected_gcd = 3'd3;
+            6'b011100: expected_gcd = 3'd1;
+            6'b011101: expected_gcd = 3'd1;
+            6'b011110: expected_gcd = 3'd3;
+            6'b011111: expected_gcd = 3'd1;
+            6'b100000: expected_gcd = 3'd4;
+            6'b100001: expected_gcd = 3'd1;
+            6'b100010: expected_gcd = 3'd2;
+            6'b100011: expected_gcd = 3'd1;
+            6'b100100: expected_gcd = 3'd4;
+            6'b100101: expected_gcd = 3'd1;
+            6'b100110: expected_gcd = 3'd2;
+            6'b100111: expected_gcd = 3'd1;
+            6'b101000: expected_gcd = 3'd5;
+            6'b101001: expected_gcd = 3'd1;
+            6'b101010: expected_gcd = 3'd1;
+            6'b101011: expected_gcd = 3'd1;
+            6'b101100: expected_gcd = 3'd1;
+            6'b101101: expected_gcd = 3'd5;
+            6'b101110: expected_gcd = 3'd1;
+            6'b101111: expected_gcd = 3'd1;
+            6'b110000: expected_gcd = 3'd6;
+            6'b110001: expected_gcd = 3'd1;
+            6'b110010: expected_gcd = 3'd2;
+            6'b110011: expected_gcd = 3'd3;
+            6'b110100: expected_gcd = 3'd2;
+            6'b110101: expected_gcd = 3'd1;
+            6'b110110: expected_gcd = 3'd6;
+            6'b110111: expected_gcd = 3'd1;
+            6'b111000: expected_gcd = 3'd7;
+            6'b111001: expected_gcd = 3'd1;
+            6'b111010: expected_gcd = 3'd1;
+            6'b111011: expected_gcd = 3'd1;
+            6'b111100: expected_gcd = 3'd1;
+            6'b111101: expected_gcd = 3'd1;
+            6'b111110: expected_gcd = 3'd1;
+            6'b111111: expected_gcd = 3'd7;
+            default: expected_gcd = '0;
+        endcase
     end
+
 
     gcd_binary_combined #(.WIDTH(WIDTH)) u_combined (
         .clk(clk), .rst(rst), .start(start), .a_in(a_in), .b_in(b_in),
