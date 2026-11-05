@@ -17,7 +17,7 @@ Static timing analysis is only as meaningful as the design model and timing cons
 
 TimingForge makes this failure mode testable:
 
-1. Establish a known-good RTL and SDC baseline.
+1. Establish a reference RTL and SDC baseline, documenting any observed setup or hold violations.
 2. Generate controlled, named SDC mutations from that baseline.
 3. Run static constraint-coverage checks.
 4. Synthesize both RTL architectures against the same standard-cell Liberty library.
@@ -132,7 +132,7 @@ Review the raw Yosys/OpenSTA logs and tool versions. A successful script exit al
 
 ## Verified evidence
 
-The repository has a successful GitHub Actions regression and a successful library-backed timing matrix in [run #41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060):
+The baseline numerical measurements and raw matrix artifacts originate from run ID `41999231060` (workflow run #69, source commit `bd29bcd96914f0415771aa5aa76949cf7163b66e`). The latest CI validation is run ID `42007925745` (workflow run #82, source commit `18121a4848825c23a878702712e1bf6b86099cf3`); both regression and library-backed STA jobs passed. The latter validates the documentation revision and workflow execution; it does not replace the original baseline measurements.
 
 - 258 directed/random GCD input pairs checked on **each** RTL architecture.
 - 13 Python unit tests passed.
@@ -142,9 +142,9 @@ The repository has a successful GitHub Actions regression and a successful libra
 - RTL operation latency measured: combined average 63.63 cycles (maximum 93); split average 84.17 cycles (maximum 124).
 - Raw logs and parsed timing matrix uploaded as [STA evidence](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13401821413); static benchmark scorecard uploaded [here](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060/artifacts/13402245334).
 
-**Measured first baseline results:** the combined architecture reported 1657.180 Yosys Liberty area units, 2.94 ns minimum period, 340.67 MHz corresponding Fmax, +7.065 ns worst setup slack, and -0.002 ns worst hold slack. The split architecture reported 1681.918 area units, 2.35 ns minimum period, 425.57 MHz Fmax, +7.650 ns worst setup slack, and +0.005 ns worst hold slack. In the same 258-case RTL test corpus, average operation latency was 63.63 cycles combined versus 84.17 cycles split (maximum 93 vs 124). This makes the trade-off visible: split improves the reported pre-layout clock limit, but the extra processing state means more cycles per operation. These are not production or post-route PPA figures.
+**Measured first baseline results:** the combined architecture reported 1657.180 Yosys Liberty area units, 2.94 ns all-path minimum period (including port paths), 340.67 MHz corresponding all-path Fmax, +7.065 ns worst setup slack, and -0.002 ns worst hold slack. The split architecture reported 1681.918 area units, 2.35 ns all-path minimum period, 425.57 MHz corresponding all-path Fmax, +7.650 ns worst setup slack, and +0.005 ns worst hold slack. These minimum-period/Fmax values come from `report_clock_min_period -include_port_paths`; they are not register-to-register-only architecture metrics. The dedicated register-to-register report records path presence but this release does not publish a separate register-to-register minimum period. In the same 258-case RTL test corpus, average operation latency was 63.63 cycles combined versus 84.17 cycles split (maximum 93 vs 124). Do not interpret the all-path Fmax comparison as a pure internal-logic comparison or as measured application throughput. These are not production or post-route PPA figures.
 
-See [Initial measured results](docs/INITIAL_RESULTS.md) and the [baseline measurement run #41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060). The later [run #78](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42006568892) passed regression and library-backed STA after documentation-only updates; it validates the final documentation revision but does not replace the original measurement artifacts or numerical results.
+See [Initial measured results](docs/INITIAL_RESULTS.md), [baseline measurement run ID 41999231060](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41999231060), and [latest CI validation run ID 42007925745](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42007925745).
 
 ## Research questions
 
