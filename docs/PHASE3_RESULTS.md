@@ -27,7 +27,7 @@ This is an educational single-corner experiment, not foundry signoff or a multi-
 
 The register-to-register minimum period and all-path minimum period are different metrics. The all-path metric includes constrained I/O-to-register and register-to-I/O paths; it is not an internal-only clock-frequency result. Fmax values are the reciprocal of the corresponding reported minimum period.
 
-The clock-skew numbers above are the skew values emitted by OpenROAD's `report_clock_skew` for its reported paths. They should not be generalized as a worst-skew guarantee for every clock sink.
+The clock-skew numbers above are the values emitted by OpenROAD's `report_clock_skew` for its reported paths, rounded to 0.01 ns. The two designs display the same rounded values, but the archived reports identify different startpoint/endpoint pairs. The ORFS final-stage metrics retain more precision: setup skew is 0.155729 ns for combined and 0.157116 ns for split; the corresponding hold-skew magnitudes are 0.055729 ns and 0.056917 ns. The displayed equality is therefore a rounding coincidence, not evidence that the clock trees or selected paths are identical. These are path-specific reports, not a worst-skew guarantee for every clock sink.
 
 ## Pre-layout versus post-route
 
