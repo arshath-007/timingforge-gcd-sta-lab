@@ -3,13 +3,13 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Early research prototype · **Version:** 0.1.0 · **License:** MIT
+**Status:** Research prototype · **Version:** 0.2.0 · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
-TimingForge is an educational, reproducible benchmark for **constraint quality and timing-analysis trust**. It starts with a small binary-GCD accelerator so that RTL behaviour is easy to verify, then injects controlled SDC defects and compares what a lightweight checker and an STA engine report.
+TimingForge is an educational, reproducible benchmark for **constraint quality and timing-analysis trust**. It uses two 32-bit binary-GCD RTL architectures as a controlled test vehicle, injects named SDC defects, runs a conservative constraint-coverage checker, and analyses the golden/mutated constraints with a library-backed OpenROAD-integrated OpenSTA flow.
 
-This is not a replacement for signoff STA, an official EDA signoff qualification, or a claim that an unconstrained path is automatically a silicon failure. It is a research and learning framework that makes assumptions visible.
+This is not a replacement for signoff STA, an official EDA signoff qualification, or a claim that an unconstrained path is automatically a silicon failure. It is a research and learning framework that makes assumptions visible and experiments reproducible.
 
 ## Why this problem matters
 
@@ -18,35 +18,48 @@ Static timing analysis is only as meaningful as the design model and timing cons
 TimingForge makes this failure mode testable:
 
 1. Establish a known-good RTL and SDC baseline.
-2. Generate controlled, named SDC mutations.
-3. Run static constraint checks.
-4. Where a Liberty library and OpenSTA are available, run STA on each scenario.
-5. Compare detected defects, unconstrained paths, and timing results.
-6. Publish every assumption and result rather than inventing PPA numbers.
+2. Generate controlled, named SDC mutations from that baseline.
+3. Run static constraint-coverage checks.
+4. Synthesize both RTL architectures against the same standard-cell Liberty library.
+5. Run the golden and mutated SDC files through the same timing engine and netlist.
+6. Compare setup/hold results, unconstrained endpoints, critical paths, and register-to-register path coverage.
+7. Publish every assumption and result rather than inventing PPA numbers.
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    A[Reference GCD RTL] --> B[Golden SDC]
-    B --> C[Controlled SDC Mutations]
-    C --> D[Static Constraint Linter]
-    D --> E[JSON and Markdown Scorecard]
-    B --> F[OpenSTA]
+    A[Reference GCD RTL: combined and split] --> B[Yosys synthesis + Nangate45 Liberty]
+    B --> C[Mapped gate-level netlists]
+    D[Golden SDC] --> E[Controlled SDC mutations]
+    D --> F[OpenROAD-integrated OpenSTA]
+    E --> G[Static SDC coverage checker]
+    E --> F
     C --> F
-    F --> G[Timing Impact Analysis - next stage]
+    G --> H[Static JSON/Markdown scorecard]
+    F --> I[Setup, hold, critical-path and unconstrained reports]
+    I --> J[Parsed 16-scenario timing matrix]
 ```
 
-The static linter and scorecard are implemented. OpenSTA integration scripts are present, but actual library-backed timing runs and parsed timing-impact comparisons remain future work.
+The static checker is a conservative, interface-specific prototype—not a full SDC Tcl parser. The library-backed matrix uses Yosys, the OpenROAD-integrated OpenSTA engine, and the educational Nangate45 typical Liberty platform.
 
 ## First release
 
 - Two synthesizable iterative binary-GCD microarchitectures: combined compare/subtract and split compare/subtract.
 - A self-checking SystemVerilog testbench using a Euclidean-algorithm reference model.
-- A documented 10 ns block-level SDC example.
-- Four controlled SDC mutation cases: missing clock, missing input delay, missing output delay, and a broad false-path exception.
-- A small Python SDC-lint prototype and unit tests.
-- Yosys and OpenSTA run scripts. Tool runs require a user-supplied Liberty file and are not claimed as completed.
+- A documented 10 ns block-level SDC example with setup/hold uncertainty and min/max I/O delays.
+- Seven controlled SDC mutation cases:
+  - M01 missing primary clock.
+  - M02 missing input delay.
+  - M03 missing output delay.
+  - M04 broad register-to-register false-path exception.
+  - M05 near-match/incorrect port collection.
+  - M06 missing hold clock uncertainty.
+  - M07 non-positive clock period.
+- Static SDC coverage checker, fault generator, JSON/Markdown scorecard, and Python unit tests.
+- Yosys synthesis scripts and a library-backed OpenROAD-integrated STA matrix runner.
+- STA report parser that summarises area, minimum clock period, Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, and unconstrained endpoints.
+- GitHub Actions regression and library-backed STA jobs.
 
 ## Repository layout
 
@@ -54,12 +67,12 @@ The static linter and scorecard are implemented. OpenSTA integration scripts are
 rtl/             synthesizable GCD architectures
 tb/              self-checking SystemVerilog testbench
 constraints/     golden SDC
-tools/           fault injector and static SDC lint prototype
+tools/           fault injector, SDC linter, benchmark and STA parser
 tests/           Python unit tests
-scripts/         Yosys synthesis and OpenSTA entry points
-docs/            scope, methodology, learning notes
+scripts/         Yosys synthesis and OpenSTA/OpenROAD entry points
+docs/            scope, fault catalog, learning path and measured results
 reports/         generated reports (not committed by default)
-.github/         automated RTL/Python regression
+.github/         automated RTL/Python and library-backed STA workflows
 ```
 
 ## Quick start
@@ -72,7 +85,7 @@ Requirements: Icarus Verilog with SystemVerilog support.
 make rtl-test
 ```
 
-### 2. SDC mutation experiment
+### 2. Static SDC fault-injection benchmark
 
 Requirements: Python 3.10+.
 
@@ -83,22 +96,29 @@ make python-test
 make benchmark
 ```
 
-Generated SDC files are written under `build/mutants/`. The linter is intentionally conservative and specific to the GCD interface. The benchmark produces JSON and Markdown scorecards under `build/`; its score covers seven controlled pattern/coverage mutations only, not general SDC correctness or signoff.
+Generated SDC files are written under `build/mutants/`. The checker validates simple expected clock, setup/hold uncertainty, and min/max I/O-delay patterns for the GCD interface. The benchmark writes JSON and Markdown scorecards under `build/`; its score covers seven controlled pattern/coverage mutations only, not general SDC correctness or signoff.
+
 ### 3. Library-backed synthesis and timing matrix
 
-For a reproducible educational run using the Nangate45 typical Liberty library and an OpenROAD Flow Scripts environment with Yosys/OpenROAD available:
+Requirements: OpenROAD Flow Scripts environment with Yosys, OpenROAD-integrated OpenSTA, Python 3, and curl.
 
 ```bash
 source /OpenROAD-flow-scripts/env.sh
 make sta-matrix
 ```
 
-The script downloads the Nangate45 typical Liberty file from the OpenROAD Flow Scripts platform repository when it is not already present, synthesises both GCD architectures, and runs the golden SDC plus seven generated mutations through the OpenROAD-integrated STA engine. It then writes `build/reports/sta_matrix_summary.md` and `.json`, including setup/hold WNS/TNS, setup-WNS deltas against the golden case, and unconstrained paths reported. Set `STA=sta` to use a standalone OpenSTA executable instead of the default `openroad` command. Nangate45 is an educational platform; the run is pre-layout without SPEF and is not portable to a production process or signoff flow.
+The script downloads the Nangate45 typical Liberty and two LEF files from a pinned OpenROAD Flow Scripts source revision when they are not present. It synthesizes both GCD architectures and runs the golden SDC plus seven mutations through the timing engine (16 STA runs total). It then writes:
+
+- `build/reports/sta_matrix_summary.md`
+- `build/reports/sta_matrix_summary.json`
+- Raw STA logs in `build/reports/`
+- Yosys synthesis logs in `build/`
+
+The summary includes Yosys cell area, minimum period, corresponding Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, missing I/O-delay warnings, and unconstrained endpoints. Set `STA=sta` to use a standalone OpenSTA executable instead of the default `openroad` command where a compatible standalone binary and LEF-independent setup are available.
 
 ### 4. Manual synthesis and STA
 
-
-Requirements: Yosys, OpenSTA, and a compatible standard-cell Liberty file.
+For a locally configured standard-cell library:
 
 ```bash
 export LIBERTY=/absolute/path/to/your/stdcells.lib
@@ -108,33 +128,41 @@ export SDC=constraints/gcd_baseline.sdc
 make sta
 ```
 
-The synthesis script is a starting point, not a guarantee that every Liberty library will map without library-specific adjustments. Review the Yosys/OpenSTA logs and tool versions.
+Review the raw Yosys/OpenSTA logs and tool versions. A successful script exit alone is not a substitute for understanding the reported paths and constraints.
 
-## Verified CI evidence
+## Verified evidence
 
-The latest **static regression** has passed:
-- 258 directed/random test cases checked on both GCD architectures.
-- 10 Python unit tests passed.
-- Golden SDC clock, setup/hold uncertainty, and min/max I/O-delay pattern checks passed.
-- 7 of 7 controlled static mutation patterns were detected by the prototype.
+The repository has a successful GitHub Actions regression and a successful library-backed timing matrix:
 
-A separate library-backed Yosys/OpenROAD timing job is now configured to synthesise both architectures and analyse the golden SDC plus seven mutations with the educational Nangate45 typical library. Its results must be inspected in GitHub Actions before marking that milestone complete.
+- 258 directed/random GCD input pairs checked on **each** RTL architecture.
+- 13 Python unit tests passed in the latest static regression.
+- Seven controlled static SDC fault patterns detected by the prototype.
+- Both architectures synthesized against the pinned Nangate45 typical Liberty file.
+- Eight SDC scenarios analysed for each architecture (16 STA log files).
+- A parsed matrix and raw timing reports produced by the CI run.
+
+**Measured first baseline results:** the combined architecture reported 1657.180 Yosys Liberty area units, 2.94 ns minimum period, 340.67 MHz corresponding Fmax, +7.065 ns worst setup slack, and -0.002 ns worst hold slack. The split architecture reported 1681.918 area units, 2.35 ns minimum period, 425.57 MHz Fmax, +7.650 ns worst setup slack, and +0.005 ns worst hold slack. The split version is faster in this pre-layout measurement but uses more area and performs an extra subtract state in odd/odd iterations. These are not production or post-route PPA figures.
+
+See [Initial measured results](docs/INITIAL_RESULTS.md) and the [successful library-backed CI run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/41997662485).
 
 ## Research questions
 
 - Does the checker detect each mutation that it is designed to recognise?
-- Can a timing exception hide paths that are timed in the golden scenario?
+- Can a timing exception hide register-to-register paths that are present under the golden SDC?
+- Can missing I/O delays cause paths to become unconstrained or make the apparent minimum period look better?
 - How do critical path, setup slack, hold slack, and unconstrained endpoints change between scenarios?
 - How do the combined and split GCD architectures trade logic depth against cycle count and cell area?
 - Which checks can be automated safely, and which require design intent or engineer review?
 
 ## Current limitations
 
-- The Python linter is a first-pass ruleset, not a full SDC parser or proof of constraint correctness.
-- A false-path statement is flagged for review; the checker does not decide whether it is valid without design intent.
-- Real timing numbers depend on the Liberty library, synthesis settings, wire/parasitic model, and STA tool version.
+- The Python linter is a first-pass line/pattern-based checker, not a full SDC parser or proof of constraint correctness.
+- A false-path statement is flagged for review; a broad false-path test is only a controlled negative experiment. The tool does not decide whether a real exception is valid without design intent.
 - The first SDC is an illustrative block-level budget, not a product specification.
-- Multi-mode/multi-corner analysis, propagated clocks, extracted parasitics, OCV/AOCV/POCV, SI, and ECO flows are future extensions.
+- The current library-backed result uses one typical Nangate45 corner, ideal clocks, and no SPEF/extracted interconnect parasitics. It is pre-layout and not signoff.
+- No full physical implementation, CTS, route, MMMC/PVT, OCV/AOCV/POCV, crosstalk/SI, or timing ECO closure is claimed yet.
+- The educational Nangate45 platform is not a modern production process or signoff reference.
+- No power measurement is claimed.
 
 ## Prior art and positioning
 
@@ -144,26 +172,27 @@ TimingForge builds on existing open-source EDA infrastructure rather than compet
 - [OpenROAD](https://github.com/The-OpenROAD-Project/OpenROAD) provides physical-design implementation flows.
 - Existing SDC lint and constraint-analysis projects already address parts of constraint validation.
 
-The project's intended contribution is a **reproducible fault-injection benchmark that links named constraint defects to expected checker findings and, later, measured STA consequences**. This positioning is a research hypothesis, not a claim of global novelty. A prior-art review is required before making stronger novelty claims.
+The intended project contribution is a **reproducible fault-injection benchmark that links named SDC defects to both static checker findings and library-backed STA observations**. This is a differentiated project direction, not a claim of global novelty. The prior-art review should be expanded as the project matures.
 
 ## Roadmap
 
-- [x] Initial RTL benchmark and two architectures
-- [x] Self-checking functional testbench
-- [x] Golden SDC example
-- [x] Four controlled SDC mutation scenarios
-- [x] Static SDC lint prototype and unit tests
-- [ ] Execute RTL and Python regressions locally and attach logs
-- [ ] Run Yosys/OpenSTA with a documented Liberty platform
-- [ ] Parse STA reports into machine-readable measurements
-- [ ] Add FIFO and MAC benchmark blocks
-- [ ] Add multiple clock scenarios and justified exception tests
-- [ ] Add OpenROAD physical implementation and parasitic-aware experiments
-- [ ] Publish a technical case study with reproducible results
+- [x] Two synthesizable GCD architectures.
+- [x] Self-checking functional regression.
+- [x] Golden SDC with explicit setup/hold and min/max I/O assumptions.
+- [x] Seven controlled SDC mutation scenarios and unit tests.
+- [x] Static SDC checker and machine-readable scorecard.
+- [x] Yosys synthesis against a documented/pinned Liberty platform.
+- [x] OpenROAD-integrated STA matrix for both architectures and all eight SDC scenarios.
+- [x] Parsed STA matrix report and initial measured results.
+- [ ] Add FIFO and MAC benchmark blocks.
+- [ ] Add generated-clock, multicycle, clock-group, and justified false-path scenarios.
+- [ ] Add additional corners and variation-aware experiments.
+- [ ] Add OpenROAD floorplanning, placement, CTS, routing, and parasitic-aware reports.
+- [ ] Validate findings with external contributors and maintainers.
 
-## Contributing
+## Contributing and citation
 
-See [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md) before proposing new checks. Contributions should include a defect definition, expected finding, negative/control case, test, and limitations.
+See [CONTRIBUTING.md](CONTRIBUTING.md), [CITATION.cff](CITATION.cff), [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), and [docs/FAULT_CATALOG.md](docs/FAULT_CATALOG.md).
 
 ## Author
 
