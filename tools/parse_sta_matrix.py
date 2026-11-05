@@ -82,11 +82,6 @@ def parse_log(path):
     clock_section = section(text, "=== CLOCK PROPERTIES ===", "=== HOLD / MIN PATH DETAILS ===")
     clock_period_match = re.search(r"^\s*core_clk\s+([-+]?(?:\d+\.?\d*|\.\d+))\s+", clock_section, re.MULTILINE)
     clock_period = float(clock_period_match.group(1)) if clock_period_match else None
-    derived_reg_period = (
-        round(clock_period - min(rising_slacks), 6)
-        if clock_period is not None and clock_period > 0 and rising_slacks and len(rising_slacks) < 1000 else None
-    )
-    derived_reg_fmax = round(1000.0 / derived_reg_period, 3) if derived_reg_period and derived_reg_period > 0 else None
     unconstrained = section(text, "=== UNCONSTRAINED PATH DETAILS ===")
     start = re.search(r"^Startpoint:\s*(.+)$", setup, re.MULTILINE)
     end = re.search(r"^Endpoint:\s*(.+)$", setup, re.MULTILINE)
@@ -120,9 +115,8 @@ def parse_log(path):
         "register_to_register_rising_paths_reported": len(rising_slacks),
         "register_to_register_rising_path_inventory_complete": len(rising_slacks) < 1000,
         "register_to_register_rising_worst_slack_ns": min(rising_slacks) if rising_slacks else None,
+        "register_to_register_rising_best_slack_ns": max(rising_slacks) if rising_slacks else None,
         "clock_period_ns": clock_period,
-        "register_to_register_derived_min_period_ns": derived_reg_period,
-        "register_to_register_derived_fmax_mhz": derived_reg_fmax,
         "register_to_register_startpoint": rr_start.group(1).strip() if rr_start else None,
         "register_to_register_endpoint": rr_end.group(1).strip() if rr_end else None,
         "unconstrained_endpoints_reported": int(warning.group(1)) if warning else (0 if "=== TIMINGFORGE SETUP CHECK ===" in text else None),
@@ -160,7 +154,7 @@ def summarise(report_dir=REPORT_DIR):
         "- Library: " + output["platform"],
         "- Parasitics: " + output["parasitics"],
         "- Logs parsed: " + str(len(records)), "",
-        "| Architecture | SDC scenario | Cell area | Native reg-to-reg period (ns) | Native reg-to-reg Fmax (MHz) | Derived period from complete reg-to-reg path set (ns) | Derived Fmax (MHz) | All-path min period (ns) | All-path Fmax (MHz) | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
+        "| Architecture | SDC scenario | Cell area | Native reg-to-reg period (ns) | Native reg-to-reg Fmax (MHz) | Rising-edge reg-to-reg paths reported | Worst slack in explicit reg-to-reg report (ns) | All-path min period (ns) | All-path Fmax (MHz) | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
     fmt = lambda value: "n/a" if value is None else f"{value:.3f}"
@@ -168,7 +162,7 @@ def summarise(report_dir=REPORT_DIR):
         rows.append(
             f"| {row['top']} | {row['scenario']} | {fmt(row['yosys_cell_area'])} | "
             f"{fmt(row['register_to_register_min_period_ns'])} | {fmt(row['register_to_register_fmax_mhz'])} | "
-            f"{fmt(row['register_to_register_derived_min_period_ns'])} | {fmt(row['register_to_register_derived_fmax_mhz'])} | "
+            f"{row['register_to_register_rising_paths_reported']} | {fmt(row['register_to_register_rising_worst_slack_ns'])} | "
             f"{fmt(row['all_path_min_period_ns'])} | {fmt(row['all_path_fmax_mhz'])} | "
             f"{fmt(row['worst_setup_slack_ns'])} | {fmt(row['worst_hold_slack_ns'])} | "
             f"{'found' if row['register_to_register_path_found'] else 'none reported'} | "
@@ -176,7 +170,7 @@ def summarise(report_dir=REPORT_DIR):
         )
     rows.extend([
         "",
-        "The native register-to-register clock-period command is reported separately. When it returns 0.00 / inf despite detailed same-clock rising-edge paths, the parser reports a derived single-cycle period only when the explicit rising-edge path report is below its 1000-path cap. The estimate is clock period minus the worst slack in that complete reported path set and remains separate from the native command. All-path period includes port paths. Neither metric is post-route or signoff timing.",
+        "The native register-to-register clock-period command is reported separately from the explicit same-clock rising-edge path inventory. Do not derive an internal Fmax from the path-report slack unless its relationship to the native command has been validated for the tool and design. The explicit inventory is capped at 1000 paths per group; a count below the cap indicates the report did not hit that limit. All-path period includes port paths. Neither metric is post-route or signoff timing.",
         "WNS may be zero when slack is positive; worst slack retains the margin. Missing metrics require raw-log investigation.",
         "",
     ])
