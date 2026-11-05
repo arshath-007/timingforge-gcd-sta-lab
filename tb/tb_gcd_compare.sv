@@ -127,7 +127,7 @@ module tb_gcd_compare;
         repeat (3) @(negedge clk);
         rst = 1'b0;
         // Keep the random corpus reproducible across repeated runs with the same simulator.
-        seed = $random(seed);
+        seed = 32'h5446_2026;
 
         check_case(0, 0);
         check_case(0, 99);
