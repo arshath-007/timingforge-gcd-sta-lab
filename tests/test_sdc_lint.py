@@ -63,5 +63,25 @@ class SdcLintTests(unittest.TestCase):
         self.assertTrue(any("TF101 ERROR: missing min input delay for port 'a_in'" == x for x in lint_sdc(text)))
 
 
+    def test_comment_does_not_satisfy_missing_input_delay(self):
+        text = GOLDEN.replace(
+            "set_input_delay -clock core_clk -min 0.100 [get_ports a_in*]",
+            "# set_input_delay -clock core_clk -min 0.100 [get_ports a_in*]",
+        )
+        self.assertTrue(any("TF101 ERROR: missing min input delay for port 'a_in'" == x for x in lint_sdc(text)))
+
+    def test_partial_bus_pattern_does_not_cover_whole_bus(self):
+        text = GOLDEN.replace("[get_ports a_in*]", "[get_ports a_in[0]]")
+        self.assertTrue(any("TF101 ERROR" in x and "a_in" in x for x in lint_sdc(text)))
+
+    def test_wrong_clock_reference_does_not_count_as_valid_delay(self):
+        text = GOLDEN.replace("-clock core_clk -max 1.200", "-clock typo_clk -max 1.200")
+        self.assertTrue(any("TF101 ERROR: missing max input delay for port 'start'" == x for x in lint_sdc(text)))
+
+    def test_grouped_port_patterns_are_supported(self):
+        text = GOLDEN.replace("[get_ports a_in*]", "[get_ports {a_in* b_in*}]")
+        self.assertFalse(any("TF101 ERROR" in x for x in lint_sdc(text)))
+
+
 if __name__ == "__main__":
     unittest.main()
