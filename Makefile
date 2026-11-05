@@ -5,7 +5,7 @@ VVP ?= vvp
 .PHONY: help rtl-test mutants lint-sdc python-test benchmark synth sta clean
 
 help:
-	@echo "Targets: rtl-test mutants lint-sdc python-test synth sta clean"
+	@echo "Targets: rtl-test mutants lint-sdc python-test benchmark synth sta clean"
 
 rtl-test:
 	mkdir -p build
@@ -20,6 +20,9 @@ lint-sdc:
 
 python-test:
 	$(PYTHON) -m unittest discover -s tests -v
+
+benchmark: mutants
+	$(PYTHON) tools/run_benchmark.py
 
 synth:
 	bash scripts/synth.sh
