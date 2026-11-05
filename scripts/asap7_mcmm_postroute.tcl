@@ -59,10 +59,10 @@ check_setup -verbose
 foreach scene {ASAP7_BC ASAP7_TC ASAP7_WC} {
     puts "TIMINGFORGE_SCENE_BEGIN $scene"
     puts "TIMINGFORGE_SETUP_BEGIN $scene"
-    report_checks -path_delay max -scenes $scene -group_path_count 1000 -format full_clock_expanded -digits 3
+    report_checks -path_delay max -scenes $scene -group_path_count 100 -format full_clock_expanded -digits 3
     puts "TIMINGFORGE_SETUP_END $scene"
     puts "TIMINGFORGE_HOLD_BEGIN $scene"
-    report_checks -path_delay min -scenes $scene -group_path_count 1000 -format full_clock_expanded -digits 3
+    report_checks -path_delay min -scenes $scene -group_path_count 100 -format full_clock_expanded -digits 3
     puts "TIMINGFORGE_HOLD_END $scene"
     puts "TIMINGFORGE_DRV_BEGIN $scene"
     report_check_types -scenes $scene -max_slew -max_capacitance -max_fanout -violators -verbose -digits 3

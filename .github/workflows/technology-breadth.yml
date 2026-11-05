@@ -32,7 +32,7 @@ permissions:
 
 concurrency:
   group: technology-breadth-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   physical-mcmm-and-second-library:

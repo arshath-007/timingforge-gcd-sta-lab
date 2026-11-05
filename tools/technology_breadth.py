@@ -249,6 +249,7 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
             "FF/TT/SS models do not provide consistent timing groups for those cells."
         ),
         "asap7_pvt": ASAP7_SCENES,
+        "asap7_path_report_limit_per_group": 100,
         "asap7_liberty_pvt_validation": (
             "Every Liberty read by each MCMM scene (AO, INVBUF, OA, filtered SIMPLE, SEQ) "
             "is parsed and checked against nom_temperature and nom_voltage in its own file."

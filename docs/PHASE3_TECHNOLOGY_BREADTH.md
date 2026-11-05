@@ -57,7 +57,7 @@ The CI workflow runs the same script and uploads a 90-day artifact named `timing
 - Per-scene setup/hold path inventories and worst slack among the reported paths.
 - Explicit RC-reuse, cross-library-comparison and signoff limitations.
 
-A reported path-inventory minimum is the minimum among paths emitted by the configured OpenSTA report, not a substitute for a separate exhaustive signoff report database.
+OpenSTA reports up to 100 setup and 100 hold paths per scene and architecture. A reported path-inventory minimum is the minimum among those emitted paths, not a substitute for a separate exhaustive signoff report database. The cap is recorded in the manifest.
 
 ## Signoff boundary
 
