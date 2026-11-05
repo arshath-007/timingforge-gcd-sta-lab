@@ -161,7 +161,7 @@ def summarise(report_dir=REPORT_DIR):
         "- Parasitics: " + output["parasitics"],
         "- Logs parsed: " + str(len(records)), "",
         "| Architecture | SDC scenario | Cell area | Native reg-to-reg period (ns) | Native reg-to-reg Fmax (MHz) | Derived period from complete reg-to-reg path set (ns) | Derived Fmax (MHz) | All-path min period (ns) | All-path Fmax (MHz) | Worst setup slack (ns) | Worst hold slack (ns) | Reg-to-reg path | Unconstrained endpoints |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|---|---:|",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|",
     ]
     fmt = lambda value: "n/a" if value is None else f"{value:.3f}"
     for row in records:
@@ -176,7 +176,7 @@ def summarise(report_dir=REPORT_DIR):
         )
     rows.extend([
         "",
-        "The native register-to-register clock-period command is reported separately. When it returns 0.00 / inf despite detailed same-clock rising-edge paths, the parser also reports a derived single-cycle period: clock period minus the worst slack in the explicit rising-edge path report. This derived estimate is separate from the native command and depends on the reported path inventory. All-path period includes port paths. Neither metric is post-route or signoff timing.",
+        "The native register-to-register clock-period command is reported separately. When it returns 0.00 / inf despite detailed same-clock rising-edge paths, the parser reports a derived single-cycle period only when the explicit rising-edge path report is below its 1000-path cap. The estimate is clock period minus the worst slack in that complete reported path set and remains separate from the native command. All-path period includes port paths. Neither metric is post-route or signoff timing.",
         "WNS may be zero when slack is positive; worst slack retains the margin. Missing metrics require raw-log investigation.",
         "",
     ])
