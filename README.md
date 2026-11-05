@@ -60,6 +60,7 @@ The static checker is a conservative, interface-specific prototype—not a full 
 - Static SDC coverage checker, fault generator, JSON/Markdown scorecard, and Python unit tests.
 - Yosys synthesis scripts and a library-backed OpenROAD-integrated STA matrix runner.
 - STA report parser that summarises area, minimum clock period, Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, and unconstrained endpoints.
+- Conservative golden-result quality checks that flag missing metrics, unconstrained endpoints, missing I/O delays, negative hold slack, and unavailable native register-only period without inventing a derived Fmax.
 - GitHub Actions regression and library-backed STA jobs.
 
 ## Repository layout
@@ -96,6 +97,7 @@ make mutants
 make lint-sdc
 make python-test
 make benchmark
+python3 -m unittest tests.test_quality_checks -v
 ```
 
 Generated SDC files are written under `build/mutants/`. The checker validates simple expected clock, setup/hold uncertainty, and min/max I/O-delay patterns for the GCD interface. The benchmark writes JSON and Markdown scorecards under `build/`; its score covers seven controlled pattern/coverage mutations only, not general SDC correctness or signoff.
@@ -107,6 +109,7 @@ Requirements: OpenROAD Flow Scripts environment with Yosys, OpenROAD-integrated 
 ```bash
 source /OpenROAD-flow-scripts/env.sh
 make sta-matrix
+python3 -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
 ```
 
 The script downloads the Nangate45 typical Liberty and two LEF files from a pinned OpenROAD Flow Scripts source revision when they are not present. It synthesizes both GCD architectures and runs the golden SDC plus seven mutations through the timing engine (16 STA runs total). It then writes:
