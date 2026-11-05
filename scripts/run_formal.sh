@@ -15,7 +15,7 @@ command -v z3 >/dev/null
 yosys -p "read_verilog -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; write_smt2 -wires build/formal/gcd_equiv.smt2" \
   | tee build/formal/yosys.log
 
-yosys-smtbmc -s z3 -t 26 --noprogress --dump-vcd build/formal/gcd_equiv.vcd build/formal/gcd_equiv.smt2 \
+yosys-smtbmc -s z3 -t 26 -c build/formal/gcd_equiv.vcd build/formal/gcd_equiv.smt2 \
   | tee build/formal/smtbmc.log
 
 grep -q "Status: PASSED" build/formal/smtbmc.log
@@ -31,7 +31,7 @@ yosys -p "read_verilog -formal -sv build/formal/gcd_binary_combined_broken.sv rt
   | tee build/formal/yosys_negative.log
 
 set +e
-yosys-smtbmc -s z3 -t 26 --noprogress --dump-vcd build/formal/gcd_equiv_negative.vcd build/formal/gcd_equiv_broken.smt2 \
+yosys-smtbmc -s z3 -t 26 -c build/formal/gcd_equiv_negative.vcd build/formal/gcd_equiv_broken.smt2 \
   > build/formal/smtbmc_negative.log 2>&1
 negative_status=$?
 set -e
