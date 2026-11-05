@@ -36,7 +36,7 @@ def parse_postroute_log(path: Path) -> dict:
     skew_setup = text.split("=== POST-ROUTE SETUP CLOCK SKEW ===", 1)
     skew_hold = text.split("=== POST-ROUTE HOLD CLOCK SKEW ===", 1)
     setup_skew_text = skew_setup[1].split("=== POST-ROUTE HOLD CLOCK SKEW ===", 1)[0] if len(skew_setup) > 1 else ""
-    hold_skew_text = skew_hold[1].split("=== POST-ROUTE SETUP SUMMARY ===", 1)[0] if len(skew_hold) > 1 else ""
+    hold_skew_text = skew_hold[1].split("=== POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ===", 1)[0] if len(skew_hold) > 1 else ""
     if period is None or period <= 0 or setup is None or hold is None:
         raise ValueError(f"{path}: required post-route period/setup/hold metric missing")
     return {
