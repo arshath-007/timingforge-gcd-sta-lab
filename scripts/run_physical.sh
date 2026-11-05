@@ -4,7 +4,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 ORFS_ROOT="${ORFS_ROOT:-/OpenROAD-flow-scripts}"
-FLOW_ROOT="${ORFS_FLOW_ROOT:-$ORFS_ROOT/flow}"
+FLOW_ROOT="${ORFS_FLOW_ROOT:-$ORFS_ROOT/flow}"\nORFS_REV="11aa833a11488c3a540a1d8eb4caa23fd22df703"
 if [[ ! -f "$ORFS_ROOT/env.sh" || ! -f "$FLOW_ROOT/Makefile" ]]; then
   echo "OpenROAD Flow Scripts not found under $ORFS_ROOT" >&2
   exit 2
@@ -25,7 +25,7 @@ mkdir -p build/physical
 {
   echo "OpenROAD: $(openroad -version)"
   echo "Yosys: $(yosys -V)"
-  echo "ORFS revision: 11aa833a11488c3a540a1d8eb4caa23fd22df703"
+  echo "ORFS revision: $ACTUAL_REV"
   echo "Platform: Nangate45"
   echo "Corner: typical"
   echo "Liberty SHA256: $(sha256sum "$LIBERTY" | awk '{print $1}')"
