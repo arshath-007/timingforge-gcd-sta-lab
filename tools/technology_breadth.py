@@ -59,8 +59,8 @@ def parse_scene_report(text: str, scene: str) -> dict:
 
 
 def parse_units(text: str, expected_time: str, expected_capacitance: str) -> dict:
-    time_match = re.search(r"^\\s*time\\s+1(\\w+)\\s*$", text, re.IGNORECASE | re.MULTILINE)
-    cap_match = re.search(r"^\\s*capacitance\\s+1(\\w+)\\s*$", text, re.IGNORECASE | re.MULTILINE)
+    time_match = re.search(r"^\s*time\s+1(\w+)\s*$", text, re.IGNORECASE | re.MULTILINE)
+    cap_match = re.search(r"^\s*capacitance\s+1(\w+)\s*$", text, re.IGNORECASE | re.MULTILINE)
     if not time_match or not cap_match:
         raise ValueError("OpenSTA report_units output is missing time/capacitance units")
     actual = {"time": time_match.group(1).lower(), "capacitance": cap_match.group(1).lower()}
@@ -80,7 +80,7 @@ def parse_sky130_postroute_metrics(text: str) -> dict:
     def summary(marker: str, kind: str) -> dict:
         section = text.split(marker, 1)[1]
         match = re.search(
-            rf"worst slack {kind} ([-+]?[0-9.]+)\\s+wns {kind} ([-+]?[0-9.]+)\\s+tns {kind} ([-+]?[0-9.]+)",
+            rf"worst slack {kind} ([-+]?[0-9.]+)\s+wns {kind} ([-+]?[0-9.]+)\s+tns {kind} ([-+]?[0-9.]+)",
             section,
         )
         if not match:
