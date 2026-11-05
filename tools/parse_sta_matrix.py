@@ -31,7 +31,14 @@ def worst_slack(text, mode):
 
 def clock_metrics(text):
     match = re.search(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", text, re.MULTILINE | re.IGNORECASE)
-    return (float(match.group(1)), float(match.group(2))) if match else (None, None)
+    if not match:
+        return (None, None)
+    period = float(match.group(1))
+    fmax_text = match.group(2).lower()
+    # OpenSTA can return 0.00 / inf when no eligible path exists.
+    if period <= 0 or fmax_text in {"inf", "+inf", "infinity", "+infinity"}:
+        return (None, None)
+    return (period, float(fmax_text))
 
 
 def section(text, heading, next_heading=None):
@@ -97,7 +104,7 @@ def parse_log(path):
         "register_to_register_path_found": bool(rr_start and rr_end),
         "register_to_register_startpoint": rr_start.group(1).strip() if rr_start else None,
         "register_to_register_endpoint": rr_end.group(1).strip() if rr_end else None,
-        "unconstrained_endpoints_reported": int(warning.group(1)) if warning else None,
+        "unconstrained_endpoints_reported": int(warning.group(1)) if warning else (0 if "=== TIMINGFORGE SETUP CHECK ===" in text else None),
         "missing_input_delay_ports": int(input_missing.group(1)) if input_missing else 0,
         "missing_output_delay_ports": int(output_missing.group(1)) if output_missing else 0,
         "unconstrained_paths_listed": len(re.findall(r"^Startpoint:", unconstrained, re.MULTILINE)),
@@ -147,7 +154,7 @@ def summarise(report_dir=REPORT_DIR):
         )
     rows.extend([
         "",
-        "Register-to-register minimum period uses report_clock_min_period without -include_port_paths. All-path period includes port paths. Treat the two metrics separately; neither is post-route or signoff timing.",
+        "The register-to-register clock-period command is reported separately. OpenSTA may return 0.00 / inf when no eligible path exists; this is recorded as n/a, not as infinite-frequency performance. All-path period includes port paths. Neither metric is post-route or signoff timing.",
         "WNS may be zero when slack is positive; worst slack retains the margin. Missing metrics require raw-log investigation.",
         "",
     ])
@@ -178,8 +185,6 @@ def main():
     # not silently become "n/a" in a supposedly complete benchmark.
     required_golden = (
         "yosys_cell_area",
-        "register_to_register_min_period_ns",
-        "register_to_register_fmax_mhz",
         "all_path_min_period_ns",
         "all_path_fmax_mhz",
         "worst_setup_slack_ns",
