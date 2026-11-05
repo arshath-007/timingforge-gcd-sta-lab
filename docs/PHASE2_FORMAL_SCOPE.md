@@ -1,6 +1,6 @@
 # Phase 2 formal and assertion evidence — scope and interpretation
 
-The formal property set checks both architecture equivalence and each implementation against an independent exhaustive 64-entry Euclidean GCD truth table at the transaction boundary. It does not require the two `done` pulses to occur on the same cycle because the split architecture intentionally has additional processing latency.
+The bounded formal miter checks mutual architecture equivalence, one completion per implementation, `done` with `busy` low, and completion within 12 positive clock edges. It does not prove either implementation against a mathematical GCD specification. A separate exhaustive 64-entry WIDTH=3 truth-table oracle is checked against an independent Euclidean reference in Icarus simulation. The two `done` pulses are not required to occur on the same cycle because the split architecture intentionally has additional processing latency.
 
 - Formal width: 3 bits; all 64 symbolic operand pairs are considered.
 - Stimulus: one reset followed by one accepted start request.
