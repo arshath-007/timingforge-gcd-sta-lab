@@ -5,7 +5,6 @@ This is NOT a full SDC parser and does not prove constraint correctness.
 """
 import argparse
 from pathlib import Path
-import re
 
 INPUTS = ("start", "rst", "a_in", "b_in")
 OUTPUTS = ("gcd_out", "busy", "done")
@@ -14,23 +13,22 @@ OUTPUTS = ("gcd_out", "busy", "done")
 def lint_sdc(text):
     lines = [line.strip() for line in text.splitlines()
              if line.strip() and not line.lstrip().startswith("#")]
-    joined = "\\n".join(lines)
     findings = []
 
-    if not re.search(r"^create_clock\\b", joined, re.MULTILINE):
+    if not any(line.startswith("create_clock ") for line in lines):
         findings.append("TF001 ERROR: no create_clock command found")
 
     for port in INPUTS:
-        pattern = rf"^set_input_delay\\b.*\\[get_ports\\s+\\{{?{re.escape(port)}(?:\\*|\\}})?"
-        if not re.search(pattern, joined, re.MULTILINE):
+        covered = any(line.startswith("set_input_delay ") and port in line for line in lines)
+        if not covered:
             findings.append("TF101 ERROR: no input delay pattern for " + port)
 
     for port in OUTPUTS:
-        pattern = rf"^set_output_delay\\b.*\\[get_ports\\s+\\{{?{re.escape(port)}(?:\\*|\\}})?"
-        if not re.search(pattern, joined, re.MULTILINE):
+        covered = any(line.startswith("set_output_delay ") and port in line for line in lines)
+        if not covered:
             findings.append("TF201 ERROR: no output delay pattern for " + port)
 
-    if re.search(r"^set_false_path\\b", joined, re.MULTILINE):
+    if any(line.startswith("set_false_path ") for line in lines):
         findings.append("TF301 REVIEW: set_false_path requires design-intent review")
 
     if not findings:
