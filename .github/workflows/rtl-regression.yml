@@ -61,6 +61,26 @@ jobs:
           git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
           git fetch --depth=1 origin "$GITHUB_SHA"
           git checkout --detach FETCH_HEAD
+      - name: Install Boolector formal solver
+        shell: bash
+        run: |
+          apt-get update
+          apt-get install -y boolector
+          command -v yosys-smtbmc
+          command -v boolector
+      - name: Run bounded GCD transaction-equivalence proof
+        shell: bash
+        run: |
+          source /OpenROAD-flow-scripts/env.sh
+          bash scripts/run_formal.sh
+      - name: Upload formal proof evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timingforge-formal-proof
+          path: |
+            build/formal/**
+          retention-days: 90
       - name: Load OpenROAD Flow Scripts environment and run Nangate45 matrix
         shell: bash
         run: |
