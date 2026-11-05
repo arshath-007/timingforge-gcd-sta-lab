@@ -29,7 +29,7 @@ if cmp -s rtl/gcd_binary_combined.sv build/formal/gcd_binary_combined_broken.sv;
   exit 1
 fi
 
-yosys -p "read_verilog -formal -sv build/formal/gcd_binary_combined_broken.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; write_smt2 -wires build/formal/gcd_equiv_broken.smt2" \
+yosys -p "read_verilog -formal -sv build/formal/gcd_binary_combined_broken.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; clk2fflogic; write_smt2 -wires build/formal/gcd_equiv_broken.smt2" \
   | tee build/formal/yosys_negative.log
 
 set +e
