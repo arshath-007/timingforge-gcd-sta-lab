@@ -3,7 +3,7 @@ mode bmc
 depth 26
 
 [engines]
-smtbmc z3
+smtbmc boolector
 
 [script]
 read -formal -sv rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv formal/gcd_equiv.sv
