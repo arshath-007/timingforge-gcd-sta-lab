@@ -12,6 +12,8 @@ fi
 # shellcheck disable=SC1090
 source "$ORFS_ROOT/env.sh"
 FLOW_ROOT="$ORFS_ROOT/flow"
+export FLOW_HOME="$FLOW_ROOT"
+ORFS_SOURCE_REVISION="11aa833a11488c3a540a1d8eb4caa23fd22df703"
 export TIMINGFORGE_ROOT="$ROOT"
 export NUM_CORES=1
 export OMP_NUM_THREADS=1
@@ -36,7 +38,7 @@ mkdir -p "$OUT"
   echo "OpenROAD: $(openroad -version)"
   echo "Yosys: $(yosys -V)"
   echo "ORFS container image digest: $ORFS_IMAGE_DIGEST"
-  echo "ORFS source revision: $(git -C "$ORFS_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
+  echo "ORFS source revision: $ORFS_SOURCE_REVISION"
 } | tee "$OUT/tool_versions.txt"
 
 for PLATFORM in asap7 sky130hd; do
