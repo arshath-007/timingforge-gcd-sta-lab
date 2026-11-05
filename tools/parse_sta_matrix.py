@@ -73,7 +73,7 @@ def classify_critical_path(startpoint, endpoint):
         return "unknown"
 
     def is_port(name, port):
-        return bool(re.fullmatch(rf"{re.escape(port)}(?:\\[[^\\]]+\\])?", name.strip()))
+        return bool(re.fullmatch(rf"{re.escape(port)}(?:\[[^\]]+\])?", name.strip()))
 
     start = startpoint.strip()
     end = endpoint.strip()
