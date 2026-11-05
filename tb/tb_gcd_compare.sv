@@ -9,6 +9,10 @@ module tb_gcd_compare;
     logic [WIDTH-1:0] gcd_combined, gcd_split;
     logic busy_combined, done_combined, busy_split, done_split;
     integer cases = 0;
+    integer total_combined_cycles = 0;
+    integer total_split_cycles = 0;
+    integer max_combined_cycles = 0;
+    integer max_split_cycles = 0;
 
     always #5 clk = ~clk;
 
@@ -38,40 +42,58 @@ module tb_gcd_compare;
         reg [WIDTH-1:0] expected;
         reg combined_seen;
         reg split_seen;
-        integer cycles;
+        integer elapsed_cycles;
+        integer combined_latency;
+        integer split_latency;
         begin
             expected = gcd_ref(a, b);
             combined_seen = 1'b0;
             split_seen = 1'b0;
+            elapsed_cycles = 0;
+            combined_latency = 0;
+            split_latency = 0;
+
             @(negedge clk);
             a_in = a;
             b_in = b;
             start = 1'b1;
             @(negedge clk);
             start = 1'b0;
-            cycles = 0;
-            while ((!combined_seen || !split_seen) && cycles < 2000) begin
-                if (done_combined) begin
+
+            // Count clock edges from accepted start until each done pulse.
+            // An input containing zero can complete on the acceptance edge (0 cycles).
+            while ((!combined_seen || !split_seen) && elapsed_cycles < 2000) begin
+                if (!combined_seen && done_combined) begin
                     combined_seen = 1'b1;
+                    combined_latency = elapsed_cycles;
                     if (gcd_combined !== expected) begin
                         $display("COMBINED mismatch a=%0d b=%0d expected=%0d actual=%0d", a, b, expected, gcd_combined);
                         $fatal(1);
                     end
                 end
-                if (done_split) begin
+                if (!split_seen && done_split) begin
                     split_seen = 1'b1;
+                    split_latency = elapsed_cycles;
                     if (gcd_split !== expected) begin
                         $display("SPLIT mismatch a=%0d b=%0d expected=%0d actual=%0d", a, b, expected, gcd_split);
                         $fatal(1);
                     end
                 end
-                @(negedge clk);
-                cycles = cycles + 1;
+                if (!combined_seen || !split_seen) begin
+                    @(negedge clk);
+                    elapsed_cycles = elapsed_cycles + 1;
+                end
             end
+
             if (!combined_seen || !split_seen) begin
                 $display("TIMEOUT a=%0d b=%0d combined_done=%b split_done=%b", a, b, combined_seen, split_seen);
                 $fatal(1);
             end
+
+            total_combined_cycles = total_combined_cycles + combined_latency;
+            total_split_cycles = total_split_cycles + split_latency;
+            if (combined_latency > max_combined_cycles) max_combined_cycles = combined_latency;
+            if (split_latency > max_split_cycles) max_split_cycles = split_latency;
             cases = cases + 1;
         end
     endtask
@@ -98,6 +120,7 @@ module tb_gcd_compare;
         end
 
         $display("PASS: %0d cases checked on both architectures", cases);
+        $display("LATENCY: combined_avg=%.2f cycles combined_max=%0d cycles split_avg=%.2f cycles split_max=%0d cycles", 1.0*total_combined_cycles/cases, max_combined_cycles, 1.0*total_split_cycles/cases, max_split_cycles);
         $finish;
     end
 endmodule
