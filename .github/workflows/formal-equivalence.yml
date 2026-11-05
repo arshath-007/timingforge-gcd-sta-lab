@@ -19,12 +19,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Install Yosys and Z3
+      - name: Install Yosys and CVC5
         run: |
           sudo apt-get update
-          sudo apt-get install -y yosys z3
+          sudo apt-get install -y yosys cvc5
           command -v yosys-smtbmc
-          command -v z3
+          command -v cvc5
       - name: Run bounded GCD transaction-equivalence proof
         shell: bash
         run: bash scripts/run_formal.sh
