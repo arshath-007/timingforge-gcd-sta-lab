@@ -4,7 +4,8 @@ set -euo pipefail
 mkdir -p build/formal
 command -v yosys >/dev/null
 command -v yosys-smtbmc >/dev/null
-FORMAL_SOLVER="${FORMAL_SOLVER:-boolector}"\ncommand -v "$FORMAL_SOLVER" >/dev/null
+FORMAL_SOLVER="${FORMAL_SOLVER:-boolector}"
+command -v "$FORMAL_SOLVER" >/dev/null
 
 {
   echo "Yosys: $(yosys -V)"
