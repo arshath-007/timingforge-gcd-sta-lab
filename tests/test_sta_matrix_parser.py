@@ -44,9 +44,11 @@ pin_b slack 0.010 (MET)
 """
         slew = parse_drv_check(report, "=== DRV MAX SLEW ===", "=== DRV MAX CAPACITANCE ===")
         self.assertTrue(slew["supported"])
+        self.assertEqual(slew["check_count"], 2)
         self.assertEqual(slew["violation_count"], 1)
         cap = parse_drv_check(report, "=== DRV MAX CAPACITANCE ===", "=== DRV MAX FANOUT ===")
         self.assertTrue(cap["supported"])
+        self.assertEqual(cap["check_count"], 0)
         self.assertEqual(cap["violation_count"], 0)
 
     def test_keeps_unsupported_drv_report_as_null(self):
@@ -57,6 +59,7 @@ TIMINGFORGE_DRV_UNSUPPORTED: max_fanout: command unavailable
 """
         result = parse_drv_check(report, "=== DRV MAX FANOUT ===", "=== UNCONSTRAINED PATH DETAILS ===")
         self.assertFalse(result["supported"])
+        self.assertIsNone(result["check_count"])
         self.assertIsNone(result["violation_count"])
 
     def test_parses_architecture_metrics_and_path_types(self):
