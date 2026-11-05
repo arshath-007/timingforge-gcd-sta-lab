@@ -47,6 +47,17 @@ class StaMatrixParserTests(unittest.TestCase):
             self.assertTrue(row["register_to_register_path_found"])
             self.assertEqual(row["register_to_register_startpoint"], "input_reg/Q")
 
+    def test_false_path_scenario_can_report_no_register_paths(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "sta_gcd_binary_combined_M04_unjustified_false_path.log"
+            no_reg_paths = SAMPLE.replace(
+                "Startpoint: input_reg/Q\nEndpoint: data_reg/D\n=== HOLD / MIN PATH DETAILS ===",
+                "No paths found.\n=== HOLD / MIN PATH DETAILS ===",
+            )
+            path.write_text(no_reg_paths, encoding="utf-8")
+            row = parse_log(path)
+            self.assertFalse(row["register_to_register_path_found"])
+
     def test_writes_delta_against_golden_for_same_architecture(self):
         with tempfile.TemporaryDirectory() as temp:
             directory = Path(temp)
