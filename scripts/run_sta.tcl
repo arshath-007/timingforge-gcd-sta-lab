@@ -20,7 +20,7 @@ link_design $top
 read_sdc $::env(SDC)
 
 puts "=== TIMINGFORGE SETUP CHECK ==="
-check_setup -verbose -unconstrained_endpoints
+check_setup -verbose -no_input_delay -no_output_delay -unconstrained_endpoints
 puts "=== CLOCK PERIOD / FREQUENCY ==="
 report_clock_min_period -include_port_paths
 puts "=== SETUP SUMMARY ==="
