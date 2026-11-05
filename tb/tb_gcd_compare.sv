@@ -146,8 +146,8 @@ module tb_gcd_compare;
         check_case(32'hffff_ffff, 32'hffff_fffe);
 
         for (i = 0; i < 250; i = i + 1) begin
-            ra = {$random(seed), $random(seed)};
-            rb = {$random(seed), $random(seed)};
+            ra = $random(seed);
+            rb = $random(seed);
             check_case(ra, rb);
         end
 
