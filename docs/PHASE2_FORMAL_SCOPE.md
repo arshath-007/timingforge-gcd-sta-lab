@@ -15,6 +15,8 @@ WIDTH=3 is the practical bounded-proof configuration retained in the current CI 
 
 The three-bit symbolic input space contains all 64 operand pairs. Exhausting those pairs is useful for checking the transaction-level relationship between the two implementations over a compact input domain, including zero and equal operands. It does **not** prove 32-bit arithmetic correctness, rule out width-dependent datapath defects, establish an unbounded sequential invariant, or cover arbitrary back-to-back transactions. The matching high-level controller intent across parameter values is context, not a substitute for a 32-bit proof.
 
+A further distinction: the miter checks **mutual transaction-result equivalence between the combined and split implementations**. It does not compare either implementation against an independent mathematical GCD specification. The separate 32-bit simulation testbench supplies that independent Euclidean-algorithm reference check for its finite directed/seeded corpus; it is simulation evidence, not a formal proof of the full 32-bit input space.
+
 The 32-bit implementations are separately exercised by directed and seeded constrained-random simulation. That is complementary evidence, not equivalent to formal proof. A future stronger result should use a scalable proof strategy (for example, width-parameterized invariants or compositional datapath/control properties) and retain its own reproducible CI evidence.
 
 This is a bounded sequential-equivalence property set for WIDTH=3. It is not a proof for all 32-bit inputs, not an unbounded induction proof, and not a proof of PPA equivalence. The 32-bit design remains covered by simulation regression and will need a separately justified formal bound or a stronger proof strategy.
