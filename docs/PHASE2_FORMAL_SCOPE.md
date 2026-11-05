@@ -7,7 +7,7 @@ The first formal property set compares the two GCD architectures at the transact
 - Stimulus: one reset followed by one accepted start request.
 - Assertions: each implementation completes once, reports `done` with `busy` low, both complete within the 16-cycle bound, and their captured GCD results match.
 - Engine: Yosys SMT2 export plus `yosys-smtbmc` and CVC5 (CI default).
-- Bound: 18 SMT steps.
+- Bound: 34 SMT steps (16 positive clock edges).
 
 This is a bounded sequential-equivalence property set for WIDTH=4. It is not a proof for all 32-bit inputs, not an unbounded induction proof, and not a proof of PPA equivalence. The 32-bit design remains covered by simulation regression and will need a separately justified formal bound or a stronger proof strategy.
 
