@@ -83,8 +83,7 @@ make python-test
 make benchmark
 ```
 
-Generated SDC files are written under `build/mutants/`. The linter reports missing clocks, missing I/O delay coverage, and timing exceptions that require human justification. This initial checker is intentionally conservative and interface-specific to the GCD example. The benchmark writes JSON and Markdown scorecards in build/; the score covers four controlled static text-pattern mutations only, not general SDC correctness or STA signoff. The benchmark target also writes `build/benchmark_report.json` and `build/benchmark_report.md`; its score covers only four controlled static text-pattern mutations, not general SDC correctness or STA signoff.
-
+Generated SDC files are written under `build/mutants/`. The linter is intentionally conservative and specific to the GCD interface. The benchmark produces JSON and Markdown scorecards under `build/`; its score covers seven controlled pattern/coverage mutations only, not general SDC correctness or signoff.
 ### 3. Library-backed synthesis and timing matrix
 
 For a reproducible educational run using the Nangate45 typical Liberty library and an OpenROAD Flow Scripts environment with Yosys/OpenROAD available:
@@ -113,14 +112,13 @@ The synthesis script is a starting point, not a guarantee that every Liberty lib
 
 ## Verified CI evidence
 
-Latest successful GitHub Actions run:
+The latest **static regression** has passed:
 - 258 directed/random test cases checked on both GCD architectures.
 - 10 Python unit tests passed.
-- Golden SDC clock, uncertainty, and min/max I/O pattern checks passed.
+- Golden SDC clock, setup/hold uncertainty, and min/max I/O-delay pattern checks passed.
 - 7 of 7 controlled static mutation patterns were detected by the prototype.
-- JSON and Markdown benchmark scorecards were uploaded as a workflow artifact.
 
-These results do **not** mean arbitrary SDC defects are detected or that STA signoff has been completed. No Yosys/OpenSTA PPA measurements are published yet.
+A separate library-backed Yosys/OpenROAD timing job is now configured to synthesise both architectures and analyse the golden SDC plus seven mutations with the educational Nangate45 typical library. Its results must be inspected in GitHub Actions before marking that milestone complete.
 
 ## Research questions
 
