@@ -1,0 +1,23 @@
+name: TimingForge regression
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Run RTL self-check
+        run: make rtl-test
+      - name: Run Python regression
+        run: make python-test
+      - name: Run golden SDC lint
+        run: make lint-sdc
+      - name: Generate mutation SDC files
+        run: make mutants
