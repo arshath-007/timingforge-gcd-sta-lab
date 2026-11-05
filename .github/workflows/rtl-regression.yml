@@ -28,3 +28,24 @@ jobs:
           path: |
             build/benchmark_report.json
             build/benchmark_report.md
+
+  library-backed-sta:
+    runs-on: ubuntu-latest
+    container:
+      image: openroad/orfs:latest
+    steps:
+      - name: Checkout public repository source
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Load OpenROAD Flow Scripts environment and run Nangate45 matrix
+        shell: bash
+        run: |
+          source /OpenROAD-flow-scripts/env.sh
+          echo "Yosys: $(yosys -V)"
+          echo "OpenROAD: $(openroad -version)"
+          make sta-matrix
