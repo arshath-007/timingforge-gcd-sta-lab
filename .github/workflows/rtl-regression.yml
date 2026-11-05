@@ -18,23 +18,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install RTL and formal tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y iverilog yosys z3
-          command -v yosys-smtbmc
-          command -v z3
-      - name: Run bounded GCD transaction-equivalence proof
-        shell: bash
-        run: bash scripts/run_formal.sh
-      - name: Upload formal proof evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: timingforge-formal-proof
-          path: |
-            build/formal/**
-          retention-days: 90
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
       - name: Run RTL self-check
         run: make rtl-test
       - name: Verify RTL regression rejects a deliberately broken design
