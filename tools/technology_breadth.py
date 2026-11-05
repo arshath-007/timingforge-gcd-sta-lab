@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 
 TOPS = ("gcd_binary_combined", "gcd_binary_split")
+ASAP7_LIB_VERSIONS = {"AO": "211120", "INVBUF": "220122", "OA": "211120", "SIMPLE": "211120", "SEQ": "220123"}
 ASAP7_SCENES = {
     "ASAP7_BC": {"process": "FF", "temperature": "25C", "voltage_v": 0.77},
     "ASAP7_TC": {"process": "TT", "temperature": "0C", "voltage_v": 0.70},
@@ -129,16 +130,18 @@ def build_manifest(root: Path, orfs_root: Path) -> dict:
         process = pvt["process"]
         files = []
         for group in ("AO", "INVBUF", "OA", "SIMPLE"):
-            matches = sorted(lib_root.glob(
-                f"asap7sc7p5t_{group}_RVT_{process}_nldm_*.lib.gz"
-            ))
-            if len(matches) != 1:
-                raise ValueError(f"expected one ASAP7 {group}/{process} Liberty, found {len(matches)}")
-            files.extend(matches)
-        seq = sorted(lib_root.glob(f"asap7sc7p5t_SEQ_RVT_{process}_nldm_*.lib"))
-        if len(seq) != 1:
-            raise ValueError(f"expected one ASAP7 SEQ/{process} Liberty, found {len(seq)}")
-        files.extend(seq)
+            path = lib_root / (
+                f"asap7sc7p5t_{group}_RVT_{process}_nldm_{ASAP7_LIB_VERSIONS[group]}.lib.gz"
+            )
+            if not path.is_file():
+                raise FileNotFoundError(f"missing pinned ASAP7 {group}/{process} Liberty: {path}")
+            files.append(path)
+        seq = lib_root / (
+            f"asap7sc7p5t_SEQ_RVT_{process}_nldm_{ASAP7_LIB_VERSIONS['SEQ']}.lib"
+        )
+        if not seq.is_file():
+            raise FileNotFoundError(f"missing pinned ASAP7 SEQ/{process} Liberty: {seq}")
+        files.append(seq)
         library_hashes[scene] = [
             {"file": path.name, "sha256": sha256(path)} for path in files
         ]
