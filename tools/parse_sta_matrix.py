@@ -60,7 +60,7 @@ def parse_drv_check(text, heading, next_heading):
     if unsupported:
         return {'supported': False, 'check_count': None, 'violation_count': None, 'reported_lines': [unsupported.group(0).strip()]}
     violations = [line.strip() for line in body.splitlines() if re.search(r'\bVIOLATED\b', line, re.IGNORECASE)]
-    checks = len(re.findall(r"^Pin\\s+", body, re.MULTILINE))
+    checks = len(re.findall(r"^Pin\s+", body, re.MULTILINE))
     return {'supported': True, 'check_count': checks,
             'violation_count': len(violations), 'reported_lines': violations}
 
