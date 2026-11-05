@@ -10,6 +10,7 @@ on:
       - "scripts/run_physical.sh"
       - "scripts/postroute_sta.tcl"
       - "tools/physical_manifest.py"
+      - "tools/physical_metrics.py"
       - ".github/workflows/physical-design.yml"
   workflow_dispatch:
 
@@ -36,11 +37,22 @@ jobs:
           git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
           git fetch --depth=1 origin "$GITHUB_SHA"
           git checkout --detach FETCH_HEAD
+      - name: Run Python regression
+        run: python3 -m unittest discover -s tests -v
+      - name: Ensure KLayout is available
+        shell: bash
+        run: |
+          if ! command -v klayout >/dev/null 2>&1; then
+            apt-get update
+            apt-get install -y klayout
+          fi
+          command -v klayout
       - name: Run both Nangate45 physical implementations
         shell: bash
         run: |
           source /OpenROAD-flow-scripts/env.sh
-          bash scripts/run_physical.sh\n          python3 -m tools.physical_metrics build/reports/sta_matrix_summary.json build/physical --output build/physical/physical_comparison.json
+          bash scripts/run_physical.sh
+          python3 -m tools.physical_metrics build/reports/sta_matrix_summary.json build/physical --output build/physical/physical_comparison.json
       - name: Upload physical design evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -48,4 +60,8 @@ jobs:
           name: timingforge-nangate45-physical
           path: |
             build/physical/**
+            build/reports/sta_matrix_summary.json
+            build/reports/sta_matrix_summary.md
+            build/reports/sta_*.log
+            build/yosys_*.log
           retention-days: 90
