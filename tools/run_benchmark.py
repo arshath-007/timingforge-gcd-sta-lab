@@ -14,6 +14,16 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "constraints" / "gcd_baseline.sdc"
 OUTPUT = ROOT / "build"
 
+EXPECTED_FINDINGS = {
+    "M01_missing_clock": "TF001 ERROR",
+    "M02_missing_input_delay": "TF101 ERROR",
+    "M03_missing_output_delay": "TF201 ERROR",
+    "M04_unjustified_false_path": "TF301 REVIEW",
+    "M05_near_match_wrong_port": "TF101 ERROR",
+    "M06_missing_hold_uncertainty": "TF402 ERROR",
+    "M07_nonpositive_clock_period": "TF002 ERROR",
+}
+
 
 def has_code(findings, code):
     return any(item.startswith(code) for item in findings)
@@ -34,15 +44,9 @@ def run_benchmark(source=SOURCE, output=OUTPUT):
         }
     ]
 
-    expected = {
-        "M01_missing_clock": "TF001 ERROR",
-        "M02_missing_input_delay": "TF101 ERROR",
-        "M03_missing_output_delay": "TF201 ERROR",
-        "M04_unjustified_false_path": "TF301 REVIEW",
-    }
     for name, spec in MUTATIONS.items():
         findings = lint_sdc(mutate(golden, spec))
-        code = expected[name]
+        code = EXPECTED_FINDINGS[name]
         scenarios.append({
             "id": name,
             "description": spec["description"],
@@ -54,13 +58,13 @@ def run_benchmark(source=SOURCE, output=OUTPUT):
     fault_cases = scenarios[1:]
     detected = sum(1 for item in fault_cases if item["detected"])
     report = {
-        "schema_version": "0.1",
+        "schema_version": "0.2",
         "benchmark": "TimingForge static SDC fault-injection benchmark",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "python_version": platform.python_version(),
         "source_file": str(source.relative_to(ROOT) if source.is_relative_to(ROOT) else source),
         "source_sha256": hashlib.sha256(golden.encode("utf-8")).hexdigest(),
-        "scope": "Static text-pattern lint only. No synthesis or STA engine was run by this benchmark command.",
+        "scope": "Static pattern/coverage checks only. No synthesis or STA engine was run by this benchmark command.",
         "golden_baseline_passed": scenarios[0]["detected"],
         "fault_cases": len(fault_cases),
         "faults_detected": detected,
@@ -91,7 +95,7 @@ def run_benchmark(source=SOURCE, output=OUTPUT):
                     "; ".join(item["findings"]) + " |")
     rows.extend([
         "",
-        "This score measures only the four controlled patterns implemented in this prototype. It is not a measure of general SDC correctness, STA signoff quality, or silicon risk.",
+        "This score measures only the controlled patterns implemented in this prototype. It is not a measure of general SDC correctness, does not prove that a timing exception is invalid, and is not STA signoff.",
         "",
     ])
     markdown_path.write_text("\n".join(rows), encoding="utf-8")
