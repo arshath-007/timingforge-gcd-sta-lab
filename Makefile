@@ -2,10 +2,10 @@ PYTHON ?= python3
 IVERILOG ?= iverilog
 VVP ?= vvp
 
-.PHONY: help rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix clean
+.PHONY: help rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality clean
 
 help:
-	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix clean"
+	@echo "Targets: rtl-test ip-block-test mutants lint-sdc python-test benchmark synth sta sta-matrix sta-quality clean"
 
 ip-block-test:
 	mkdir -p build
@@ -39,6 +39,9 @@ sta:
 
 sta-matrix:
 	bash scripts/run_nangate_sta.sh
+
+sta-quality: sta-matrix
+	$(PYTHON) -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
 
 clean:
 	rm -rf build
