@@ -12,14 +12,16 @@ This document is the execution tracker for the proposed expansion roadmap. A che
 - [x] Add unit tests for quality-check behavior.
 - [x] Run the quality checker in the library-backed STA CI job and upload its JSON findings.
 
-### Remaining Phase 1 work
+### Phase 1 work completed
 - [x] Add heuristic critical-path class labels (input-to-register, register-to-register, register-to-output, input-to-output, or unknown) from OpenSTA startpoint/endpoint names, with unknown fallback and unit tests.
-- [ ] Add a DRV summary for max transition, max capacitance, max fanout, and violations only where the selected OpenSTA build exposes the relevant reports reliably.
-- [ ] Add clock-uncertainty and clock-latency sensitivity experiments with immutable baseline constraints and explicit deltas.
-- [ ] Add mutation impact scoring that distinguishes expected effects from unexplained changes; never collapse it into a single accuracy percentage.
-- [ ] Validate the quality findings against archived raw logs from more than one run.
+- [x] Add OpenSTA violator-only reports for max transition, max capacitance and max fanout; unsupported reports remain null and empty fanout output is not treated as complete check coverage.
+- [x] Add nine clock-constraint sensitivity variants per architecture, derived from the immutable golden SDC, with explicit setup/hold slack deltas and reproducibility metadata.
+- [x] Add expected-versus-observed mutation impact scoring with matched, mismatched and inconclusive states; no aggregate accuracy percentage.
+- [x] Validate findings against archived raw logs from feature-branch run #257 and post-merge main run #258; both passed both CI jobs.
 
 **Phase 1 exit criteria:** all new checks have unit tests; the full workflow produces machine-readable findings; baseline and mutation behavior is explained; no derived internal Fmax is published without an independently validated method.
+
+**Evidence:** [run #257](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42046659049) and [post-merge run #258](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600), including the [run #258 STA artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600/artifacts/13425391627).
 
 ## Phase 2 — Verification depth and QoR analytics
 
@@ -45,7 +47,7 @@ This document is the execution tracker for the proposed expansion roadmap. A che
 
 ## Current release boundary
 
-The current v0.2.2 candidate is a functional-regression and documentation maintenance update. It does not claim that all three phases are complete. FIFO and MAC remain functional-only extensions and are not part of the 16-run GCD STA matrix. The published GCD results remain educational pre-layout Nangate45 typical-corner results with ideal clocks and no extracted SPEF. The combined architecture's native register-only minimum-period query remains unresolved, and the golden-SDC hold slack remains -0.002 ns.
+The v0.3.0 candidate includes the functional-regression maintenance from the unpublished v0.2.2 candidate plus completed Phase 1 reliability diagnostics. It does not claim that Phase 2 or Phase 3 is complete. FIFO and MAC remain functional-only extensions and are not part of the 16-run GCD STA matrix. The published GCD results remain educational pre-layout Nangate45 typical-corner results with ideal clocks and no extracted SPEF. The combined architecture's native register-only minimum-period query remains unresolved, and the golden-SDC hold slack remains -0.002 ns.
 
 ## Execution policy
 
