@@ -19,11 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Icarus Verilog
-        run: sudo apt-get update && sudo apt-get install -y iverilog verilator
+        run: sudo apt-get update && sudo apt-get install -y iverilog verilator verilator
       - name: Run RTL self-check
         run: make rtl-test
       - name: Sweep parameterized GCD widths (8, 16, 32)
         run: make width-sweep
+      - name: Run concurrent SVA protocol assertions with Verilator
+        run: make sva-test
       - name: Verify RTL regression rejects a deliberately broken design
         shell: bash
         run: |
