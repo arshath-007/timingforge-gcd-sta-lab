@@ -91,6 +91,7 @@ jobs:
           mkdir -p build
           { echo "Yosys: $(yosys -V)"; echo "OpenROAD: $(openroad -version)"; } | tee build/tool_versions.txt
           make sta-matrix
+          python3 -m tools.qor_history snapshot build/reports/sta_matrix_summary.json --output build/reports/qor_snapshot.json
           python3 -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
           python3 -m tools.mutation_impact build/reports/sta_matrix_summary.json --output build/reports/sta_mutation_impact.json
           python3 -m tools.run_sensitivity
@@ -102,6 +103,7 @@ jobs:
           path: |
             build/reports/sta_matrix_summary.md
             build/reports/sta_matrix_summary.json
+            build/reports/qor_snapshot.json
             build/reports/sta_quality_findings.json
             build/reports/sta_mutation_impact.json
             build/sensitivity/**
