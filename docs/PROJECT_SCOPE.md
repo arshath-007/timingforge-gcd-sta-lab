@@ -15,6 +15,12 @@ Test whether a timing-constraint review flow identifies a small, explicitly defi
 - Functional equivalence of two GCD architectures.
 - Reproducible synthesis and STA entry points.
 
+## Functional extension blocks
+
+The repository also contains a parameterized synchronous FIFO and a signed MAC accumulator. Their directed SystemVerilog tests run through `make ip-block-test` and the regression workflow. These blocks broaden the functional learning examples only; they are not yet synthesised or included in the published 16-run GCD STA matrix.
+
+Generated-clock and multicycle-path examples are documented in [ADVANCED_SDC_EXERCISES.md](ADVANCED_SDC_EXERCISES.md). They are templates for future multi-clock RTL experiments, not active constraints or additional passing mutation cases.
+
 ## Out of scope
 
 - Full SDC Tcl grammar parsing or semantic elaboration.
