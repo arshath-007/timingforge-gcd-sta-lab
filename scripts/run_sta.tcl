@@ -1,4 +1,4 @@
-# OpenSTA script for a mapped GCD netlist.
+# OpenSTA/OpenROAD-integrated STA script for a mapped GCD netlist.
 # Required environment: LIBERTY, NETLIST, SDC. Optional: TOP.
 if {![info exists ::env(LIBERTY)]} { error "Set LIBERTY to a standard-cell Liberty file" }
 if {![info exists ::env(NETLIST)]} { error "Set NETLIST to a mapped Verilog netlist" }
@@ -12,10 +12,20 @@ link_design $top
 read_sdc $::env(SDC)
 
 puts "=== TIMINGFORGE SETUP CHECK ==="
-check_setup -verbose
-puts "=== MAX / SETUP PATHS ==="
+check_setup -verbose -unconstrained_endpoints
+puts "=== CLOCK PERIOD / FREQUENCY ==="
+report_clock_min_period -include_port_paths
+puts "=== SETUP SUMMARY ==="
+report_worst_slack -max -digits 3
+report_wns -max -digits 3
+report_tns -max -digits 3
+puts "=== HOLD SUMMARY ==="
+report_worst_slack -min -digits 3
+report_wns -min -digits 3
+report_tns -min -digits 3
+puts "=== SETUP / MAX PATH DETAILS ==="
 report_checks -path_delay max -format full_clock_expanded -digits 3
-puts "=== MIN / HOLD PATHS ==="
+puts "=== HOLD / MIN PATH DETAILS ==="
 report_checks -path_delay min -format full_clock_expanded -digits 3
-puts "=== UNCONSTRAINED PATHS ==="
+puts "=== UNCONSTRAINED PATH DETAILS ==="
 report_checks -unconstrained -digits 3
