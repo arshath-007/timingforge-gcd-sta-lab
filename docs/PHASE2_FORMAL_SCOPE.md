@@ -5,7 +5,7 @@ The first formal property set compares the two GCD architectures at the transact
 - Width: 4 bits.
 - Inputs: symbolic constants, so the proof considers every 4-bit input pair, including zero and equal operands.
 - Stimulus: one reset followed by one accepted start request.
-- Assertions: each implementation completes once, reports `done` with `busy` low, both complete within the 24-cycle bound, and their captured GCD results match.
+- Assertions: each implementation completes once, reports `done` with `busy` low, both complete within the 16-cycle bound, and their captured GCD results match.
 - Engine: Yosys SMT2 export plus `yosys-smtbmc` and Z3 (CI default).
 - Bound: 18 SMT steps.
 
