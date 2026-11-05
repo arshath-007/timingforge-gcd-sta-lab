@@ -22,7 +22,7 @@ python-test:
 	$(PYTHON) -m unittest discover -s tests -v
 
 benchmark: mutants
-	$(PYTHON) tools/run_benchmark.py
+	$(PYTHON) -m tools.run_benchmark
 
 synth:
 	bash scripts/synth.sh
