@@ -18,6 +18,15 @@ module tb_mac_accumulator;
       if (acc!==-24'sd2) $fatal(1,"MAC enable hold failed");
       clear=1; tick(); clear=0;
       if (acc!==0) $fatal(1,"MAC clear failed");
+
+      // Most-negative signed operand multiplied by itself.
+      a=-8'sd128; b=-8'sd128; enable=1; tick();
+      if (acc!==24'sd16384) $fatal(1,"MAC signed boundary multiply failed: %0d",acc);
+
+      // Synchronous clear has priority over an asserted enable.
+      clear=1; tick(); clear=0;
+      if (acc!==0) $fatal(1,"MAC clear priority failed");
+      enable=0;
       $display("PASS: signed MAC accumulator directed tests");
       $finish;
     end
