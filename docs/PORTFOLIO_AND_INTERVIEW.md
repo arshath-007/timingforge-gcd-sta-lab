@@ -1,4 +1,4 @@
-# TimingForge Portfolio and STA Interview Notes
+# TimingForge Portfolio Summary and Project Demonstration
 
 ## Portfolio summary
 
@@ -19,51 +19,9 @@ Built a reproducible RTL-to-STA learning benchmark using SystemVerilog, Yosys, O
 
 The GCD results use one typical Nangate45 Liberty corner, ideal clocks and no extracted SPEF parasitics. Baseline DRV records include max-slew and max-capacitance violations; the combined golden-SDC hold slack is -0.002 ns. Mutation scoring reports 12 matched, 0 mismatched and 2 inconclusive observations. All-path Fmax includes I/O paths and is not an internal architecture-only speed comparison. The combined architecture's register-only minimum-period query is unresolved; do not claim a combined internal Fmax. This is an educational pre-layout benchmark, not production signoff.
 
-## Interview explanation (60–90 seconds)
+## Project overview
 
 "TimingForge is a constraint-aware STA benchmark I built around two 32-bit binary-GCD RTL architectures. I used the same synthesis library and timing constraints for both designs, then introduced seven controlled SDC defects such as a missing clock, missing I/O delays, an incorrect port collection and an unjustified false path. The flow runs Yosys synthesis and OpenROAD-integrated OpenSTA, checks the RTL against a reference model, and produces a 16-run timing matrix. The key lesson is that positive slack alone does not prove timing coverage: missing constraints can leave endpoints unconstrained or hide paths. I also document limitations such as the single typical library corner, ideal clocks and lack of extracted parasitics."
-
-## Core STA interview questions
-
-### 1. What is setup time?
-
-The minimum time data must be stable before the active capture-clock edge. A setup violation means the data arrives too late for the capturing register.
-
-### 2. What is hold time?
-
-The minimum time data must remain stable after the active capture-clock edge. A hold violation means data changes too early.
-
-### 3. What is slack?
-
-For setup, slack is required arrival time minus actual arrival time. Positive slack meets the check; negative slack violates it. Hold uses the corresponding minimum-delay relationship.
-
-### 4. What is WNS versus TNS?
-
-WNS is the worst slack among the analysed checks. TNS is the sum of negative slack across violating endpoints. Always state whether the report is setup or hold.
-
-### 5. Why do input and output delays matter?
-
-They model the external timing budget at the block boundary. Without them, input-to-register or register-to-output paths may be unconstrained or omitted from the intended timing analysis.
-
-### 6. What does a false path do?
-
-It tells STA not to time a selected path. It must be justified by design intent and synchronisation architecture; a broad false path can hide real timing failures.
-
-### 7. What is clock uncertainty?
-
-A margin representing clock jitter and other uncertainty in the clock relationship. Setup and hold uncertainty affect their respective timing budgets.
-
-### 8. Why is a positive setup slack not enough?
-
-Because the path may not have been constrained, a required clock may be missing, or a timing exception may have excluded the path. Review coverage and exceptions as well as slack.
-
-### 9. What is the difference between pre-layout and signoff STA?
-
-Pre-layout analysis lacks final routed interconnect parasitics and realistic propagated clock-tree effects. Signoff uses implementation-specific parasitics, corners, modes and validated constraints.
-
-### 10. What is the most important lesson from TimingForge?
-
-The quality of STA conclusions depends on both timing calculations and constraint completeness. The benchmark tests whether known defects are visible; it does not prove arbitrary SDC files are correct.
 
 ## Demonstration checklist
 
