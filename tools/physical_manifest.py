@@ -29,7 +29,7 @@ def sha256(path: Path) -> str:
 
 
 def _value(text: str, label: str) -> str:
-    match = re.search(r"^" + re.escape(label) + r":\\s*(.+)$", text, re.MULTILINE)
+    match = re.search(r"^" + re.escape(label) + r":\s*(.+)$", text, re.MULTILINE)
     if not match:
         raise ValueError(f"tool_versions.txt is missing {label}")
     return match.group(1).strip()
