@@ -104,6 +104,12 @@ class QorGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "limit set mismatch"):
             evaluate(snapshot(), snapshot(), policy)
 
+    def test_rejects_duplicate_required_metric(self):
+        policy = deepcopy(POLICY)
+        policy["required_metrics"].append("cell_area")
+        with self.assertRaisesRegex(ValueError, "exactly once"):
+            evaluate(snapshot(), snapshot(), policy)
+
     def test_rejects_boolean_metric(self):
         candidate = snapshot()
         candidate["records"][0]["cell_area"] = True
