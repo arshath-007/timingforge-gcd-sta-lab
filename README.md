@@ -7,7 +7,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.4.0 candidate (PR #10 validation passed at `6140483a`; awaiting merge and main-branch validation) · **Latest published release:** [v0.2.1](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.1) · **License:** MIT
+**Status:** Research prototype · **Version:** 0.4.0 candidate (latest PR #10 head `8dc2747` passed all five CI workflows; awaiting independent review, merge and main-branch validation) · **Latest published release:** [v0.2.1](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.1) · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -66,10 +66,10 @@ The static checker is a conservative, interface-specific prototype—not a full 
 - STA report parser that summarises area, minimum clock period, Fmax, worst setup/hold slack, WNS/TNS, register-to-register path presence, unconstrained endpoints, heuristic critical-path classes, and OpenSTA max-slew/max-capacitance/max-fanout violation records.
 - Phase 1 quality findings, SDC mutation impact scoring, and reproducible clock-uncertainty/source-latency sensitivity experiments.
 - Conservative golden-result quality checks that flag missing metrics, unconstrained endpoints, missing I/O delays, negative hold slack, and unavailable native register-only period without inventing a derived Fmax.
-- Bounded WIDTH=3 formal miter with an independent exhaustive GCD truth-table oracle, protocol assertions, and a deliberately broken RTL negative control (validated by [PR #10 formal run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460124)).
+- Bounded WIDTH=3 formal miter with an independent exhaustive GCD truth-table oracle, protocol assertions, and a deliberately broken RTL negative control (validated by [PR #10 formal run](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754417)).
 - Verilator concurrent-SVA protocol checks and WIDTH=8/16/32 simulation sweeps; these are simulation/assertion evidence, not full-width formal proofs.
 - Environment-specific fail-closed Nangate45 typical-corner QoR regression gate.
-- Validated ASAP7 BC/TC/WC MCMM and SKY130HD TT physical-flow extension; see the [measured technology-breadth results](docs/PHASE3_TECHNOLOGY_BREADTH_RESULTS.md) and [PR #10 workflow](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181).
+- Validated ASAP7 BC/TC/WC MCMM and SKY130HD TT physical-flow extension; see the [measured technology-breadth results](docs/PHASE3_TECHNOLOGY_BREADTH_RESULTS.md) and [PR #10 workflow](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754263).
 - GitHub Actions regression, formal, physical-design and technology-breadth workflows.
 
 ## Repository layout
@@ -186,20 +186,20 @@ See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report
 
 ## Phase 2 verification evidence — bounded formal + reproducible simulation
 
-The updated oracle-backed formal miter passed in [PR #10 formal workflow run #42199460124](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460124); download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460124/artifacts/13494245840). The positive CVC5 proof passed at 26 SMT steps / 12 positive clock edges (11:08 solver time). The deliberately broken subtract mutant was rejected at step 5 for the counterexample operands a=5, b=3.
+The updated oracle-backed formal miter passed in [PR #10 formal workflow run #42225754417](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754417); download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754417/artifacts/13494245840). The positive CVC5 proof passed at 26 SMT steps / 12 positive clock edges (11:08 solver time). The deliberately broken subtract mutant was rejected at step 5 for the counterexample operands a=5, b=3.
 
 - The formal oracle covers all 64 symbolic WIDTH=3 operand pairs and is cross-checked against Python math.gcd; both GCD architectures are checked against that independent oracle, against each other, and for one-transaction completion/protocol behavior.
 - The proof remains bounded at WIDTH=3. It does not prove all 32-bit inputs, arbitrary back-to-back transactions, or an unbounded sequential invariant.
 - The 32-bit regression includes directed cases and 250 deterministic constrained-random cases using seed 0x54462026; 259 cases were checked on each architecture, with parity, zero/equal, high-bit, GCD-class and latency-bin coverage.
 - Verilator concurrent-SVA protocol checks and WIDTH=8/16/32 simulations are complementary dynamic evidence, not part of the Yosys/CVC5 proof.
 - QoR snapshots record source SHA, tool versions, platform/corner, Liberty hash, scenario and SDC hashes. The comparator rejects environment or scenario mismatches. Snapshots are artifact-backed, not a persistent database/dashboard.
-- The [PR #10 regression and library-backed STA run #42199460175](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460175) passed the RTL/width/SVA/FIFO/MAC/Python checks, SDC lint, static fault-injection benchmark, Nangate45 STA matrix and QoR gate. Artifacts: [Nangate45 STA matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460175/artifacts/13492738499) and [static benchmark scorecard](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460175/artifacts/13494116003).
+- The [PR #10 regression and library-backed STA run #42225754505](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754505) passed the RTL/width/SVA/FIFO/MAC/Python checks, SDC lint, static fault-injection benchmark, Nangate45 STA matrix and QoR gate. Artifacts: [Nangate45 STA matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754505/artifacts/13506026425) and [static benchmark scorecard](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754505/artifacts/13506240639).
 
 
 
 ## Phase 3 physical-design evidence — Nangate45 typical
 
-The latest PR #10 [physical-design workflow run #42199460198](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460198) passed for both architectures. Download the [complete physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460198/artifacts/13493527667), which includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA logs, comparison JSON and SHA-256 manifest. Detailed interpretation is in [Phase 3 measured results](docs/PHASE3_RESULTS.md).
+The latest PR #10 [physical-design workflow run #42225754311](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754311) passed for both architectures. Download the [complete physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754311/artifacts/13505672933), which includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA logs, comparison JSON and SHA-256 manifest. Detailed interpretation is in [Phase 3 measured results](docs/PHASE3_RESULTS.md).
 
 | Post-route metric | Combined GCD | Split GCD |
 |---|---:|---:|
@@ -216,7 +216,7 @@ The register-to-register metric excludes I/O paths; all-path period includes con
 
 ## Phase 3 technology breadth — PR validation passed
 
-The dedicated [PR #10 technology-breadth workflow run #42199460181](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181) passed for both architectures on ASAP7 and SKY130HD. The [90-day artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181/artifacts/13494468655) contains 412 files, final ODB/GDS/SPEF/SDC for all four platform/design combinations, per-scene reports, tool/library provenance and a SHA-256 manifest. All 36 manifest-listed per-design implementation artifacts were independently hash-checked after download.
+The dedicated [PR #10 technology-breadth workflow run #42225754263](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754263) passed for both architectures on ASAP7 and SKY130HD. The [90-day artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754263/artifacts/13505838538) contains 412 files, final ODB/GDS/SPEF/SDC for all four platform/design combinations, per-scene reports, tool/library provenance and a SHA-256 manifest. All 36 manifest-listed per-design implementation artifacts were independently hash-checked after download.
 
 - ASAP7 uses distinct FF/TT/SS Liberty scenes: BC (FF, 0°C, 0.77 V), TC (TT, 25°C, 0.70 V), and WC (SS, 100°C, 0.63 V). The top 100 setup and hold paths per scene were reported for each architecture.
 - The combined design's minimum hold slack among the emitted WC hold paths was -3.225 ps; this is a real hold warning and must not be described as full hold closure. The split design's minimum among the emitted paths was +5.691 ps. OpenSTA is asked for up to 100 paths per path group; the manifest emitted 100 hold rows per scene in this run. The reported minima are limited to emitted reports, not an exhaustive path inventory.
@@ -273,7 +273,7 @@ The intended project contribution is a **reproducible fault-injection benchmark 
 - [ ] Add generated-clock, multicycle, clock-group, and justified false-path scenarios.
 - [x] Add OpenROAD floorplanning, placement, CTS, routing, GDS generation, and SPEF-based post-route STA for both architectures at Nangate45 typical.
 - [x] Compare pre-layout and post-route metrics using the same baseline SDC and typical Liberty; treat deltas as cross-flow observations because the synthesis settings/netlists are not matched; archive raw logs and SHA-256 manifests.
-- [x] Validate the ASAP7 BC/TC/WC MCMM and SKY130HD TT experiments using the dedicated technology-breadth workflow and its artifact manifest ([PR #10 run #42199460181](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181)); final main-branch validation remains part of the release gate.
+- [x] Validate the ASAP7 BC/TC/WC MCMM and SKY130HD TT experiments using the dedicated technology-breadth workflow and its artifact manifest ([PR #10 run #42225754263](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754263)); final main-branch validation remains part of the release gate.
 - [ ] Add variation-aware experiments (OCV/AOCV/POCV) only with appropriate validated models and methodology.
 - [ ] Validate findings with external contributors and maintainers.
 
@@ -292,6 +292,6 @@ Maintained by [arshath-007](https://github.com/arshath-007).
 
 The Nangate45 pre-layout Yosys synthesis and ORFS physical synthesis configurations are not netlist-matched. Timing deltas are therefore cross-flow observations; they must not be attributed solely to routing or parasitics. The physical manifest records the source revision, RTL/SDC/script hashes and declared pinned container digest. The post-route flow checks SPEF annotation and reports register-only and all-path minimum periods separately. The optional ORFS Kepler netlist-LEC subprocess remains disabled, so no netlist-to-netlist equivalence claim is made.
 
-The [physical robustness experiment](docs/PHYSICAL_ROBUSTNESS.md) includes five paired placement/utilization variants and six clock-period targets for both GCD architectures. Its latest successful [PR #10 workflow run #42199460096](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460096) parsed 22/22 physical runs. Across the five placement pairs, combined GCD had the shorter register-only period in all five; split GCD averaged about 5.9% less cell area. At a 2.5 ns target, combined GCD retained a max-capacitance violation at pin `_3726_/ZN` (54.633 against a 53.406 limit; slack -1.227) and was correctly classified as not closed; split GCD closed. These are educational Nangate45 typical-corner experiments, not signoff or a guarantee across all placement seeds.
+The [physical robustness experiment](docs/PHYSICAL_ROBUSTNESS.md) includes five paired placement/utilization variants and six clock-period targets for both GCD architectures. Its latest successful [PR #10 workflow run #42225754303](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754303) parsed 22/22 physical runs. Across the five placement pairs, combined GCD had the shorter register-only period in all five; split GCD averaged about 5.9% less cell area. At a 2.5 ns target, combined GCD retained a max-capacitance violation at pin `_3726_/ZN` (54.633 against a 53.406 limit; slack -1.227) and was correctly classified as not closed; split GCD closed. These are educational Nangate45 typical-corner experiments, not signoff or a guarantee across all placement seeds.
 
 The separate [ASAP7 and SKY130HD technology-breadth results](docs/PHASE3_TECHNOLOGY_BREADTH_RESULTS.md) are not mixed with the Nangate45 measurements. ASAP7 WC combined-GCD hold slack is -3.225 ps among the emitted hold paths (100-path-per-group reporting cap), and the same TC-extracted SPEF is reused across its three Liberty scenes; this is not full PVT/RC signoff.
