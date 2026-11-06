@@ -97,6 +97,84 @@ def parse_postroute_log(path: Path) -> dict:
     }
 
 
+def _stage_metrics(log_dir: Path, top: str) -> dict:
+    stages = {
+        "orfs_synthesis": ("1_synth.json", "synth"),
+        "global_placement": ("3_3_place_gp.json", "globalplace"),
+        "clock_tree_synthesis": ("4_1_cts.json", "cts"),
+        "global_route": ("5_1_grt.json", "globalroute"),
+        "final": ("6_report.json", "finish"),
+    }
+    result = {}
+    for stage, (filename, prefix) in stages.items():
+        path = log_dir / filename
+        if not path.is_file():
+            raise FileNotFoundError(f"{top}: missing ORFS stage metrics {path}")
+        data = json.loads(path.read_text(encoding="utf-8"))
+        required = {
+            "instance_count": f"{prefix}__design__instance__count__stdcell",
+            "instance_area": f"{prefix}__design__instance__area__stdcell",
+            "total_instance_count": f"{prefix}__design__instance__count",
+            "total_instance_area": f"{prefix}__design__instance__area",
+        }
+        missing = [key for key, source in required.items() if source not in data]
+        if missing:
+            raise ValueError(f"{top}: {filename} missing standard-cell metrics {missing}")
+        result[stage] = {
+            "standard_cell_instance_count": int(data[required["instance_count"]]),
+            "standard_cell_area": float(data[required["instance_area"]]),
+            "total_instance_count_including_physical_cells": int(data[required["total_instance_count"]]),
+            "total_instance_area": float(data[required["total_instance_area"]]),
+            "source_report": filename,
+        }
+    return result
+
+
+def _prelayout_synthesis_metrics(build_root: Path, top: str, matrix_row: dict) -> dict:
+    path = build_root / f"yosys_{top}.log"
+    if not path.is_file():
+        raise FileNotFoundError(f"{top}: pre-layout Yosys synthesis log missing: {path}")
+    text = path.read_text(encoding="utf-8", errors="replace")
+    areas = re.findall(r"Chip area for module .*?:\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
+    counts = re.findall(r"^\\s*(\\d+)\\s+[-+]?(?:\\d+\\.?\\d*|\\.\\d+)\\s+cells\\s*$", text, re.MULTILINE)
+    area = float(areas[-1]) if areas else matrix_row.get("yosys_cell_area")
+    if area is None or not counts:
+        raise ValueError(f"{top}: pre-layout synthesis area/cell count missing from {path}")
+    return {
+        "standard_cell_instance_count": int(counts[-1]),
+        "standard_cell_area": float(area),
+        "source_log": str(path),
+    }
+
+
+def parse_presynth_log(path: Path) -> dict:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    if "ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD" not in text:
+        raise ValueError(f"{path}: ORFS post-synthesis STA heading missing")
+    reg = _section(text, "=== ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD ===",
+                   "=== ORFS POST-SYNTHESIS ALL-PATH CLOCK PERIOD ===")
+    all_path = _section(text, "=== ORFS POST-SYNTHESIS ALL-PATH CLOCK PERIOD ===",
+                        "=== ORFS POST-SYNTHESIS SETUP SUMMARY ===")
+    def period(section_text: str) -> tuple[float | None, float | None]:
+        match = re.search(r"^\\s*\\S+\\s+period_min\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s+fmax\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", section_text, re.MULTILINE)
+        return (float(match.group(1)), float(match.group(2))) if match else (None, None)
+    reg_period, reg_fmax = period(reg)
+    all_period, all_fmax = period(all_path)
+    setup = _number(r"^\\s*worst slack\\s+max\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
+    hold = _number(r"^\\s*worst slack\\s+min\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
+    if reg_period is None or all_period is None or setup is None or hold is None:
+        raise ValueError(f"{path}: incomplete ORFS post-synthesis timing metrics")
+    return {
+        "register_to_register_min_period_ns": reg_period,
+        "register_to_register_fmax_mhz": reg_fmax,
+        "all_path_min_period_ns": all_period,
+        "all_path_fmax_mhz": all_fmax,
+        "worst_setup_slack_ns": setup,
+        "worst_hold_slack_ns": hold,
+        "log": str(path),
+    }
+
+
 def compare(prelayout_path: Path, physical_root: Path, repo_root: Path | None = None) -> dict:
     matrix = json.loads(prelayout_path.read_text(encoding="utf-8"))
     if matrix.get("platform") != "Nangate45 typical Liberty":
