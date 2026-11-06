@@ -7,6 +7,8 @@ import json
 import re
 from pathlib import Path
 
+from tools.physical_annotation import classify_annotation
+
 TOPS = ("gcd_binary_combined", "gcd_binary_split")
 
 
@@ -30,13 +32,9 @@ def parse_postroute_log(path: Path) -> dict:
                           "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===")
     if not annotation.strip() or "TIMINGFORGE_PARASITIC_ANNOTATION_UNSUPPORTED" in annotation:
         raise ValueError(f"{path}: native parasitic annotation report missing")
-    unannotated = re.search(r"Found\s+(\d+)\s+unannotated\s+drivers?", annotation, re.IGNORECASE)
-    partially = re.search(r"Found\s+(\d+)\s+partially\s+unannotated\s+drivers?", annotation, re.IGNORECASE)
-    if not unannotated or not partially:
-        raise ValueError(f"{path}: native SPEF annotation report did not provide both unannotated-driver counts")
-    unannotated_count, partially_count = int(unannotated.group(1)), int(partially.group(1))
-    if unannotated_count or partially_count:
-        raise ValueError(f"{path}: incomplete SPEF annotation: unannotated={unannotated_count}, partially_unannotated={partially_count}")
+    top = path.parent.name
+    final_netlist = path.parent / "results" / "nangate45" / top / "base" / "6_final.v"
+    annotation_metrics = classify_annotation(path, final_netlist)
     reg_text = _section(text, "=== POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ===",
                         "=== POST-ROUTE ALL-PATH CLOCK PERIOD ===")
     all_text = _section(text, "=== POST-ROUTE ALL-PATH CLOCK PERIOD ===",
@@ -79,8 +77,11 @@ def parse_postroute_log(path: Path) -> dict:
         "hold_clock_skew_report": hold_skew.strip(),
         "clock_skew_supported": bool(setup_skew.strip() and hold_skew.strip()) and "TIMINGFORGE_CLOCK_SKEW_UNSUPPORTED" not in setup_skew + hold_skew,
         "parasitic_annotation_report": annotation.strip(),
-        "postroute_unannotated_driver_count": unannotated_count,
-        "postroute_partially_unannotated_driver_count": partially_count,
+        "postroute_reported_unannotated_driver_count": annotation_metrics["reported_unannotated_driver_count"],
+        "postroute_dangling_unannotated_driver_count": annotation_metrics["dangling_unannotated_driver_count"],
+        "postroute_unannotated_connected_driver_count": annotation_metrics["unannotated_connected_driver_count"],
+        "postroute_partially_unannotated_driver_count": annotation_metrics["partially_unannotated_driver_count"],
+        "parasitic_annotation_classification": annotation_metrics["unannotated_driver_classification"],
         "postroute_max_slew_violation_count": drv_count(drv_slew),
         "postroute_max_capacitance_violation_count": drv_count(drv_cap),
         "postroute_max_fanout_violation_count": drv_count(drv_fanout),
