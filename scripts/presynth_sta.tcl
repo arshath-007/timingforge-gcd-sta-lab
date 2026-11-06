@@ -1,9 +1,11 @@
 # Post-synthesis STA on the exact ORFS 1_2_yosys.v mapped netlist.
-foreach name {LIBERTY NETLIST SDC TOP} {
+foreach name {LIBERTY TECH_LEF SC_LEF NETLIST SDC TOP} {
     if {![info exists ::env($name)]} {
         error "Set $name for ORFS post-synthesis STA"
     }
 }
+read_lef $::env(TECH_LEF)
+read_lef $::env(SC_LEF)
 read_liberty $::env(LIBERTY)
 read_verilog $::env(NETLIST)
 link_design $::env(TOP)
