@@ -16,6 +16,8 @@ on:
       - "scripts/synth.sh"
       - "scripts/postroute_sta.tcl"
       - "scripts/presynth_sta.tcl"
+      - "scripts/run_netlist_equiv.sh"
+      - "scripts/synth.sh"
       - "tools/physical_manifest.py"
       - "tools/physical_metrics.py"
       - "tools/physical_annotation.py"
@@ -100,4 +102,5 @@ jobs:
             build/reports/sta_*.log
             build/yosys_*.log
             build/gcd_binary_*.v
+            build/netlist_equiv/**
           retention-days: 90
