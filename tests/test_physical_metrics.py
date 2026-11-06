@@ -94,7 +94,7 @@ class PhysicalMetricsTests(unittest.TestCase):
                 ],
             }
             matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
-            result = compare(matrix_path, physical)
+            result = compare(matrix_path, physical, root)
             self.assertEqual(len(result["designs"]), 2)
             self.assertEqual(result["designs"][0]["all_path_min_period_delta_ns_observational_only"], -0.5)
             self.assertFalse(result["netlist_matched"])
