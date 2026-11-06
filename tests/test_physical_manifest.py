@@ -33,7 +33,7 @@ class PhysicalManifestTests(unittest.TestCase):
             for name in REQUIRED:
                 (results / name).write_bytes(("fixture-" + name).encode())
             (work / "postroute_sta.log").write_text(
-                "=== POST-ROUTE PARASITIC ANNOTATION ===\nAnnotated parasitics fixture\n"
+                "=== POST-ROUTE PARASITIC ANNOTATION ===\nFound 0 unannotated drivers.\\nFound 0 partially unannotated drivers.\n"
                 "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===\n"
                 "=== POST-ROUTE PARASITICS LOADED ===\nSPEF=fixture\n",
                 encoding="utf-8",
@@ -64,6 +64,16 @@ class PhysicalManifestTests(unittest.TestCase):
             log = physical_root / TOPS[1] / "postroute_sta.log"
             log.write_text("=== POST-ROUTE PARASITICS LOADED ===\nSPEF=fixture\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "annotation report"):
+                build_manifest(physical_root)
+
+
+    def test_manifest_rejects_nonzero_unannotated_drivers(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            physical_root = self._make_fixture(Path(tmp))
+            log = physical_root / TOPS[0] / "postroute_sta.log"
+            text = log.read_text(encoding="utf-8")
+            log.write_text(text.replace("Found 0 unannotated drivers.", "Found 2 unannotated drivers."), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "SPEF annotation incomplete"):
                 build_manifest(physical_root)
 
     def test_manifest_rejects_source_hash_mismatch(self):
