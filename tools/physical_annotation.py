@@ -74,7 +74,7 @@ def classify_annotation(log_path: Path, netlist_path: Path) -> dict:
         refs = re.findall(r"(?<![A-Za-z0-9_$])" + re.escape(net) + r"(?![A-Za-z0-9_$])", netlist)
         port_base = net.split("[", 1)[0]
         is_port = re.search(
-            r"\\b(?:input|output|inout)\\b[^;]*\\b" + re.escape(port_base) + r"\\b",
+            r"\b(?:input|output|inout)\b[^;]*\b" + re.escape(port_base) + r"\b",
             netlist,
             re.IGNORECASE,
         )
