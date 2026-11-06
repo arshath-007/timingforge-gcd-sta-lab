@@ -14,6 +14,7 @@ on:
       - "scripts/postroute_sta.tcl"
       - "tools/physical_experiments.py"
       - "tools/physical_metrics.py"
+      - "tests/test_physical_experiments.py"
       - "tools/physical_annotation.py"
       - ".github/workflows/physical-experiments.yml"
   workflow_dispatch:
