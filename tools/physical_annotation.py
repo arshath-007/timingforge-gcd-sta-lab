@@ -32,8 +32,10 @@ def classify_annotation(log_path: Path, netlist_path: Path) -> dict:
         raise ValueError(f"{log_path}: {partial} partially unannotated parasitic drivers")
     netlist = netlist_path.read_text(encoding="utf-8", errors="replace")
     pin_nets = {}
+    instances = set()
     for cell in CELL_RE.finditer(netlist):
         instance = _normalise_name(cell.group(2))
+        instances.add(instance)
         for pin, connection in PORT_RE.findall(cell.group(3)):
             pin_nets[(instance, pin)] = connection.strip()
     unannotated_names = []
@@ -57,7 +59,10 @@ def classify_annotation(log_path: Path, netlist_path: Path) -> dict:
         instance, pin = driver.rsplit("/", 1)
         key = (_normalise_name(instance), pin)
         if key not in pin_nets:
-            unresolved.append(driver)
+            if key[0] in instances:
+                dangling.append(driver)  # output port is omitted from the Verilog instance
+            else:
+                unresolved.append(driver)
             continue
         net = pin_nets[key]
         if not net:
