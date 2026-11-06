@@ -46,6 +46,28 @@ class PhysicalAnnotationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "connected to routed nets"):
                 classify_annotation(log, netlist)
 
+
+    def test_direct_output_port_is_a_connected_net(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            log = root / "postroute.log"
+            netlist = root / "final.v"
+            log.write_text(
+                "=== POST-ROUTE PARASITIC ANNOTATION ===\\n"
+                "Found 1 unannotated drivers.\\ndriver/Z\\n"
+                "Found 0 partially unannotated drivers.\\n"
+                "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===\\n",
+                encoding="utf-8",
+            )
+            netlist.write_text(
+                "module top(output out);\\n"
+                "BUF_X1 driver (.Z(out));\\n"
+                "endmodule\\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "connected to routed nets"):
+                classify_annotation(log, netlist)
+
     def test_partial_annotation_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             log, netlist = self._fixture(
