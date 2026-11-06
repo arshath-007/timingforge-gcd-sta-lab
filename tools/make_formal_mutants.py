@@ -1,4 +1,4 @@
-"""Generate auditable common-mode and single-RTL formal negative controls."""
+"""Generate auditable single-RTL formal negative controls."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]

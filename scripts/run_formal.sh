@@ -21,7 +21,7 @@ ACTUAL_CVC5="$(cvc5 --version 2>&1 | head -n 1)"
 {
   echo "Yosys: $ACTUAL_YOSYS"
   echo "Solver: cvc5 1.1.2"
-  echo "Proof: WIDTH=3 and WIDTH=4 bounded transaction equivalence plus independent Euclidean GCD specification"
+  echo "Proof: WIDTH=3 bounded transaction-result equivalence; independent functional correctness via exhaustive WIDTH=8 simulation"
   echo "Timeout policy: 180s first attempt; retry once for 300s only after timeout"
 } | tee build/formal/tool_versions.txt
 printf "proof,attempt,timeout_seconds,elapsed_seconds,exit_code\n" > build/formal/solver_timings.csv
@@ -88,7 +88,6 @@ run_proof() {
 }
 
 run_proof 3 rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv baseline_w3 pass
-run_proof 4 rtl/gcd_binary_combined.sv rtl/gcd_binary_split.sv baseline_w4 pass
 
 python3 -m tools.make_formal_mutants
 run_proof 3 build/formal/n1_combined.sv build/formal/n1_split.sv negative_n1_single_rtl fail

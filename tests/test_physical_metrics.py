@@ -115,6 +115,18 @@ class PhysicalMetricsTests(unittest.TestCase):
             self.assertEqual(result["worst_setup_slack_ns"], 5.9)
             self.assertEqual(result["worst_hold_slack_ns"], 0.01)
 
+    def test_parser_treats_zero_register_period_and_infinite_fmax_as_unavailable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "presynth_sta.log"
+            unavailable = PRESYNTH_LOG.replace("3.900 fmax = 256.410", "0.00 fmax = inf")
+            path.write_text(unavailable, encoding="utf-8")
+            result = parse_presynth_log(path)
+            self.assertIsNone(result["register_to_register_min_period_ns"])
+            self.assertIsNone(result["register_to_register_fmax_mhz"])
+            self.assertFalse(result["register_to_register_period_available"])
+            self.assertIn("zero register-only period", result["register_to_register_period_note"])
+            self.assertEqual(result["all_path_min_period_ns"], 4.1)
+
     def test_compare_marks_cross_flow_deltas_observational_only_and_includes_orfs_stages(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -123,7 +135,10 @@ class PhysicalMetricsTests(unittest.TestCase):
                 work = physical / top
                 work.mkdir(parents=True)
                 (work / "postroute_sta.log").write_text(LOG, encoding="utf-8")
-                (work / "presynth_sta.log").write_text(PRESYNTH_LOG, encoding="utf-8")
+                (work / "presynth_sta.log").write_text(
+                    PRESYNTH_LOG.replace("3.900 fmax = 256.410", "0.00 fmax = inf"),
+                    encoding="utf-8",
+                )
                 results = work / "results" / "nangate45" / top / "base"
                 results.mkdir(parents=True)
                 (results / "6_final.v").write_text("module top; endmodule\n", encoding="utf-8")
@@ -157,7 +172,9 @@ class PhysicalMetricsTests(unittest.TestCase):
             self.assertEqual(combined["prelayout_synthesis"]["standard_cell_instance_count"], 50)
             self.assertEqual(combined["orfs_synthesis"]["standard_cell_instance_count"], 100)
             self.assertEqual(combined["orfs_stage_metrics"]["clock_tree_synthesis"]["standard_cell_area"], 200.0)
-            self.assertEqual(combined["orfs_post_synthesis_sta"]["register_to_register_min_period_ns"], 3.9)
+            self.assertIsNone(combined["orfs_post_synthesis_sta"]["register_to_register_min_period_ns"])
+            self.assertIsNone(combined["orfs_synthesis_to_postroute"]["register_to_register_min_period_delta_ns"])
+            self.assertFalse(combined["orfs_synthesis_to_postroute"]["register_to_register_period_delta_available"])
             self.assertFalse(combined["orfs_synthesis_to_postroute"]["exact_netlist_match"])
 
 

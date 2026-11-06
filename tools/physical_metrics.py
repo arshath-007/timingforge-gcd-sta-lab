@@ -160,17 +160,37 @@ def parse_presynth_log(path: Path) -> dict:
     all_path = _section(text, "=== ORFS POST-SYNTHESIS ALL-PATH CLOCK PERIOD ===",
                         "=== ORFS POST-SYNTHESIS SETUP SUMMARY ===")
     def period(section_text: str) -> tuple[float | None, float | None]:
-        match = re.search(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", section_text, re.MULTILINE)
-        return (float(match.group(1)), float(match.group(2))) if match else (None, None)
+        match = re.search(
+            r"^\\s*\\S+\\s+period_min\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))"
+            r"\\s+fmax\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+)|inf|nan)",
+            section_text,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        if not match:
+            return None, None
+        period_value = float(match.group(1))
+        fmax_text = match.group(2).lower()
+        fmax_value = float(fmax_text) if fmax_text not in {"inf", "+inf", "-inf", "nan"} else None
+        # OpenROAD reports 0.00 ns / infinite Fmax when its register-only
+        # minimum-period query has no usable result. Preserve that as unavailable.
+        if period_value <= 0 or fmax_value is None:
+            return None, None
+        return period_value, fmax_value
+
     reg_period, reg_fmax = period(reg)
     all_period, all_fmax = period(all_path)
-    setup = _number(r"^\s*worst slack\s+max\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
-    hold = _number(r"^\s*worst slack\s+min\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
-    if reg_period is None or all_period is None or setup is None or hold is None:
+    setup = _number(r"^\\s*worst slack\\s+max\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
+    hold = _number(r"^\\s*worst slack\\s+min\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
+    if all_period is None or all_period <= 0 or setup is None or hold is None:
         raise ValueError(f"{path}: incomplete ORFS post-synthesis timing metrics")
     return {
         "register_to_register_min_period_ns": reg_period,
         "register_to_register_fmax_mhz": reg_fmax,
+        "register_to_register_period_available": reg_period is not None,
+        "register_to_register_period_note": (
+            None if reg_period is not None else
+            "OpenROAD reported a zero register-only period / infinite Fmax; retained as unavailable."
+        ),
         "all_path_min_period_ns": all_period,
         "all_path_fmax_mhz": all_fmax,
         "worst_setup_slack_ns": setup,
@@ -226,8 +246,15 @@ def compare(prelayout_path: Path, physical_root: Path, repo_root: Path | None = 
                 "same_orfs_synthesis_lineage": True,
                 "exact_netlist_match": False,
                 "interpretation": "post-synthesis versus final routed implementation in one ORFS flow; placement/CTS/timing repair may resize or buffer the netlist",
-                "register_to_register_min_period_delta_ns": round(
-                    post["postroute_register_to_register_min_period_ns"] - synthesis_sta["register_to_register_min_period_ns"], 6
+                "register_to_register_min_period_delta_ns": (
+                    round(post["postroute_register_to_register_min_period_ns"] - synthesis_sta["register_to_register_min_period_ns"], 6)
+                    if post.get("postroute_register_to_register_min_period_ns") is not None
+                    and synthesis_sta.get("register_to_register_min_period_ns") is not None
+                    else None
+                ),
+                "register_to_register_period_delta_available": (
+                    post.get("postroute_register_to_register_min_period_ns") is not None
+                    and synthesis_sta.get("register_to_register_min_period_ns") is not None
                 ),
                 "all_path_min_period_delta_ns": round(
                     post["postroute_all_path_min_period_ns"] - synthesis_sta["all_path_min_period_ns"], 6
