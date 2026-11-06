@@ -72,7 +72,7 @@ jobs:
             exit 1
           fi
           tail -n 100 build/physical/physical_flow_console.log
-          python3 -m tools.physical_metrics build/reports/sta_matrix_summary.json build/physical --output build/physical/physical_comparison.json
+          python3 -m tools.physical_metrics build/reports/sta_matrix_summary.json build/physical --output build/physical/physical_comparison.json --repo-root "$GITHUB_WORKSPACE"
       - name: Record exact source revision
         if: always()
         shell: bash
