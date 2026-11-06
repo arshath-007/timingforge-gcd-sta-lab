@@ -5,7 +5,11 @@ cd "$ROOT"
 
 ORFS_ROOT="${ORFS_ROOT:-/OpenROAD-flow-scripts}"
 EXPECTED_ORFS_IMAGE_DIGEST="sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e"
-ORFS_IMAGE_DIGEST="${ORFS_IMAGE_DIGEST:-$EXPECTED_ORFS_IMAGE_DIGEST}"
+ORFS_IMAGE_DIGEST="${ORFS_IMAGE_DIGEST:-}"
+if [[ -z "$ORFS_IMAGE_DIGEST" ]]; then
+  echo "ORFS_IMAGE_DIGEST must be explicitly set; the script cannot introspect its container runtime image digest" >&2
+  exit 2
+fi
 if [[ "$ORFS_IMAGE_DIGEST" != "$EXPECTED_ORFS_IMAGE_DIGEST" ]]; then
   echo "ORFS image digest mismatch: expected $EXPECTED_ORFS_IMAGE_DIGEST, received $ORFS_IMAGE_DIGEST" >&2
   exit 2
@@ -45,7 +49,7 @@ for file in "$LIBERTY" "$TECH_LEF" "$SC_LEF"; do
   [[ -s "$file" ]] || { echo "Required Nangate45 file missing: $file" >&2; exit 2; }
 done
 
-ORFS_SOURCE_REV="container-image-pinned"
+ORFS_SOURCE_REV="not-independently-identifiable; pinned container digest is recorded"
 if git -C "$ORFS_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   ORFS_SOURCE_REV="$(git -C "$ORFS_ROOT" rev-parse HEAD)"
 fi
