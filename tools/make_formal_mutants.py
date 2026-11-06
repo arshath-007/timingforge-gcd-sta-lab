@@ -22,14 +22,12 @@ def main() -> None:
     (OUT / "n1_split.sv").write_text(split, encoding="utf-8")
 
     n3_combined = replace_once(combined, "gcd_out <= b_in;", "gcd_out <= '0;", "N3 combined zero case")
-    n3_split = replace_once(split, "gcd_out <= b_in;", "gcd_out <= '0;", "N3 split zero case")
     (OUT / "n3_combined.sv").write_text(n3_combined, encoding="utf-8")
-    (OUT / "n3_split.sv").write_text(n3_split, encoding="utf-8")
+    (OUT / "n3_split.sv").write_text(split, encoding="utf-8")
 
     n4_combined = replace_once(combined, "common_shift <= common_shift + 1'b1;", "common_shift <= common_shift;", "N4 combined shift")
-    n4_split = replace_once(split, "common_shift <= common_shift + 1'b1;", "common_shift <= common_shift;", "N4 split shift")
     (OUT / "n4_combined.sv").write_text(n4_combined, encoding="utf-8")
-    (OUT / "n4_split.sv").write_text(n4_split, encoding="utf-8")
+    (OUT / "n4_split.sv").write_text(split, encoding="utf-8")
 
     n6_combined = replace_once(combined, "end else if (x > y) begin", "end else if (x[1:0] > y[1:0]) begin", "N6 comparator")
     (OUT / "n6_combined.sv").write_text(n6_combined, encoding="utf-8")
