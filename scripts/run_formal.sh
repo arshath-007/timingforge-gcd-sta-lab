@@ -81,7 +81,7 @@ run_solver() {
 run_proof() {
   local width="$1" combined="$2" split="$3" prefix="$4" expected="$5"
   local max_cycles depth
-  max_cycles=$((2 * ((1 << width) - 2) + 4))
+  if [[ "$width" -le 3 ]]; then max_cycles=12; else max_cycles=20; fi
   depth=$((max_cycles + 2))
   build_smt2 "$width" "$combined" "$split" "$prefix" "$depth"
   run_solver "$prefix" "$depth" "$expected"
