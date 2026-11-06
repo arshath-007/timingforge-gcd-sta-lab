@@ -12,10 +12,11 @@ Use the pinned OpenROAD Flow Scripts container or a compatible installation:
 
 ```bash
 source /OpenROAD-flow-scripts/env.sh
+export ORFS_IMAGE_DIGEST=sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
 bash scripts/run_physical.sh
 ```
 
-The script derives the repository root from its own path and exports `DESIGN_REPO_ROOT` for the ORFS configs, avoiding an undeclared `GITHUB_WORKSPACE` dependency. It records the source Git SHA, RTL/script/SDC hashes, tool versions, workflow-declared container digest, ORFS source revision when available, and Liberty/LEF hashes under `build/physical/`. The digest is recorded as workflow-declared provenance rather than independently measured from inside the container.
+The script derives the repository root from its own path and exports `DESIGN_REPO_ROOT` for the ORFS configs, avoiding an undeclared `GITHUB_WORKSPACE` dependency. It records the source Git SHA, RTL/script/SDC hashes, tool versions, workflow-declared container digest, ORFS source revision when available, and Liberty/LEF hashes under `build/physical/`. The digest is recorded as workflow-declared provenance rather than independently measured from inside the container. The runner requires the caller to supply this exact digest and rejects a missing or different declaration; GitHub Actions enforces the actual container image reference by pulling the digest-pinned image. A local shell cannot independently attest the container runtime's image digest, so the local environment must be verified by the operator.
 
 ## Required evidence
 
