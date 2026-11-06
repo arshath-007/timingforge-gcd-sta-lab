@@ -21,6 +21,7 @@ on:
       - "tools/parse_sta_matrix.py"
       - "tools/quality_checks.py"
       - "tools/qor_history.py"
+      - "tests/test_physical_*.py"
       - ".github/workflows/physical-design.yml"
   workflow_dispatch:
 
