@@ -73,7 +73,7 @@ class PhysicalManifestTests(unittest.TestCase):
             log = physical_root / TOPS[0] / "postroute_sta.log"
             text = log.read_text(encoding="utf-8")
             log.write_text(text.replace("Found 0 unannotated drivers.", "Found 2 unannotated drivers."), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "SPEF annotation incomplete"):
+            with self.assertRaisesRegex(ValueError, "report lists 0 unannotated drivers but summary says 2"):
                 build_manifest(physical_root)
 
     def test_manifest_rejects_source_hash_mismatch(self):
