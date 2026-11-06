@@ -121,7 +121,12 @@ def parse_log(path):
     rising_slacks = [
         float(value) for value in re.findall(r"([-+]?(?:\d+\.?\d*|\.\d+))\s+slack\s+\((?:MET|VIOLATED)\)", rising_reg2reg)
     ]
+    clock_properties_section_present = "=== CLOCK PROPERTIES ===" in text
     clock_section = section(text, "=== CLOCK PROPERTIES ===", "=== HOLD / MIN PATH DETAILS ===")
+    clock_properties_section_valid = bool(
+        re.search(r"^\\s*Clock\\s+Period\\s+Waveform\\s*$", clock_section, re.MULTILINE)
+        and re.search(r"^\\s*-{5,}\\s*$", clock_section, re.MULTILINE)
+    )
     clock_period_match = re.search(r"^\s*core_clk\s+([-+]?(?:\d+\.?\d*|\.\d+))\s+", clock_section, re.MULTILINE)
     clock_period = float(clock_period_match.group(1)) if clock_period_match else None
     unconstrained = section(text, "=== UNCONSTRAINED PATH DETAILS ===")
@@ -163,6 +168,8 @@ def parse_log(path):
         "register_to_register_rising_worst_slack_ns": min(rising_slacks) if rising_slacks else None,
         "register_to_register_rising_best_slack_ns": max(rising_slacks) if rising_slacks else None,
         "clock_period_ns": clock_period,
+        "clock_properties_section_present": clock_properties_section_present,
+        "clock_properties_section_valid": clock_properties_section_valid,
         "register_to_register_startpoint": rr_start.group(1).strip() if rr_start else None,
         "register_to_register_endpoint": rr_end.group(1).strip() if rr_end else None,
         "unconstrained_endpoints_reported": int(warning.group(1)) if warning else (0 if "=== TIMINGFORGE SETUP CHECK ===" in text else None),
