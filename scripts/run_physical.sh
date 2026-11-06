@@ -72,6 +72,9 @@ GIT_SHA="$(git -C "$ROOT" rev-parse HEAD)"
   echo "Script SHA256 (tools/physical_metrics.py): $(sha256sum tools/physical_metrics.py | awk '{print $1}')"
   echo "Script SHA256 (tools/physical_annotation.py): $(sha256sum tools/physical_annotation.py | awk '{print $1}')"
   echo "Source SDC SHA256: $(sha256sum constraints/gcd_baseline.sdc | awk '{print $1}')"
+  echo "Config SHA256 (physical/config/gcd_binary_combined.mk): $(sha256sum physical/config/gcd_binary_combined.mk | awk '{print $1}')"
+  echo "Config SHA256 (physical/config/gcd_binary_split.mk): $(sha256sum physical/config/gcd_binary_split.mk | awk '{print $1}')"
+  echo "Workflow SHA256 (.github/workflows/physical-design.yml): $(sha256sum .github/workflows/physical-design.yml | awk '{print $1}')"
 } | tee build/physical/tool_versions.txt
 
 for TOP in gcd_binary_combined gcd_binary_split; do
