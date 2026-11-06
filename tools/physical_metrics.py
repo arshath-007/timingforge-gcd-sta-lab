@@ -54,7 +54,7 @@ def parse_postroute_log(path: Path) -> dict:
     def drv_count(section: str) -> int | None:
         if not section.strip() or "TIMINGFORGE_DRV_UNSUPPORTED" in section:
             return None
-        return len(re.findall(r"\\(VIOLATED\\)", section, re.IGNORECASE))
+        return len(re.findall(r"\(VIOLATED\)", section, re.IGNORECASE))
     if all_period is None or all_period <= 0 or setup is None or hold is None:
         raise ValueError(f"{path}: required all-path period/setup/hold metric missing")
     return {
