@@ -72,7 +72,13 @@ def classify_annotation(log_path: Path, netlist_path: Path) -> dict:
         # A declaration plus the driver connection are the only references
         # for a dangling output. Any further token use indicates a sink or port.
         refs = re.findall(r"(?<![A-Za-z0-9_$])" + re.escape(net) + r"(?![A-Za-z0-9_$])", netlist)
-        if len(refs) <= 2:
+        port_base = net.split("[", 1)[0]
+        is_port = re.search(
+            r"\\b(?:input|output|inout)\\b[^;]*\\b" + re.escape(port_base) + r"\\b",
+            netlist,
+            re.IGNORECASE,
+        )
+        if len(refs) <= 2 and not is_port:
             dangling.append(driver)
         else:
             connected.append({"driver": driver, "net": net, "net_references": len(refs)})
