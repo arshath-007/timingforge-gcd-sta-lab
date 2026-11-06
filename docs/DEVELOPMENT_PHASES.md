@@ -61,7 +61,7 @@ The reviewed baseline and limits apply only to the pinned Nangate45 typical envi
 | Split | TC | TT, 25°C, 0.70 V | 7780.835 | 16.630 |
 | Split | WC | SS, 100°C, 0.63 V | 7490.069 | 5.691 |
 
-The combined WC scene has a negative hold slack among its 100 reported paths; the experiment must not be described as full hold closure. The path report cap is 100, so the recorded minimum is not an exhaustive signoff path inventory. Each architecture's TC-extracted SPEF is reused unchanged across BC/TC/WC. There is no corner-specific RC extraction or scaling.
+The combined WC scene has a negative hold slack among its emitted hold paths; the experiment must not be described as full hold closure. OpenSTA `report_checks -group_path_count 100` requests up to 100 paths per path group, not 100 paths total. The parser reports minima among emitted slack rows only; no exhaustive signoff path inventory or full-path WNS/TNS claim is made. Each architecture's TC-extracted SPEF is reused unchanged across BC/TC/WC. There is no corner-specific RC extraction or scaling.
 
 **SKY130HD TT post-route results:**
 
