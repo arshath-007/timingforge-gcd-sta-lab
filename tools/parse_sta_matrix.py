@@ -112,6 +112,8 @@ def parse_log(path):
     if top is None:
         raise ValueError(f"Unrecognised STA log: {path.name}")
     scenario = path.stem[len("sta_" + top + "_"):]
+    setup_check = section(text, "=== TIMINGFORGE SETUP CHECK ===", "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===")
+    setup_check_warnings = [line.strip() for line in setup_check.splitlines() if line.strip().startswith("Warning:")]
     setup = section(text, "=== SETUP / MAX PATH DETAILS ===", "=== REGISTER-TO-REGISTER SETUP PATHS ===")
     if "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===" in text:
         reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===")
@@ -149,6 +151,8 @@ def parse_log(path):
         log_path = str(path)
     return {
         "top": top, "scenario": scenario, "log_file": log_path,
+        "setup_check_warning_count": len(setup_check_warnings),
+        "setup_check_warnings": setup_check_warnings,
         "yosys_cell_area": cell_area(top, path),
         "register_to_register_min_period_ns": rr_period,
         "register_to_register_fmax_mhz": rr_fmax,
@@ -202,7 +206,7 @@ def summarise(report_dir=REPORT_DIR):
             if base and row["worst_setup_slack_ns"] is not None and base["worst_setup_slack_ns"] is not None else None
         )
     output = {
-        "schema_version": "0.4",
+        "schema_version": "0.5",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "analysis_engine": "OpenROAD-integrated OpenSTA",
         "platform": "Nangate45 typical Liberty",
