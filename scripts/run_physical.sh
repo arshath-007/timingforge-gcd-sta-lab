@@ -4,7 +4,12 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 ORFS_ROOT="${ORFS_ROOT:-/OpenROAD-flow-scripts}"
-ORFS_IMAGE_DIGEST="${ORFS_IMAGE_DIGEST:-sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e}"
+EXPECTED_ORFS_IMAGE_DIGEST="sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e"
+ORFS_IMAGE_DIGEST="${ORFS_IMAGE_DIGEST:-$EXPECTED_ORFS_IMAGE_DIGEST}"
+if [[ "$ORFS_IMAGE_DIGEST" != "$EXPECTED_ORFS_IMAGE_DIGEST" ]]; then
+  echo "ORFS image digest mismatch: expected $EXPECTED_ORFS_IMAGE_DIGEST, received $ORFS_IMAGE_DIGEST" >&2
+  exit 2
+fi
 export DESIGN_REPO_ROOT="$ROOT"
 if [[ ! -f "$ORFS_ROOT/env.sh" || ! -f "$ORFS_ROOT/flow/Makefile" ]]; then
   echo "OpenROAD Flow Scripts environment/Makefile not found under $ORFS_ROOT" >&2
