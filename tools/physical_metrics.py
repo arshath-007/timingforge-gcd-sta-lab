@@ -135,8 +135,8 @@ def _prelayout_synthesis_metrics(build_root: Path, top: str, matrix_row: dict) -
     if not path.is_file():
         raise FileNotFoundError(f"{top}: pre-layout Yosys synthesis log missing: {path}")
     text = path.read_text(encoding="utf-8", errors="replace")
-    areas = re.findall(r"Chip area for module .*?:\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
-    counts = re.findall(r"^\\s*(\\d+)\\s+[-+]?(?:\\d+\\.?\\d*|\\.\\d+)\\s+cells\\s*$", text, re.MULTILINE)
+    areas = re.findall(r"Chip area for module .*?:\s*([-+]?(?:\d+\.?\d*|\.\d+))", text)
+    counts = re.findall(r"^\s*(\d+)\s+[-+]?(?:\d+\.?\d*|\.\d+)\s+cells\s*$", text, re.MULTILINE)
     area = float(areas[-1]) if areas else matrix_row.get("yosys_cell_area")
     if area is None or not counts:
         raise ValueError(f"{top}: pre-layout synthesis area/cell count missing from {path}")
@@ -156,12 +156,12 @@ def parse_presynth_log(path: Path) -> dict:
     all_path = _section(text, "=== ORFS POST-SYNTHESIS ALL-PATH CLOCK PERIOD ===",
                         "=== ORFS POST-SYNTHESIS SETUP SUMMARY ===")
     def period(section_text: str) -> tuple[float | None, float | None]:
-        match = re.search(r"^\\s*\\S+\\s+period_min\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s+fmax\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", section_text, re.MULTILINE)
+        match = re.search(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", section_text, re.MULTILINE)
         return (float(match.group(1)), float(match.group(2))) if match else (None, None)
     reg_period, reg_fmax = period(reg)
     all_period, all_fmax = period(all_path)
-    setup = _number(r"^\\s*worst slack\\s+max\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
-    hold = _number(r"^\\s*worst slack\\s+min\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
+    setup = _number(r"^\s*worst slack\s+max\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
+    hold = _number(r"^\s*worst slack\s+min\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
     if reg_period is None or all_period is None or setup is None or hold is None:
         raise ValueError(f"{path}: incomplete ORFS post-synthesis timing metrics")
     return {
