@@ -19,6 +19,8 @@ PROVENANCE_FILES = (
     "constraints/gcd_baseline.sdc", "scripts/run_physical.sh",
     "scripts/postroute_sta.tcl", "tools/physical_manifest.py",
     "tools/physical_metrics.py", "tools/physical_annotation.py",
+    "physical/config/gcd_binary_combined.mk", "physical/config/gcd_binary_split.mk",
+    ".github/workflows/physical-design.yml",
 )
 
 
@@ -57,6 +59,10 @@ def build_manifest(root: Path, repo_root: Path | None = None) -> dict:
             label = f"RTL SHA256 ({relative})"
         elif relative.startswith("constraints/"):
             label = "Source SDC SHA256"
+        elif relative.startswith("physical/config/"):
+            label = f"Config SHA256 ({relative})"
+        elif relative.startswith(".github/"):
+            label = "Workflow SHA256 (.github/workflows/physical-design.yml)"
         else:
             label = f"Script SHA256 ({relative})"
         recorded = _value(versions, label)
