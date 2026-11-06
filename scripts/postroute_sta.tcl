@@ -13,6 +13,11 @@ read_sdc $::env(SDC)
 read_spef $::env(SPEF)
 set_propagated_clock [all_clocks]
 
+puts "=== POST-ROUTE PARASITIC ANNOTATION ==="
+if {[catch {report_parasitic_annotation -report_unannotated} annotation_error]} {
+    puts "TIMINGFORGE_PARASITIC_ANNOTATION_UNSUPPORTED: $annotation_error"
+    error "Cannot verify SPEF parasitic annotation with this OpenSTA build"
+}
 puts "=== TIMINGFORGE POST-ROUTE SETUP CHECK ==="
 check_setup -verbose
 puts "=== POST-ROUTE CLOCK PROPERTIES ==="
