@@ -5,6 +5,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "rtl/gcd_binary_*.sv"
       - "constraints/gcd_baseline_asap7.sdc"
       - "constraints/gcd_baseline_sky130hd.sdc"
       - "physical/config/*_asap7.mk"
@@ -17,6 +18,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - "rtl/gcd_binary_*.sv"
       - "constraints/gcd_baseline_asap7.sdc"
       - "constraints/gcd_baseline_sky130hd.sdc"
       - "physical/config/*_asap7.mk"
