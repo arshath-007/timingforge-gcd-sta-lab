@@ -103,7 +103,7 @@ for TOP in gcd_binary_combined gcd_binary_split; do
   export GDS_PATH="$RESULTS/6_final.gds" TOP_CELL="$TOP" GDS_REPORT="$ROOT/build/physical/$TOP/gds_validation.json"
   klayout -b -r "$ROOT/scripts/validate_gds.py" 2>&1 | tee "$ROOT/build/physical/$TOP/gds_validation.log"
   grep -q "GDS_VALIDATION_PASS" "$ROOT/build/physical/$TOP/gds_validation.log"
-  for artifact in 1_2_yosys.v 1_2_yosys.sdc; do
+  for artifact in 1_2_yosys.v 1_2_yosys.sdc 6_final.v; do
     [[ -s "$RESULTS/$artifact" ]] || {
       echo "ERROR: required ORFS synthesis artifact missing: $RESULTS/$artifact" >&2
       exit 1
