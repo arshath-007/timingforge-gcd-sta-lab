@@ -63,7 +63,7 @@ class PhysicalMetricsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "postroute.log"
             path.write_text(LOG.replace("Found 0 unannotated drivers.\n", "").replace("Found 0 partially unannotated drivers.\n", ""), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "both unannotated-driver counts"):
+            with self.assertRaisesRegex(ValueError, "native parasitic annotation report missing"):
                 parse_postroute_log(path)
 
     def test_compare_marks_cross_flow_deltas_observational_only(self):
