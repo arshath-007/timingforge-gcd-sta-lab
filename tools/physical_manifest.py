@@ -21,7 +21,7 @@ PROVENANCE_FILES = (
     "constraints/gcd_baseline.sdc", "scripts/run_physical.sh",
     "scripts/postroute_sta.tcl", "scripts/presynth_sta.tcl",
     "scripts/run_nangate_sta.sh", "scripts/synth.sh", "scripts/run_sta.sh",
-    "scripts/run_sta.tcl", "scripts/run_netlist_equiv.sh", "tools/physical_manifest.py",
+    "scripts/run_sta.tcl", "scripts/run_netlist_equiv.sh", "scripts/validate_gds.py", "tools/physical_manifest.py",
     "tools/physical_metrics.py", "tools/physical_annotation.py",
     "physical/config/gcd_binary_combined.mk", "physical/config/gcd_binary_split.mk",
     ".github/workflows/physical-design.yml",
@@ -90,6 +90,12 @@ def build_manifest(root: Path, repo_root: Path | None = None) -> dict:
             raise FileNotFoundError(f"{top}: ORFS post-synthesis STA log missing")
         if "ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD" not in presynth.read_text(encoding="utf-8", errors="replace"):
             raise ValueError(f"{top}: ORFS post-synthesis STA evidence incomplete")
+        gds_validation = work / "gds_validation.json"
+        if not gds_validation.is_file():
+            raise FileNotFoundError(f"{top}: KLayout GDS validation report missing")
+        gds_report = json.loads(gds_validation.read_text(encoding="utf-8"))
+        if gds_report.get("status") != "PASS" or gds_report.get("top_cell") != top:
+            raise ValueError(f"{top}: KLayout GDS validation did not pass for expected top cell")
         postroute = work / "postroute_sta.log"
         if not postroute.is_file():
             raise FileNotFoundError(f"{top}: post-route STA log missing")
@@ -118,6 +124,7 @@ def build_manifest(root: Path, repo_root: Path | None = None) -> dict:
             "final_spef": str((results / "6_final.spef").relative_to(root)),
             "final_sdc_sha256": sha256(results / "6_final.sdc"),
             "orfs_synthesis_netlist": str((results / "1_2_yosys.v").relative_to(root)),
+            "gds_validation_report": str(gds_validation.relative_to(root)),
             "presynth_sta_log": str(presynth.relative_to(root)),
             "postroute_sta_log": str(postroute.relative_to(root)),
             "parasitic_annotation": annotation_metrics,
