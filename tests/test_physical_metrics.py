@@ -112,8 +112,10 @@ class PhysicalMetricsTests(unittest.TestCase):
             root = Path(tmp)
             log = root / "yosys_gcd_binary_split.log"
             log.write_text(
-                "  1193 1.68E+03 cells\\n"
-                "Chip area for module 'gcd_binary_split': 1681.918000\\n",
+                "\n".join([
+                    "  1193 1.68E+03 cells",
+                    "Chip area for module 'gcd_binary_split': 1681.918000",
+                ]) + "\n",
                 encoding="utf-8",
             )
             result = _prelayout_synthesis_metrics(
@@ -123,35 +125,10 @@ class PhysicalMetricsTests(unittest.TestCase):
             self.assertAlmostEqual(result["standard_cell_area"], 1681.918, places=3)
 
             log.write_text(
-                "  1193 1.70E+03 cells\\n"
-                "Chip area for module 'gcd_binary_split': 1681.918000\\n",
-                encoding="utf-8",
-            )
-            with self.assertRaisesRegex(ValueError, "does not match Chip area"):
-                _prelayout_synthesis_metrics(
-                    root, "gcd_binary_split", {"yosys_cell_area": 1681.918}
-                )
-
-    def test_prelayout_yosys_metrics_accept_scientific_notation_and_match_area(self):
-        from tools.physical_metrics import _prelayout_synthesis_metrics
-
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            log = root / "yosys_gcd_binary_split.log"
-            log.write_text(
-                "  1193 1.68E+03 cells\n"
-                "Chip area for module 'gcd_binary_split': 1681.918000\n",
-                encoding="utf-8",
-            )
-            result = _prelayout_synthesis_metrics(
-                root, "gcd_binary_split", {"yosys_cell_area": 1681.918}
-            )
-            self.assertEqual(result["standard_cell_instance_count"], 1193)
-            self.assertAlmostEqual(result["standard_cell_area"], 1681.918, places=3)
-
-            log.write_text(
-                "  1193 1.70E+03 cells\n"
-                "Chip area for module 'gcd_binary_split': 1681.918000\n",
+                "\n".join([
+                    "  1193 1.70E+03 cells",
+                    "Chip area for module 'gcd_binary_split': 1681.918000",
+                ]) + "\n",
                 encoding="utf-8",
             )
             with self.assertRaisesRegex(ValueError, "does not match Chip area"):
