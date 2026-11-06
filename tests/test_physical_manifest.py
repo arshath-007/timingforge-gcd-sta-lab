@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.physical_manifest import PROVENANCE_FILES, REQUIRED, TOPS, build_manifest, sha256
+from tools.physical_manifest import PROVENANCE_FILES, REQUIRED, REQUIRED_STAGE_LOGS, TOPS, build_manifest, sha256
 
 
 class PhysicalManifestTests(unittest.TestCase):
@@ -36,6 +36,10 @@ class PhysicalManifestTests(unittest.TestCase):
             results.mkdir(parents=True)
             for name in REQUIRED:
                 (results / name).write_bytes(("fixture-" + name).encode())
+            logs = work / "logs" / "nangate45" / top / "base"
+            logs.mkdir(parents=True)
+            for name in REQUIRED_STAGE_LOGS:
+                (logs / name).write_bytes(("fixture-" + name).encode())
             (work / "presynth_sta.log").write_text(
                 "=== ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD ===\n",
                 encoding="utf-8",
