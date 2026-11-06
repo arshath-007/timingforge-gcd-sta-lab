@@ -1,15 +1,15 @@
-# Phase 3 technology-breadth results — PR validation
+# Phase 3 technology-breadth results — PR #10 validation
 
 ## Latest validated run
 
-- Workflow: [TimingForge technology breadth](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727158)
-- Source commit: `6f5a9c1b9c73261005445a6fd941242e6dde54cb`
-- Artifact: [timingforge-technology-breadth.zip](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727158/artifacts/13449087689) (55,750,648 bytes; 90-day retention)
-- Artifact SHA-256: `d043643e285e840120da9e407c59ae744d58bf4379773c708e6c85bb7768127c`
-- Manifest: `technology_breadth_manifest.json` (schema 1.0; 412 files in the archive)
-- Tool provenance: OpenROAD `26Q3-1080-gab6fd26351`; Yosys `0.68+post`; ORFS source revision `11aa833a11488c3a540a1d8eb4caa23fd22df703`; pinned container digest `sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e`.
+- Workflow: [TimingForge technology breadth, run #58](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181)
+- Source commit: `6140483a93dec20f0dff4c014ff9a9f852802a75`
+- Artifact: [timingforge-technology-breadth.zip](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181/artifacts/13494468655) (55,751,174 bytes; 90-day retention)
+- Artifact SHA-256: `bed410bfef04cbd23211c1f13f24653e16301823431448c10f6ae521f5a75112`
+- Manifest: `technology_breadth_manifest.json` (schema 1.0; produced by the PR #10 run)
+- Tool provenance: OpenROAD/Yosys versions and ORFS source revision are recorded in the artifact's `tool_versions.txt`; pinned container digest `sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e`.
 
-The workflow completed successfully for both GCD architectures on both platforms. Each of the four platform/design combinations includes final ODB, Verilog, GDS, SPEF and SDC. All 36 manifest-listed implementation-artifact hashes were independently checked after downloading the archive; no missing file or SHA-256 mismatch was found.
+The PR #10 workflow completed successfully for both GCD architectures on both platforms. It generated final ODB, Verilog, GDS, SPEF and SDC for all four platform/design combinations and passed manifest validation. The build-time manifest generator reads the actual pinned Liberty files used by the three ASAP7 scenes, parses each file's `nom_voltage` and `nom_temperature`, compares those values with the expected scene values, and records the parsed values and SHA-256 hashes. A successful run therefore confirms that this check passed against the actual libraries in the pinned ORFS environment; it is not merely a unit test against synthetic headers.
 
 ## ASAP7 post-route MCMM
 
@@ -32,7 +32,7 @@ The physical implementation is performed once per architecture at TC. OpenSTA th
 | Split GCD | TC | 7780.835 | 16.630 |
 | Split GCD | WC | 7490.069 | 5.691 |
 
-The combined architecture has a negative hold slack of -3.225 ps among the 100 reported WC paths. This must remain visible; the experiment does not establish full hold closure. The path cap is 100 per path type/scene/architecture, so these values are minima among the emitted paths, not an exhaustive signoff path inventory. All six scenes produced setup, hold and design-rule report files.
+The combined architecture has a negative hold slack of -3.225 ps among the reported WC hold paths. This must remain visible; the experiment does not establish full hold closure. The TCL uses OpenSTA `report_checks -group_path_count 100`: OpenSTA defines this as up to 100 paths **per path group**, not 100 paths total. The reports remain grouped by path group (the optional `-sort_by_slack` mode instead sorts across groups). The parser computes the minimum only from slack rows present in those emitted reports. Accordingly, the values below are minima among the emitted path set; they are not a full path inventory, and the project does not claim exhaustive signoff WNS/TNS from this capped report. All six scenes produced setup, hold and design-rule report files. See the [OpenSTA `report_checks` command reference](https://opensta.readthedocs.io/en/latest/Commands/) for the path-group and sorting options.
 
 The ASAP7 experiment uses these exact library models, with PVT metadata parsed from every Liberty file actually read by each scene. The SIMPLE corner Liberty files are filtered to remove XOR, XNOR and HAxp5 cells because the pinned platform's FF/TT/SS models do not provide consistent timing groups for those cells; the same cell exclusions are applied to physical mapping. The manifest records source and filtered Liberty hashes.
 
