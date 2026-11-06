@@ -5,7 +5,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.4.0 candidate · **Latest published release:** v0.2.0 · **License:** MIT
+**Status:** Research prototype · **Version:** 0.4.0 candidate · **Latest published release:** v0.2.1 · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -76,7 +76,7 @@ tools/           fault injector, SDC linter, STA/QoR and physical-evidence parse
 tests/           Python unit tests for STA, QoR, and physical evidence
 scripts/         synthesis, formal, OpenSTA and OpenROAD entry points
 formal/          bounded transaction-equivalence miter and SymbiYosys config
-physical/        matched Nangate45 ORFS design configurations
+physical/        paired Nangate45 ORFS design configurations
 docs/            scope, fault catalog, verification and physical results
 reports/         generated reports (not committed by default)
 .github/         automated RTL/Python and library-backed STA workflows
@@ -205,7 +205,9 @@ The [physical-design workflow run #23](https://github.com/arshath-007/timingforg
 | Reported setup skew (worst reported path) | +0.16 ns | +0.16 ns |
 | Reported hold skew (worst reported path) | -0.06 ns | -0.06 ns |
 
-The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are typical-corner educational results, not signoff. Multi-corner analysis is deferred because a second, independently verified Liberty PVT model is not part of the selected platform. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
+The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged.
+
+**Architecture conclusion (single physical run):** combined is faster on the post-route register-to-register minimum period (0.95 vs 1.02 ns) and all-path minimum period (2.13 vs 2.26 ns), and has slightly higher worst setup/hold slack in this run. Split has lower post-route standard-cell area (2502.00 vs 2654.95 area units). The pre-layout all-path result alone favours split (2.35 vs 2.94 ns), but that metric includes I/O paths and does not establish an internal-speed advantage; the combined pre-layout native register-only period was unavailable. Confidence in the post-route ranking is limited to one Nangate45 typical-corner placement/CTS/routing configuration. No variation study or uniform-random latency result is included yet; do not generalize this ranking as a robust architecture winner. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are typical-corner educational results, not signoff. Multi-corner analysis is deferred because a second, independently verified Liberty PVT model is not part of the selected platform. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
 
 ## Research questions
 
