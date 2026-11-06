@@ -45,7 +45,7 @@ class PhysicalMetricsTests(unittest.TestCase):
             self.assertEqual(result["postroute_worst_setup_slack_ns"], 6.1)
             self.assertEqual(result["postroute_worst_hold_slack_ns"], 0.02)
             self.assertTrue(result["clock_skew_supported"])
-            self.assertIn("Annotated parasitics", result["parasitic_annotation_report"])
+            self.assertIn("Found 0 unannotated drivers.", result["parasitic_annotation_report"])
             self.assertEqual(result["postroute_max_slew_violation_count"], 1)
             self.assertEqual(result["postroute_max_capacitance_violation_count"], 0)
             self.assertEqual(result["postroute_max_fanout_violation_count"], 0)
@@ -62,8 +62,8 @@ class PhysicalMetricsTests(unittest.TestCase):
     def test_parser_rejects_missing_annotation_report(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "postroute.log"
-            path.write_text(LOG.replace("Annotated parasitics report: fixture", ""), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "annotation report missing"):
+            path.write_text(LOG.replace("Found 0 unannotated drivers.\\nFound 0 partially unannotated drivers.\\n", ""), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "both unannotated-driver counts"):
                 parse_postroute_log(path)
 
     def test_compare_marks_cross_flow_deltas_observational_only(self):
