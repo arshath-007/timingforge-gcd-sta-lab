@@ -135,13 +135,30 @@ def _prelayout_synthesis_metrics(build_root: Path, top: str, matrix_row: dict) -
     if not path.is_file():
         raise FileNotFoundError(f"{top}: pre-layout Yosys synthesis log missing: {path}")
     text = path.read_text(encoding="utf-8", errors="replace")
-    areas = re.findall(r"Chip area for module .*?:\s*([-+]?(?:\d+\.?\d*|\.\d+))", text)
-    counts = re.findall(r"^\s*(\d+)\s+[-+]?(?:\d+\.?\d*|\.\d+)\s+cells\s*$", text, re.MULTILINE)
+    # Yosys's mapped-statistics table may render area in scientific notation
+    # (for example, "1193 1.68E+03 cells"). Accept that representation, but
+    # cross-check it against the explicit Chip area summary to avoid silently
+    # reporting a malformed or mismatched row.
+    number = r"[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?"
+    areas = re.findall(r"Chip area for module .*?:\\s*(" + number + r")", text)
+    rows = re.findall(
+        r"^\\s*(\\d+)\\s+(" + number + r")\\s+cells\\s*$",
+        text,
+        re.MULTILINE,
+    )
     area = float(areas[-1]) if areas else matrix_row.get("yosys_cell_area")
-    if area is None or not counts:
+    if area is None or not rows:
         raise ValueError(f"{top}: pre-layout synthesis area/cell count missing from {path}")
+    count, table_area = rows[-1]
+    table_area = float(table_area)
+    if areas and abs(table_area - float(area)) > max(0.01, abs(float(area)) * 1e-5):
+        raise ValueError(
+            f"{top}: mapped-statistics area {table_area} does not match Chip area {area} in {path}"
+        )
+    if int(count) <= 0 or float(area) <= 0:
+        raise ValueError(f"{top}: pre-layout synthesis metrics must be positive in {path}")
     return {
-        "standard_cell_instance_count": int(counts[-1]),
+        "standard_cell_instance_count": int(count),
         "standard_cell_area": float(area),
         "source_log": str(path),
     }
