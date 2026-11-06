@@ -63,7 +63,7 @@ TIMINGFORGE_DRV_UNSUPPORTED: max_fanout: command unavailable
     def test_records_check_setup_warnings(self):
         sample = SAMPLE.replace(
             "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===",
-            "=== TIMINGFORGE SETUP CHECK ===\\nWarning: There are 1 unconstrained endpoints.\\n"
+            "=== TIMINGFORGE SETUP CHECK ===\nWarning: There are 1 unconstrained endpoints.\n"
             "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===",
         )
         with tempfile.TemporaryDirectory() as temp:
@@ -159,7 +159,7 @@ core_clk                 10.00        0.00      5.00
     def test_m01_clock_properties_section_is_valid_when_empty(self):
         sample = SAMPLE.replace(
             "=== HOLD / MIN PATH DETAILS ===",
-            "=== CLOCK PROPERTIES ===\\nClock                   Period          Waveform\\n----------------------------------------------------\\n=== HOLD / MIN PATH DETAILS ===",
+            "=== CLOCK PROPERTIES ===\nClock                   Period          Waveform\n----------------------------------------------------\n=== HOLD / MIN PATH DETAILS ===",
         )
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "sta_gcd_binary_combined_M01_missing_clock.log"
@@ -172,7 +172,7 @@ core_clk                 10.00        0.00      5.00
     def test_m01_malformed_clock_properties_section_is_invalid(self):
         sample = SAMPLE.replace(
             "=== HOLD / MIN PATH DETAILS ===",
-            "=== CLOCK PROPERTIES ===\\nthis is not a clock report\\n=== HOLD / MIN PATH DETAILS ===",
+            "=== CLOCK PROPERTIES ===\nthis is not a clock report\n=== HOLD / MIN PATH DETAILS ===",
         )
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "sta_gcd_binary_combined_M01_missing_clock.log"
@@ -183,10 +183,10 @@ core_clk                 10.00        0.00      5.00
             self.assertFalse(row["clock_properties_section_valid"])
 
     def test_mutant_path_inventory_uses_100_path_cap(self):
-        paths = "\\n".join("0.100 slack (MET)" for _ in range(100))
+        paths = "\n".join("0.100 slack (MET)" for _ in range(100))
         sample = SAMPLE.replace(
             "=== HOLD / MIN PATH DETAILS ===",
-            "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===\\n" + paths + "\\n=== HOLD / MIN PATH DETAILS ===",
+            "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===\n" + paths + "\n=== HOLD / MIN PATH DETAILS ===",
         )
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "sta_gcd_binary_combined_M04_unjustified_false_path.log"
