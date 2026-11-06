@@ -33,7 +33,7 @@ class PhysicalManifestTests(unittest.TestCase):
             for name in REQUIRED:
                 (results / name).write_bytes(("fixture-" + name).encode())
             (work / "postroute_sta.log").write_text(
-                "=== POST-ROUTE PARASITIC ANNOTATION ===\nFound 0 unannotated drivers.\\nFound 0 partially unannotated drivers.\n"
+                "=== POST-ROUTE PARASITIC ANNOTATION ===\nFound 0 unannotated drivers.\nFound 0 partially unannotated drivers.\n"
                 "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===\n"
                 "=== POST-ROUTE PARASITICS LOADED ===\nSPEF=fixture\n",
                 encoding="utf-8",
