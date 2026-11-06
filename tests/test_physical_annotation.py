@@ -30,7 +30,7 @@ class PhysicalAnnotationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             log, netlist = self._fixture(
                 Path(tmp),
-                "Found 2 unannotated drivers.\ndangling/ZN\nno_load/ZN\nFound 0 partially unannotated drivers.",
+                "Found 2 unannotated drivers.\ndangling/Z\nno_load/Z\nFound 0 partially unannotated drivers.",
             )
             result = classify_annotation(log, netlist)
             self.assertEqual(result["reported_unannotated_driver_count"], 2)
@@ -41,7 +41,7 @@ class PhysicalAnnotationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             log, netlist = self._fixture(
                 Path(tmp),
-                "Found 1 unannotated drivers.\nconnected/ZN\nFound 0 partially unannotated drivers.",
+                "Found 1 unannotated drivers.\nconnected/Z\nFound 0 partially unannotated drivers.",
             )
             with self.assertRaisesRegex(ValueError, "connected to routed nets"):
                 classify_annotation(log, netlist)
