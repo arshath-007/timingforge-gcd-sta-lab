@@ -4,7 +4,7 @@
 
 Phase 3 adds a reproducible educational RTL-to-GDS flow for the two GCD architectures using the same pinned OpenROAD Flow Scripts Nangate45 platform as the pre-layout STA matrix.
 
-The intended stages are floorplanning, global placement, clock-tree synthesis, global/detail routing, final database generation, OpenRCX parasitic extraction, KLayout GDS generation, and post-route STA with propagated clocks. The physical CI pins an ORFS container image digest so the source flow, platform files, and tool binaries remain a matched set. The pre-layout matrix is regenerated inside that same job from the exact bundled Nangate45 Liberty/LEF files before physical implementation. However, pre-layout Yosys synthesis and ORFS synthesis use different configurations; the resulting netlists are not proven identical. The cross-stage comparison must therefore be interpreted as observational, not as a pure routing-parasitic delta.
+The intended stages are floorplanning, global placement, clock-tree synthesis, global/detail routing, final database generation, OpenRCX parasitic extraction, KLayout GDS generation, and post-route STA with propagated clocks. KLayout batch validation then checks that the GDS is readable, contains the expected top cell, has a non-empty bounding box, and contains geometry. This is a structural GDS sanity check, not foundry DRC or LVS signoff. The physical CI pins an ORFS container image digest so the source flow, platform files, and tool binaries remain a matched set. The pre-layout matrix is regenerated inside that same job from the exact bundled Nangate45 Liberty/LEF files before physical implementation. However, pre-layout Yosys synthesis and ORFS synthesis use different configurations; the resulting netlists are not proven identical. The cross-stage comparison must therefore be interpreted as observational, not as a pure routing-parasitic delta.
 
 ## Run
 
@@ -27,7 +27,7 @@ For each architecture the flow must produce:
 - `4_cts.odb`
 - `5_route.odb`
 - `6_final.odb`
-- `6_final.gds`
+- `6_final.gds` plus `gds_validation.json` confirming KLayout read/top-cell/geometry checks
 - `6_final.spef`
 - `6_final.sdc`
 - post-route STA log showing the extracted SPEF was loaded and propagated-clock reports were generated
