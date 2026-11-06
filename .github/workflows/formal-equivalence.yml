@@ -16,15 +16,18 @@ concurrency:
 jobs:
   formal-equivalence:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - name: Install Yosys and CVC5
         run: |
           sudo apt-get update
-          sudo apt-get install -y yosys cvc5
+          sudo apt-get install -y yosys cvc5 iverilog
           command -v yosys-smtbmc
           command -v cvc5
+          command -v iverilog
+          test "$(yosys -V)" = "Yosys 0.33 (git sha1 2584903a060)"
+          test "$(cvc5 --version 2>&1 | head -n 1)" = "This is cvc5 version 1.1.2"
       - name: Run bounded GCD transaction-equivalence proof
         shell: bash
         run: bash scripts/run_formal.sh
