@@ -33,13 +33,16 @@ module gcd_equiv_formal #(parameter integer WIDTH = 3);
 
     function automatic [WIDTH-1:0] gcd_spec(input [WIDTH-1:0] a, input [WIDTH-1:0] b);
         reg [WIDTH-1:0] x, y, temp;
+        integer step;
         begin
             x = a;
             y = b;
-            while (y != 0) begin
-                temp = x % y;
-                x = y;
-                y = temp;
+            for (step = 0; step < (2 * WIDTH); step = step + 1) begin
+                if (y != 0) begin
+                    temp = x % y;
+                    x = y;
+                    y = temp;
+                end
             end
             gcd_spec = x;
         end
