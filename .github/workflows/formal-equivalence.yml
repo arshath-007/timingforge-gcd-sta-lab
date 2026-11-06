@@ -28,6 +28,18 @@ jobs:
       - name: Run bounded GCD transaction-equivalence proof
         shell: bash
         run: bash scripts/run_formal.sh
+      - name: Record exact source revision
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## TimingForge formal evidence provenance'
+            echo "- Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- Checked-out SHA: $GITHUB_SHA"
+            echo "- PR head SHA: ${{ github.event.pull_request.head.sha || 'not a pull_request event' }}"
+            echo "- Ref: $GITHUB_REF"
+            echo "- Event: $GITHUB_EVENT_NAME"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload formal proof evidence
         if: always()
         uses: actions/upload-artifact@v4
