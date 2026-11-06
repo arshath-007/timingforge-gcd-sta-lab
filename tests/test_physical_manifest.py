@@ -40,6 +40,9 @@ class PhysicalManifestTests(unittest.TestCase):
             logs.mkdir(parents=True)
             for name in REQUIRED_STAGE_LOGS:
                 (logs / name).write_bytes(("fixture-" + name).encode())
+            (work / "gds_validation.json").write_text(
+                json.dumps({"status": "PASS", "top_cell": top}), encoding="utf-8"
+            )
             (work / "presynth_sta.log").write_text(
                 "=== ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD ===\n",
                 encoding="utf-8",
