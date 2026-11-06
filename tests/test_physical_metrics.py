@@ -7,7 +7,7 @@ from tools.physical_metrics import compare, parse_postroute_log
 
 
 LOG = """=== POST-ROUTE PARASITIC ANNOTATION ===
-Annotated parasitics report: fixture
+Found 0 unannotated drivers.\nFound 0 partially unannotated drivers.
 === TIMINGFORGE POST-ROUTE SETUP CHECK ===
 === POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ===
 core_clk period_min = 3.700 fmax = 270.270
@@ -50,6 +50,14 @@ class PhysicalMetricsTests(unittest.TestCase):
             self.assertEqual(result["postroute_max_capacitance_violation_count"], 0)
             self.assertEqual(result["postroute_max_fanout_violation_count"], 0)
             self.assertTrue(result["postroute_drv_supported"])
+
+
+    def test_parser_rejects_nonzero_unannotated_driver_count(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "postroute.log"
+            path.write_text(LOG.replace("Found 0 unannotated drivers.", "Found 1 unannotated drivers."), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "incomplete SPEF annotation"):
+                parse_postroute_log(path)
 
     def test_parser_rejects_missing_annotation_report(self):
         with tempfile.TemporaryDirectory() as tmp:
