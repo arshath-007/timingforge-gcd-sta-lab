@@ -62,6 +62,12 @@ def parse_postroute_log(path: Path) -> dict:
         return len(re.findall(r"\(VIOLATED\)", section, re.IGNORECASE))
     if all_period is None or all_period <= 0 or setup is None or hold is None:
         raise ValueError(f"{path}: required all-path period/setup/hold metric missing")
+    if reg_period is None or reg_period <= 0:
+        raise ValueError(f"{path}: register-to-register minimum-period metric missing")
+    if not setup_skew.strip() or not hold_skew.strip() or "TIMINGFORGE_CLOCK_SKEW_UNSUPPORTED" in setup_skew + hold_skew:
+        raise ValueError(f"{path}: propagated-clock skew reports missing")
+    if any(drv_count(section) is None for section in (drv_slew, drv_cap, drv_fanout)):
+        raise ValueError(f"{path}: one or more post-route DRV reports are unsupported or missing")
     return {
         "postroute_register_to_register_min_period_ns": reg_period,
         "postroute_register_to_register_fmax_mhz": reg_fmax,
