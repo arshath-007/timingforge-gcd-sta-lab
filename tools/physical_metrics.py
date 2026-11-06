@@ -161,8 +161,8 @@ def parse_presynth_log(path: Path) -> dict:
                         "=== ORFS POST-SYNTHESIS SETUP SUMMARY ===")
     def period(section_text: str) -> tuple[float | None, float | None]:
         match = re.search(
-            r"^\\s*\\S+\\s+period_min\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))"
-            r"\\s+fmax\\s*=\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+)|inf|nan)",
+            r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))"
+            r"\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+)|inf|nan)",
             section_text,
             re.MULTILINE | re.IGNORECASE,
         )
@@ -179,8 +179,8 @@ def parse_presynth_log(path: Path) -> dict:
 
     reg_period, reg_fmax = period(reg)
     all_period, all_fmax = period(all_path)
-    setup = _number(r"^\\s*worst slack\\s+max\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
-    hold = _number(r"^\\s*worst slack\\s+min\\s+([-+]?(?:\\d+\\.?\\d*|\\.\\d+))", text)
+    setup = _number(r"^\s*worst slack\s+max\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
+    hold = _number(r"^\s*worst slack\s+min\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
     if all_period is None or all_period <= 0 or setup is None or hold is None:
         raise ValueError(f"{path}: incomplete ORFS post-synthesis timing metrics")
     return {
