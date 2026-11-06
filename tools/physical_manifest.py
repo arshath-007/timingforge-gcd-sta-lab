@@ -19,7 +19,9 @@ REQUIRED_STAGE_LOGS = ("1_synth.json", "3_3_place_gp.json", "4_1_cts.json", "5_1
 PROVENANCE_FILES = (
     "rtl/gcd_binary_combined.sv", "rtl/gcd_binary_split.sv",
     "constraints/gcd_baseline.sdc", "scripts/run_physical.sh",
-    "scripts/postroute_sta.tcl", "scripts/presynth_sta.tcl", "tools/physical_manifest.py",
+    "scripts/postroute_sta.tcl", "scripts/presynth_sta.tcl",
+    "scripts/run_nangate_sta.sh", "scripts/synth.sh", "scripts/run_sta.sh",
+    "scripts/run_sta.tcl", "scripts/run_netlist_equiv.sh", "tools/physical_manifest.py",
     "tools/physical_metrics.py", "tools/physical_annotation.py",
     "physical/config/gcd_binary_combined.mk", "physical/config/gcd_binary_split.mk",
     ".github/workflows/physical-design.yml",
