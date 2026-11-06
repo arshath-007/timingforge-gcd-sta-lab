@@ -15,6 +15,7 @@ on:
       - "scripts/run_sta.tcl"
       - "scripts/synth.sh"
       - "scripts/postroute_sta.tcl"
+      - "scripts/presynth_sta.tcl"
       - "tools/physical_manifest.py"
       - "tools/physical_metrics.py"
       - "tools/physical_annotation.py"
