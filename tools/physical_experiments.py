@@ -157,6 +157,9 @@ def collect(root: Path) -> dict:
         "run_count": len(runs),
         "parsed_run_count": sum(row.get("evidence_status") == "parsed" for row in runs),
         "failed_run_count": sum(row.get("evidence_status") != "parsed" for row in runs),
+        "variance_run_count": sum(row.get("experiment") == "variance" for row in runs),
+        "variance_parsed_run_count": sum(row.get("experiment") == "variance" and row.get("evidence_status") == "parsed" for row in runs),
+        "clock_sweep_run_count": sum(row.get("experiment") == "clock_sweep" for row in runs),
         "variance_summary_by_architecture": by_top,
         "variance_pairwise_register_period_wins": wins,
         "variance_pairwise_results": variance_pairs,
@@ -176,7 +179,12 @@ def main() -> int:
     args.output.write_text(rendered, encoding="utf-8")
     print(f"runs={result['run_count']} parsed={result['parsed_run_count']} failed={result['failed_run_count']}")
     print(f"variance period wins: {result['variance_pairwise_register_period_wins']}")
-    return 0 if result["parsed_run_count"] else 1
+    return 0 if (
+        result["run_count"] == 22
+        and result["variance_run_count"] == 10
+        and result["variance_parsed_run_count"] == 10
+        and result["clock_sweep_run_count"] == 12
+    ) else 1
 
 
 if __name__ == "__main__":
