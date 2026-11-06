@@ -1,4 +1,4 @@
-"""Parse post-route OpenSTA logs and compare against matched pre-layout results."""
+"""Parse post-route OpenSTA evidence and label cross-flow comparisons honestly."""
 from __future__ import annotations
 
 import argparse
@@ -15,42 +15,58 @@ def _number(pattern: str, text: str) -> float | None:
     return float(match.group(1)) if match else None
 
 
+def _section(text: str, start: str, end: str) -> str:
+    parts = text.split(start, 1)
+    if len(parts) != 2:
+        return ""
+    return parts[1].split(end, 1)[0]
+
+
 def parse_postroute_log(path: Path) -> dict:
     text = path.read_text(encoding="utf-8", errors="replace")
-    if "POST-ROUTE PARASITICS LOADED" not in text:
-        raise ValueError(f"{path}: extracted parasitics marker missing")
-    if "SPEF=" not in text:
-        raise ValueError(f"{path}: SPEF path not recorded")
-    clock = text.split("=== POST-ROUTE ALL-PATH CLOCK PERIOD ===", 1)
-    if len(clock) != 2:
-        raise ValueError(f"{path}: post-route clock-period section missing")
-    clock_text = clock[1].split("=== POST-ROUTE SETUP SUMMARY ===", 1)[0]
-    period = _number(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", clock_text)
-    fmax = _number(r"^\s*\S+\s+period_min\s*=\s*[-+]?(?:\d+\.?\d*|\.\d+)\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", clock_text)
+    if "POST-ROUTE PARASITICS LOADED" not in text or "SPEF=" not in text:
+        raise ValueError(f"{path}: extracted SPEF load evidence missing")
+    annotation = _section(text, "=== POST-ROUTE PARASITIC ANNOTATION ===",
+                          "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===")
+    if not annotation.strip() or "TIMINGFORGE_PARASITIC_ANNOTATION_UNSUPPORTED" in annotation:
+        raise ValueError(f"{path}: native parasitic annotation report missing")
+    reg_text = _section(text, "=== POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ===",
+                        "=== POST-ROUTE ALL-PATH CLOCK PERIOD ===")
+    all_text = _section(text, "=== POST-ROUTE ALL-PATH CLOCK PERIOD ===",
+                        "=== POST-ROUTE SETUP SUMMARY ===")
+    reg_period = _number(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", reg_text)
+    reg_fmax = _number(r"^\s*\S+\s+period_min\s*=\s*[-+]?(?:\d+\.?\d*|\.\d+)\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", reg_text)
+    all_period = _number(r"^\s*\S+\s+period_min\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", all_text)
+    all_fmax = _number(r"^\s*\S+\s+period_min\s*=\s*[-+]?(?:\d+\.?\d*|\.\d+)\s+fmax\s*=\s*([-+]?(?:\d+\.?\d*|\.\d+))", all_text)
     setup = _number(r"^\s*worst slack\s+max\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
     hold = _number(r"^\s*worst slack\s+min\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
     setup_wns = _number(r"^\s*wns\s+max\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
     setup_tns = _number(r"^\s*tns\s+max\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
     hold_wns = _number(r"^\s*wns\s+min\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
     hold_tns = _number(r"^\s*tns\s+min\s+([-+]?(?:\d+\.?\d*|\.\d+))", text)
-    skew_setup = text.split("=== POST-ROUTE SETUP CLOCK SKEW ===", 1)
-    skew_hold = text.split("=== POST-ROUTE HOLD CLOCK SKEW ===", 1)
-    setup_skew_text = skew_setup[1].split("=== POST-ROUTE HOLD CLOCK SKEW ===", 1)[0] if len(skew_setup) > 1 else ""
-    hold_skew_text = skew_hold[1].split("=== POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ===", 1)[0] if len(skew_hold) > 1 else ""
-    if period is None or period <= 0 or setup is None or hold is None:
-        raise ValueError(f"{path}: required post-route period/setup/hold metric missing")
+    setup_skew = _section(text, "=== POST-ROUTE SETUP CLOCK SKEW ===",
+                          "=== POST-ROUTE HOLD CLOCK SKEW ===")
+    hold_skew = _section(text, "=== POST-ROUTE HOLD CLOCK SKEW ===",
+                         "=== POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ===")
+    drv = _section(text, "=== POST-ROUTE DRV ===", "=== POST-ROUTE PARASITICS LOADED ===")
+    if all_period is None or all_period <= 0 or setup is None or hold is None:
+        raise ValueError(f"{path}: required all-path period/setup/hold metric missing")
     return {
-        "postroute_all_path_min_period_ns": period,
-        "postroute_all_path_fmax_mhz": fmax,
+        "postroute_register_to_register_min_period_ns": reg_period,
+        "postroute_register_to_register_fmax_mhz": reg_fmax,
+        "postroute_all_path_min_period_ns": all_period,
+        "postroute_all_path_fmax_mhz": all_fmax,
         "postroute_worst_setup_slack_ns": setup,
         "postroute_setup_wns_ns": setup_wns,
         "postroute_setup_tns_ns": setup_tns,
         "postroute_worst_hold_slack_ns": hold,
         "postroute_hold_wns_ns": hold_wns,
         "postroute_hold_tns_ns": hold_tns,
-        "setup_clock_skew_report": setup_skew_text.strip(),
-        "hold_clock_skew_report": hold_skew_text.strip(),
-        "clock_skew_supported": bool(setup_skew_text.strip() and hold_skew_text.strip()) and "TIMINGFORGE_CLOCK_SKEW_UNSUPPORTED" not in setup_skew_text + hold_skew_text,
+        "setup_clock_skew_report": setup_skew.strip(),
+        "hold_clock_skew_report": hold_skew.strip(),
+        "clock_skew_supported": bool(setup_skew.strip() and hold_skew.strip()) and "TIMINGFORGE_CLOCK_SKEW_UNSUPPORTED" not in setup_skew + hold_skew,
+        "parasitic_annotation_report": annotation.strip(),
+        "drv_report": drv.strip(),
         "postroute_log": str(path),
     }
 
@@ -59,7 +75,8 @@ def compare(prelayout_path: Path, physical_root: Path) -> dict:
     matrix = json.loads(prelayout_path.read_text(encoding="utf-8"))
     if matrix.get("platform") != "Nangate45 typical Liberty":
         raise ValueError("Pre-layout platform/corner does not match Nangate45 typical")
-    source_sdc = prelayout_path.resolve().parents[2] / "constraints" / "gcd_baseline.sdc"
+    repo_root = prelayout_path.resolve().parents[2]
+    source_sdc = repo_root / "constraints" / "gcd_baseline.sdc"
     if not source_sdc.is_file():
         raise FileNotFoundError(f"Missing baseline SDC: {source_sdc}")
     sdc_hash = hashlib.sha256(source_sdc.read_bytes()).hexdigest()
@@ -70,34 +87,30 @@ def compare(prelayout_path: Path, physical_root: Path) -> dict:
         if baseline is None:
             raise ValueError(f"Pre-layout golden row missing for {top}")
         post = parse_postroute_log(physical_root / top / "postroute_sta.log")
+        pre_period = baseline.get("all_path_min_period_ns")
+        pre_setup = baseline.get("worst_setup_slack_ns")
+        pre_hold = baseline.get("worst_hold_slack_ns")
         results.append({
             "top": top,
             "platform": "Nangate45",
             "corner": "typical",
             "source_sdc_sha256": sdc_hash,
-            "prelayout_all_path_min_period_ns": baseline.get("all_path_min_period_ns"),
+            "prelayout_all_path_min_period_ns": pre_period,
             "postroute_all_path_min_period_ns": post["postroute_all_path_min_period_ns"],
-            "all_path_min_period_delta_ns": (
-                round(post["postroute_all_path_min_period_ns"] - baseline["all_path_min_period_ns"], 6)
-                if baseline.get("all_path_min_period_ns") is not None else None
-            ),
-            "prelayout_worst_setup_slack_ns": baseline.get("worst_setup_slack_ns"),
+            "all_path_min_period_delta_ns_observational_only": round(post["postroute_all_path_min_period_ns"] - pre_period, 6) if pre_period is not None else None,
+            "prelayout_worst_setup_slack_ns": pre_setup,
             "postroute_worst_setup_slack_ns": post["postroute_worst_setup_slack_ns"],
-            "setup_slack_delta_ns": (
-                round(post["postroute_worst_setup_slack_ns"] - baseline["worst_setup_slack_ns"], 6)
-                if baseline.get("worst_setup_slack_ns") is not None else None
-            ),
-            "prelayout_worst_hold_slack_ns": baseline.get("worst_hold_slack_ns"),
+            "setup_slack_delta_ns_observational_only": round(post["postroute_worst_setup_slack_ns"] - pre_setup, 6) if pre_setup is not None else None,
+            "prelayout_worst_hold_slack_ns": pre_hold,
             "postroute_worst_hold_slack_ns": post["postroute_worst_hold_slack_ns"],
-            "hold_slack_delta_ns": (
-                round(post["postroute_worst_hold_slack_ns"] - baseline["worst_hold_slack_ns"], 6)
-                if baseline.get("worst_hold_slack_ns") is not None else None
-            ),
+            "hold_slack_delta_ns_observational_only": round(post["postroute_worst_hold_slack_ns"] - pre_hold, 6) if pre_hold is not None else None,
             **post,
         })
     return {
-        "schema_version": "1.0",
-        "comparison": "same Nangate45 typical corner and source baseline SDC; pre-layout cell-based STA vs post-route propagated-clock SPEF STA",
+        "schema_version": "1.1",
+        "comparison": "cross-flow observation: same Nangate45 typical corner and source SDC, but pre-layout and ORFS synthesis netlists are not matched",
+        "netlist_matched": False,
+        "delta_interpretation": "observational_only; do not attribute differences to routing parasitics alone",
         "signoff_claim": False,
         "designs": results,
     }
@@ -111,10 +124,11 @@ def main() -> int:
     args = parser.parse_args()
     result = compare(args.prelayout_matrix, args.physical_root)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(json.dumps(result, indent=2) + "\\n", encoding="utf-8")
     print(json.dumps({
         "status": "PASS",
         "designs": [row["top"] for row in result["designs"]],
+        "netlist_matched": result["netlist_matched"],
         "clock_skew_supported": [row["clock_skew_supported"] for row in result["designs"]],
         "signoff_claim": False,
     }, indent=2))
