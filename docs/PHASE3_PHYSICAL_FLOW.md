@@ -50,4 +50,4 @@ The physical CI sets `LEC_CHECK=0` because the container's optional Kepler-based
 
 The earlier [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) ran on PR #6 merge SHA `4686342491aeabc5746fecd36f7e33b2d90c8b5b`, not a standalone main commit. New workflow configuration runs on main pushes and version tags and records the exact checked-out SHA. Its [90-day evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211) contains the raw stage outputs, final databases, GDS, extracted SPEF, post-route timing logs, comparison JSON and SHA-256 manifest.
 
-See [Phase 3 measured results](PHASE3_RESULTS.md) for the post-route timing table, matched pre-layout comparison, and interpretation limits.
+See [Phase 3 measured results](PHASE3_RESULTS.md) for the post-route timing table, cross-flow pre-layout/post-route observations, and interpretation limits.
