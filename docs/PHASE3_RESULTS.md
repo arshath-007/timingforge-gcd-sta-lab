@@ -27,6 +27,14 @@ This is an educational single-corner experiment, not foundry signoff or a multi-
 
 The register-to-register minimum period and all-path minimum period are different metrics. The all-path metric includes constrained I/O-to-register and register-to-I/O paths; it is not an internal-only clock-frequency result. Fmax values are the reciprocal of the corresponding reported minimum period.
 
+## Architecture conclusion
+
+For this single post-route Nangate45 typical-corner run, the combined architecture ranks ahead on both timing-period measures: 0.95 ns versus 1.02 ns register-to-register, and 2.13 ns versus 2.26 ns all-path. It also has slightly better worst setup and hold slack in this run. The split architecture ranks ahead on post-route standard-cell area: 2502.00 versus 2654.95 area units (about 5.8% lower).
+
+The pre-layout all-path result favours split (2.35 ns versus 2.94 ns), but this includes I/O paths and is sensitive to the interface timing budget. It does not establish that split has a faster internal clock path. The combined pre-layout native register-to-register minimum-period query was unavailable, so no pre-layout register-only ranking can be made.
+
+**Confidence is limited.** These rankings come from one floorplan/placement configuration and one Nangate45 typical corner. They do not establish a robust architecture winner across placement seeds or utilization/density choices. A uniform-random time-per-GCD measure and a placement-variation study are separate experiments; do not infer application throughput from Fmax alone.
+
 The clock-skew numbers above are the values emitted by OpenROAD's `report_clock_skew` for its reported paths, rounded to 0.01 ns. The two designs display the same rounded values, but the archived reports identify different startpoint/endpoint pairs. The ORFS final-stage metrics retain more precision: setup skew is 0.155729 ns for combined and 0.157116 ns for split; the corresponding hold-skew magnitudes are 0.055729 ns and 0.056917 ns. The displayed equality is therefore a rounding coincidence, not evidence that the clock trees or selected paths are identical. These are path-specific reports, not a worst-skew guarantee for every clock sink.
 
 ## Pre-layout versus post-route
@@ -53,7 +61,7 @@ For each architecture the archive contains:
 - Post-route STA log showing SPEF loading, propagated clocks, setup/hold reports and clock-skew reports.
 - SHA-256 manifest entries for the archived physical artifacts.
 
-The original manifest reports 84 files per design. The updated manifest also records the source Git commit, hashes of both RTL files and the key flow/parser scripts, and requires the native parasitic annotation report to be present. The workflow-supplied ORFS image digest is labelled as declared provenance; the running container does not independently attest its own registry digest.
+The original manifest reports 84 files per design. The updated manifest also records the source Git commit, hashes of both RTL files and the key flow/parser scripts, and classifies OpenSTA's unannotated-driver list against the final routed netlist. The archived report's unannotated drivers were classified as dangling cell outputs with no sinks; partially unannotated drivers and any unannotated connected driver cause the evidence gate to fail. This is distinct from claiming that OpenSTA reported zero unannotated driver pins. The workflow-supplied ORFS image digest is labelled as declared provenance; the running container does not independently attest its own registry digest.
 
 ### Source SDC versus final exported SDC
 
