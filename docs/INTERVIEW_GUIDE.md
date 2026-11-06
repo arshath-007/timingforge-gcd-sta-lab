@@ -10,7 +10,7 @@ I use two synthesizable 32-bit binary-GCD architectures as a controlled RTL benc
 
 The flow synthesises both architectures and analyses eight constraint scenarios per design, so there are 16 timing runs. It reports cell area, minimum clock period, Fmax, setup and hold slack, missing I/O delay coverage, unconstrained endpoints, and register-to-register path presence.
 
-One finding is that a broad false-path exception removes the register-to-register paths from the dedicated report. Another is that removing the input delay on a 32-bit bus changes the reported critical path and makes the timing result look better. The project also reports max-slew/max-capacitance violation records, runs 18 controlled clock-constraint sensitivity experiments, and scores mutation impact as matched/mismatched/inconclusive. Across two CI runs the mutation summary was 12 matched, 0 mismatched and 2 inconclusive. The baseline still has DRV warnings and a -0.002 ns hold slack; the combined register-only minimum-period metric remains unavailable. The project reports all-path timing metrics, cell area, and RTL operation cycle counts separately. Because the reported minimum period includes port paths, it does not claim a register-to-register-only architecture speedup.
+One finding is that a broad false-path exception removes register-to-register paths from the dedicated report; another is that removing an input delay can make the reported result look better by changing the constrained path set. The benchmark also includes seven controlled SDC mutations, 18 clock-constraint sensitivity experiments, OpenSTA DRV reporting, bounded WIDTH=3 formal verification against an independent 64-entry GCD oracle, Verilator protocol assertions, WIDTH=8/16/32 simulation, Nangate45 physical implementation, ASAP7 BC/TC/WC Liberty-scene analysis, and SKY130HD TT physical implementation. These are distinct evidence types: the bounded formal proof checks both architectures against the mathematical oracle and against each other for one WIDTH=3 transaction; simulation covers wider widths but is not a 32-bit formal proof. The ASAP7 combined design has -3.225 ps hold slack among the reported WC paths. The Nangate45 combined design also fails the 2.5 ns target closure gate because of a max-capacitance violation (54.633 versus a 53.406 limit, slack -1.227), even though setup and hold slack are non-negative at that point. The ASAP7 path report is capped at 100 paths per path group and is not an exhaustive signoff inventory. The project remains an educational research prototype, not foundry signoff.
 
 The results are educational pre-layout Nangate45 measurements—not production signoff. The next step is multi-corner and physical implementation with realistic clock and parasitic assumptions."
 
@@ -70,7 +70,7 @@ The input path no longer receives the intended external arrival budget. The repo
 It proves that this RTL and this illustrative SDC were synthesised and analysed in a reproducible educational library-backed flow. It does not prove production process timing, extracted interconnect timing, power, or signoff closure.
 
 **What did the DRV reports reveal?**  
-The golden combined architecture produced 10 max-slew and 15 max-capacitance violation records; the split architecture produced 9 and 15 respectively. The violator-only report emitted no max-fanout violation records, but it does not enumerate total applicable checks. I report these as review findings, not as signoff conclusions.
+The golden combined architecture produced 10 max-slew and 15 max-capacitance violation records; the split architecture produced 9 and 15 respectively. The violator-only report emitted no max-fanout violation records, but it does not enumerate total applicable checks. I report these as review findings, not as signoff conclusions. Separately, in the physical target-period sweep, combined GCD did not close at 2.500 ns because pin `_3726_/ZN` had 54.633 capacitance against a 53.406 limit (slack -1.227); split GCD closed at 2.500 ns. This target-specific failure is recorded in `docs/PHYSICAL_ROBUSTNESS.md` and is not hidden by the successful ORFS run.
 
 **How did you validate constraint sensitivity?**  
 I changed one parameter family at a time from an immutable golden SDC: setup uncertainty (0.100/0.150/0.200 ns), hold uncertainty (0.025/0.050/0.075 ns), and source latency with early fixed at 0 and late at 0/0.050/0.100 ns. Nine variants per architecture produced 18 runs with explicit setup/hold slack deltas and source/tool/library/SDC identity.
@@ -79,7 +79,7 @@ I changed one parameter family at a time from an immutable golden SDC: setup unc
 M06 removes hold uncertainty, but the current parsed report does not directly expose whether that command was applied. A change in hold slack is evidence of sensitivity, not proof that the uncertainty command was present or absent. The tool therefore records M06 as inconclusive rather than overstating detection.
 
 **What would you do next?**  
-Phase 2: add formal properties/equivalence, constrained-random coverage, and environment-safe QoR history. Phase 3: establish floorplanning, placement, CTS, routing, extracted-parasitic STA, and verified multi-corner/second-library experiments. Do not describe either phase as complete yet.
+Next steps are to investigate and repair the reported ASAP7 WC hold issue and Nangate45 2.5 ns max-capacitance failure, expand timing-path inventory beyond the current 100-per-path-group report cap, add corner-specific RC extraction/scaling and validated variation-aware analysis, and complete fresh post-merge main-branch validation. Do not call the project signoff-clean: the current experiments establish reproducible educational flows, not production closure.
 
 ## Evidence to open during a walkthrough
 
@@ -96,6 +96,15 @@ Phase 2: add formal properties/equivalence, constrained-random coverage, and env
 - [Downloadable static benchmark](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699/artifacts/13408887449)
 
 Run #160 (ID 42015328699) validated the corrected-load measurements on source commit `bdd42621749035fa088e326c766f3af8031af337`. Both CI jobs passed.
+
+## Phase 2/3 evidence distinctions to explain
+
+- **Formal correctness against the oracle:** the WIDTH=3 miter checks both architectures against a separate 64-entry mathematical GCD table and checks their captured results against each other. This is bounded to 3-bit operands and one accepted transaction.
+- **Oracle-table validation:** the Python test parses all 64 explicit truth-table rows, rejects duplicates, and compares the complete mapping with Python `math.gcd`. The regression log also prints: `PASS: exhaustive 3-bit GCD oracle table verified for all 64 operand pairs`.
+- **Simulation versus proof:** WIDTH=8/16/32 sweeps and Verilator SVA are dynamic simulation/assertion evidence, not 32-bit or unbounded formal proofs.
+- **ASAP7 path inventory:** `report_checks -group_path_count 100` requests up to 100 paths per path group. Results are grouped by path group; the current published slack minima are minima among emitted paths, not an exhaustive signoff inventory. The project does not claim that a capped path report is a complete timing database.
+- **ASAP7 RC limitation:** one TC-extracted SPEF is reused unchanged across BC/TC/WC; no corner-specific RC extraction or scaling is performed.
+- **Known physical failures:** ASAP7 combined WC reported hold slack is -3.225 ps among the emitted paths. Nangate45 combined GCD is not closed at the 2.500 ns target because of the max-capacitance violation noted above.
 
 ## Personal preparation checklist
 
