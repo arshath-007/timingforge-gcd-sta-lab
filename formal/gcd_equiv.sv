@@ -1,7 +1,7 @@
 // Bounded sequential equivalence miter for all 3-bit input pairs.
 // The proof compares transaction results, not cycle-by-cycle latency.
 module gcd_equiv_formal #(parameter integer WIDTH = 3);
-    localparam integer MAX_CYCLES = (WIDTH <= 3) ? 12 : 20;
+    localparam integer MAX_CYCLES = (2 * ((1 << WIDTH) - 2)) + 4;
 
     (* gclk *) reg clk = 0;
     (* anyconst *) reg [WIDTH-1:0] a_in;
@@ -32,17 +32,22 @@ module gcd_equiv_formal #(parameter integer WIDTH = 3);
     );
 
     function automatic [WIDTH-1:0] gcd_spec(input [WIDTH-1:0] a, input [WIDTH-1:0] b);
-        reg [WIDTH-1:0] x, y, temp;
+        reg [WIDTH-1:0] x, y;
         integer step;
         begin
             x = a;
             y = b;
-            for (step = 0; step < (2 * WIDTH); step = step + 1) begin
-                if (y != 0) begin
-                    temp = x % y;
+            // Independent subtractive Euclidean reference. For WIDTH-bit
+            // operands, at most (2**WIDTH - 1) nonzero subtractions are needed.
+            for (step = 0; step < ((1 << WIDTH) + 1); step = step + 1) begin
+                if (x == 0)
                     x = y;
-                    y = temp;
-                end
+                else if (y == 0)
+                    y = x;
+                else if (x > y)
+                    x = x - y;
+                else if (y > x)
+                    y = y - x;
             end
             gcd_spec = x;
         end
