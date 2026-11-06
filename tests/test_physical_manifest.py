@@ -12,7 +12,7 @@ class PhysicalManifestTests(unittest.TestCase):
         for relative in PROVENANCE_FILES:
             target = project / relative
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text("fixture source " + relative + "\\n", encoding="utf-8")
+            target.write_text("fixture source " + relative + "\n", encoding="utf-8")
         lines = [
             "Git commit SHA: fixture-commit",
             "ORFS container image digest (declared by workflow): sha256:fixture",
@@ -25,7 +25,7 @@ class PhysicalManifestTests(unittest.TestCase):
             else:
                 label = f"Script SHA256 ({relative})"
             lines.append(f"{label}: {sha256(project / relative)}")
-        (physical_root / "tool_versions.txt").write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+        (physical_root / "tool_versions.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
         for top in TOPS:
             work = physical_root / top
             results = work / "results" / "nangate45" / top / "base"
@@ -33,9 +33,9 @@ class PhysicalManifestTests(unittest.TestCase):
             for name in REQUIRED:
                 (results / name).write_bytes(("fixture-" + name).encode())
             (work / "postroute_sta.log").write_text(
-                "=== POST-ROUTE PARASITIC ANNOTATION ===\\nAnnotated parasitics fixture\\n"
-                "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===\\n"
-                "=== POST-ROUTE PARASITICS LOADED ===\\nSPEF=fixture\\n",
+                "=== POST-ROUTE PARASITIC ANNOTATION ===\nAnnotated parasitics fixture\n"
+                "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===\n"
+                "=== POST-ROUTE PARASITICS LOADED ===\nSPEF=fixture\n",
                 encoding="utf-8",
             )
         return physical_root
@@ -62,7 +62,7 @@ class PhysicalManifestTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             physical_root = self._make_fixture(Path(tmp))
             log = physical_root / TOPS[1] / "postroute_sta.log"
-            log.write_text("=== POST-ROUTE PARASITICS LOADED ===\\nSPEF=fixture\\n", encoding="utf-8")
+            log.write_text("=== POST-ROUTE PARASITICS LOADED ===\nSPEF=fixture\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "annotation report"):
                 build_manifest(physical_root)
 
