@@ -52,7 +52,7 @@ def parse_postroute_log(path: Path) -> dict:
     drv_cap = _section(text, "=== POST-ROUTE DRV MAX CAPACITANCE ===", "=== POST-ROUTE DRV MAX FANOUT ===")
     drv_fanout = _section(text, "=== POST-ROUTE DRV MAX FANOUT ===", "=== POST-ROUTE PARASITICS LOADED ===")
     def drv_count(section: str) -> int | None:
-        if not section.strip() or "TIMINGFORGE_DRV_UNSUPPORTED" in section:
+        if not section or "TIMINGFORGE_DRV_UNSUPPORTED" in section:
             return None
         return len(re.findall(r"\(VIOLATED\)", section, re.IGNORECASE))
     if all_period is None or all_period <= 0 or setup is None or hold is None:
