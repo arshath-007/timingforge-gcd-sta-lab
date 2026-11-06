@@ -4,18 +4,19 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 TOPS = ("gcd_binary_combined", "gcd_binary_split")
 REQUIRED = (
-    "2_floorplan.odb",
-    "3_place.odb",
-    "4_cts.odb",
-    "5_route.odb",
-    "6_final.odb",
-    "6_final.gds",
-    "6_final.spef",
-    "6_final.sdc",
+    "2_floorplan.odb", "3_place.odb", "4_cts.odb", "5_route.odb",
+    "6_final.odb", "6_final.gds", "6_final.spef", "6_final.sdc",
+)
+PROVENANCE_FILES = (
+    "rtl/gcd_binary_combined.sv", "rtl/gcd_binary_split.sv",
+    "constraints/gcd_baseline.sdc", "scripts/run_physical.sh",
+    "scripts/postroute_sta.tcl", "tools/physical_manifest.py",
+    "tools/physical_metrics.py",
 )
 
 
@@ -27,23 +28,56 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def build_manifest(root: Path) -> dict:
+def _value(text: str, label: str) -> str:
+    match = re.search(r"^" + re.escape(label) + r":\\s*(.+)$", text, re.MULTILINE)
+    if not match:
+        raise ValueError(f"tool_versions.txt is missing {label}")
+    return match.group(1).strip()
+
+
+def build_manifest(root: Path, repo_root: Path | None = None) -> dict:
+    root = root.resolve()
+    repo_root = (repo_root or root.parent.parent).resolve()
+    versions_path = root / "tool_versions.txt"
+    if not versions_path.is_file():
+        raise FileNotFoundError("build/physical/tool_versions.txt is required")
+    versions = versions_path.read_text(encoding="utf-8")
+    commit_sha = _value(versions, "Git commit SHA")
+    image_digest = _value(versions, "ORFS container image digest (declared by workflow)")
+    source_hashes = {}
+    for relative in PROVENANCE_FILES:
+        source = repo_root / relative
+        if not source.is_file():
+            raise FileNotFoundError(f"Required provenance source missing: {relative}")
+        actual = sha256(source)
+        source_hashes[relative] = actual
+        if relative.startswith("rtl/"):
+            label = f"RTL SHA256 ({relative})"
+        elif relative.startswith("constraints/"):
+            label = "Source SDC SHA256"
+        else:
+            label = f"Script SHA256 ({relative})"
+        recorded = _value(versions, label)
+        if recorded != actual:
+            raise ValueError(f"Provenance hash mismatch for {relative}: recorded {recorded}, actual {actual}")
+
     designs = []
     for top in TOPS:
         work = root / top
         results = work / "results" / "nangate45" / top / "base"
         reports = work / "reports" / "nangate45" / top / "base"
         logs = work / "logs" / "nangate45" / top / "base"
-        missing = [
-            name for name in REQUIRED
-            if not (results / name).is_file() or (results / name).stat().st_size == 0
-        ]
+        missing = [name for name in REQUIRED if not (results / name).is_file() or (results / name).stat().st_size == 0]
         if missing:
             raise FileNotFoundError(f"{top}: missing required physical artifacts: {missing}")
         postroute = work / "postroute_sta.log"
-        postroute_text = postroute.read_text(encoding="utf-8", errors="replace") if postroute.is_file() else ""
-        if "POST-ROUTE PARASITICS LOADED" not in postroute_text or "SPEF=" not in postroute_text:
-            raise FileNotFoundError(f"{top}: extracted-parasitic post-route STA log missing or incomplete")
+        if not postroute.is_file():
+            raise FileNotFoundError(f"{top}: post-route STA log missing")
+        log_text = postroute.read_text(encoding="utf-8", errors="replace")
+        if "POST-ROUTE PARASITICS LOADED" not in log_text or "SPEF=" not in log_text:
+            raise ValueError(f"{top}: SPEF load evidence missing")
+        if "=== POST-ROUTE PARASITIC ANNOTATION ===" not in log_text or "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===" not in log_text:
+            raise ValueError(f"{top}: native parasitic annotation report missing")
         artifacts = []
         for path in sorted(p for p in work.rglob("*") if p.is_file()):
             if path.name.endswith((".odb", ".gds", ".spef", ".sdc", ".def", ".v", ".rpt", ".json", ".log")):
@@ -65,21 +99,18 @@ def build_manifest(root: Path) -> dict:
             "artifact_count": len(artifacts),
             "artifacts": artifacts,
         })
-    versions = root / "tool_versions.txt"
-    if not versions.is_file():
-        raise FileNotFoundError("build/physical/tool_versions.txt is required")
-    source_sdc = root.parent.parent / "constraints" / "gcd_baseline.sdc"
-    if not source_sdc.is_file():
-        raise FileNotFoundError("Repository baseline SDC is missing")
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "flow": "OpenROAD Flow Scripts",
         "platform": "Nangate45",
         "corner": "typical",
         "timing_stage": "post-route with propagated clocks and extracted SPEF",
-        "source_sdc_sha256": sha256(source_sdc),
+        "repo_commit_sha": commit_sha,
+        "orfs_image_digest_declared_by_workflow": image_digest,
+        "source_hashes": source_hashes,
+        "source_sdc_sha256": source_hashes["constraints/gcd_baseline.sdc"],
         "signoff_claim": False,
-        "tool_versions_file": str(versions.relative_to(root)),
+        "tool_versions_file": str(versions_path.relative_to(root)),
         "designs": designs,
     }
 
@@ -88,14 +119,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--repo-root", type=Path, default=None)
     args = parser.parse_args()
-    result = build_manifest(args.root)
+    result = build_manifest(args.root, args.repo_root)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(json.dumps(result, indent=2) + "\\n", encoding="utf-8")
     print(json.dumps({
         "status": "PASS",
         "designs": [item["top"] for item in result["designs"]],
         "physical_artifacts_per_design": [item["artifact_count"] for item in result["designs"]],
+        "repo_commit_sha": result["repo_commit_sha"],
         "timing_stage": result["timing_stage"],
         "signoff_claim": False,
     }, indent=2))
