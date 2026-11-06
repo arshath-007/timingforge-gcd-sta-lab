@@ -4,14 +4,14 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 ORFS_ROOT="${ORFS_ROOT:-/OpenROAD-flow-scripts}"
-ORFS_IMAGE_DIGEST="sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e"
+ORFS_IMAGE_DIGEST="${ORFS_IMAGE_DIGEST:-sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e}"
+export DESIGN_REPO_ROOT="$ROOT"
 if [[ ! -f "$ORFS_ROOT/env.sh" || ! -f "$ORFS_ROOT/flow/Makefile" ]]; then
   echo "OpenROAD Flow Scripts environment/Makefile not found under $ORFS_ROOT" >&2
   exit 2
 fi
 
-# The pinned container supplies a matched ORFS source tree and its tool binaries.
-# Keep the flow source and executable versions together; do not mix another ORFS revision.
+# The pinned container supplies a matched ORFS source tree and tool binaries.
 # shellcheck disable=SC1090
 source "$ORFS_ROOT/env.sh"
 FLOW_ROOT="$ORFS_ROOT/flow"
@@ -21,9 +21,7 @@ export OPENROAD_EXE="$(command -v openroad)"
 export OPENSTA_EXE="$(command -v sta || true)"
 export PYTHON_EXE="$(command -v python3)"
 export KLAYOUT_CMD="$(command -v klayout)"
-# Keep the small Nangate45 implementation deterministic on heterogeneous hosted runners.
 export NUM_CORES=1
-# Disable ORFS' optional Kepler-based internal LEC subprocess; separate RTL formal equivalence is run in Phase 2.
 export LEC_CHECK=0
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
@@ -46,21 +44,26 @@ if git -C "$ORFS_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 mkdir -p build/physical
-# Run the 16-scenario pre-layout matrix using the exact Liberty/LEF files used by ORFS.
 export LIBERTY TECH_LEF SC_LEF
 bash scripts/run_nangate_sta.sh
 
+GIT_SHA="$(git -C "$ROOT" rev-parse HEAD)"
 {
+  echo "Git commit SHA: $GIT_SHA"
   echo "OpenROAD: $(openroad -version)"
   echo "Yosys: $(yosys -V)"
   echo "ORFS source revision: $ORFS_SOURCE_REV"
-  echo "ORFS container image digest: $ORFS_IMAGE_DIGEST"
+  echo "ORFS container image digest (declared by workflow): $ORFS_IMAGE_DIGEST"
   echo "Platform: Nangate45"
   echo "Corner: typical"
   echo "Liberty SHA256: $(sha256sum "$LIBERTY" | awk '{print $1}')"
   echo "Tech LEF SHA256: $(sha256sum "$TECH_LEF" | awk '{print $1}')"
   echo "Std-cell LEF SHA256: $(sha256sum "$SC_LEF" | awk '{print $1}')"
-  echo "SDC SHA256: $(sha256sum constraints/gcd_baseline.sdc | awk '{print $1}')"
+  echo "RTL SHA256 (rtl/gcd_binary_combined.sv): $(sha256sum rtl/gcd_binary_combined.sv | awk '{print $1}')"
+  echo "RTL SHA256 (rtl/gcd_binary_split.sv): $(sha256sum rtl/gcd_binary_split.sv | awk '{print $1}')"
+  echo "Script SHA256 (scripts/run_physical.sh): $(sha256sum scripts/run_physical.sh | awk '{print $1}')"
+  echo "Script SHA256 (scripts/postroute_sta.tcl): $(sha256sum scripts/postroute_sta.tcl | awk '{print $1}')"
+  echo "Source SDC SHA256: $(sha256sum constraints/gcd_baseline.sdc | awk '{print $1}')"
 } | tee build/physical/tool_versions.txt
 
 for TOP in gcd_binary_combined gcd_binary_split; do
@@ -70,7 +73,6 @@ for TOP in gcd_binary_combined gcd_binary_split; do
   rm -rf "$WORK_HOME"
   echo "=== OpenROAD RTL-to-GDS flow: $TOP ==="
   make -C "$FLOW_ROOT" DESIGN_CONFIG="$CONFIG" WORK_HOME="$WORK_HOME" all
-  # The GDS target is explicit for clarity; all also depends on the final GDS artifact.
   make -C "$FLOW_ROOT" DESIGN_CONFIG="$CONFIG" WORK_HOME="$WORK_HOME" gds
 
   RESULTS="$WORK_HOME/results/nangate45/$TOP/base"
@@ -86,8 +88,7 @@ for TOP in gcd_binary_combined gcd_binary_split; do
   export ODB="$RESULTS/6_final.odb"
   export SDC="$RESULTS/6_final.sdc"
   export SPEF="$RESULTS/6_final.spef"
-  openroad -exit "$ROOT/scripts/postroute_sta.tcl" 2>&1 \
-    | tee "$ROOT/build/physical/$TOP/postroute_sta.log"
+  openroad -exit "$ROOT/scripts/postroute_sta.tcl" 2>&1 | tee "$ROOT/build/physical/$TOP/postroute_sta.log"
   grep -q "POST-ROUTE PARASITICS LOADED" "$ROOT/build/physical/$TOP/postroute_sta.log"
 done
 
