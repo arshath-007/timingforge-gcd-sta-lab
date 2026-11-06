@@ -53,16 +53,16 @@ class PhysicalAnnotationTests(unittest.TestCase):
             log = root / "postroute.log"
             netlist = root / "final.v"
             log.write_text(
-                "=== POST-ROUTE PARASITIC ANNOTATION ===\\n"
-                "Found 1 unannotated drivers.\\ndriver/Z\\n"
-                "Found 0 partially unannotated drivers.\\n"
-                "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===\\n",
+                "=== POST-ROUTE PARASITIC ANNOTATION ===\n"
+                "Found 1 unannotated drivers.\ndriver/Z\n"
+                "Found 0 partially unannotated drivers.\n"
+                "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===\n",
                 encoding="utf-8",
             )
             netlist.write_text(
-                "module top(output out);\\n"
-                "BUF_X1 driver (.Z(out));\\n"
-                "endmodule\\n",
+                "module top(output out);\n"
+                "BUF_X1 driver (.Z(out));\n"
+                "endmodule\n",
                 encoding="utf-8",
             )
             with self.assertRaisesRegex(ValueError, "connected to routed nets"):
