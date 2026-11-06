@@ -12,9 +12,10 @@ from tools.physical_annotation import classify_annotation
 TOPS = ("gcd_binary_combined", "gcd_binary_split")
 REQUIRED = (
     "2_floorplan.odb", "3_place.odb", "4_cts.odb", "5_route.odb",
-    "1_2_yosys.v", "1_2_yosys.sdc", "1_synth.json", "3_3_place_gp.json", "4_1_cts.json", "5_1_grt.json", "6_report.json",
+    "1_2_yosys.v", "1_2_yosys.sdc",
     "6_final.odb", "6_final.gds", "6_final.v", "6_final.spef", "6_final.sdc",
 )
+REQUIRED_STAGE_LOGS = ("1_synth.json", "3_3_place_gp.json", "4_1_cts.json", "5_1_grt.json", "6_report.json")
 PROVENANCE_FILES = (
     "rtl/gcd_binary_combined.sv", "rtl/gcd_binary_split.sv",
     "constraints/gcd_baseline.sdc", "scripts/run_physical.sh",
@@ -79,6 +80,9 @@ def build_manifest(root: Path, repo_root: Path | None = None) -> dict:
         missing = [name for name in REQUIRED if not (results / name).is_file() or (results / name).stat().st_size == 0]
         if missing:
             raise FileNotFoundError(f"{top}: missing required physical artifacts: {missing}")
+        missing_logs = [name for name in REQUIRED_STAGE_LOGS if not (logs / name).is_file() or (logs / name).stat().st_size == 0]
+        if missing_logs:
+            raise FileNotFoundError(f"{top}: missing required ORFS stage metrics: {missing_logs}")
         presynth = work / "presynth_sta.log"
         if not presynth.is_file():
             raise FileNotFoundError(f"{top}: ORFS post-synthesis STA log missing")
