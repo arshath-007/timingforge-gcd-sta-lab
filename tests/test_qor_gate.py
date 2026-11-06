@@ -88,10 +88,20 @@ class QorGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate candidate golden record"):
             evaluate(snapshot(), candidate, POLICY)
 
-    def test_rejects_unknown_metric_policy(self):
+    def test_rejects_unknown_or_missing_metric_policy(self):
+        policy = deepcopy(POLICY)
+        policy["required_metrics"].remove("worst_hold_slack_ns")
+        with self.assertRaisesRegex(ValueError, "each supported metric"):
+            evaluate(snapshot(), snapshot(), policy)
         policy = deepcopy(POLICY)
         policy["required_metrics"].append("unconstrained_endpoint_count")
-        with self.assertRaisesRegex(ValueError, "unsupported or empty"):
+        with self.assertRaisesRegex(ValueError, "each supported metric"):
+            evaluate(snapshot(), snapshot(), policy)
+
+    def test_rejects_incomplete_limit_policy(self):
+        policy = deepcopy(POLICY)
+        policy["limits"].pop("worst_hold_slack_drop_ns")
+        with self.assertRaisesRegex(ValueError, "limit set mismatch"):
             evaluate(snapshot(), snapshot(), policy)
 
     def test_rejects_boolean_metric(self):
