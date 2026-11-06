@@ -82,6 +82,7 @@ Use the pinned OpenROAD Flow Scripts environment:
 
 ```bash
 source /OpenROAD-flow-scripts/env.sh
+export ORFS_IMAGE_DIGEST=sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
 bash scripts/run_physical.sh
 ```
 
