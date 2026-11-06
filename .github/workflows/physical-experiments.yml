@@ -63,7 +63,7 @@ jobs:
           d = json.loads(p.read_text())
           print("variance pairs:", d["variance_pairwise_register_period_wins"])
           print("clock sweep:", json.dumps(d["clock_period_sweep"], indent=2))
-PY
+          PY
       - name: Record exact source revision
         if: always()
         shell: bash
