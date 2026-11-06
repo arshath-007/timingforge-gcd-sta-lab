@@ -4,7 +4,7 @@
 
 Phase 3 adds a reproducible educational RTL-to-GDS flow for the two GCD architectures using the same pinned OpenROAD Flow Scripts Nangate45 platform as the pre-layout STA matrix.
 
-The intended stages are floorplanning, global placement, clock-tree synthesis, global/detail routing, final database generation, OpenRCX parasitic extraction, KLayout GDS generation, and post-route STA with propagated clocks. The physical CI pins an ORFS container image digest so the source flow, platform files, and tool binaries remain a matched set. The pre-layout matrix is regenerated inside that same job from the exact bundled Nangate45 Liberty/LEF files before physical implementation.
+The intended stages are floorplanning, global placement, clock-tree synthesis, global/detail routing, final database generation, OpenRCX parasitic extraction, KLayout GDS generation, and post-route STA with propagated clocks. The physical CI pins an ORFS container image digest so the source flow, platform files, and tool binaries remain a matched set. The pre-layout matrix is regenerated inside that same job from the exact bundled Nangate45 Liberty/LEF files before physical implementation. However, pre-layout Yosys synthesis and ORFS synthesis use different configurations; the resulting netlists are not proven identical. The cross-stage comparison must therefore be interpreted as observational, not as a pure routing-parasitic delta.
 
 ## Run
 
@@ -15,7 +15,7 @@ source /OpenROAD-flow-scripts/env.sh
 bash scripts/run_physical.sh
 ```
 
-The script builds both `gcd_binary_combined` and `gcd_binary_split` with matched floorplan and baseline SDC settings. It records tool versions, pinned container digest, ORFS source revision when available, Liberty/LEF hashes, and SDC hash under `build/physical/`.
+The script derives the repository root from its own path and exports `DESIGN_REPO_ROOT` for the ORFS configs, avoiding an undeclared `GITHUB_WORKSPACE` dependency. It records the source Git SHA, RTL/script/SDC hashes, tool versions, workflow-declared container digest, ORFS source revision when available, and Liberty/LEF hashes under `build/physical/`. The digest is recorded as workflow-declared provenance rather than independently measured from inside the container.
 
 ## Required evidence
 
@@ -48,6 +48,6 @@ The physical CI sets `LEC_CHECK=0` because the container's optional Kepler-based
 
 ## Latest validated run
 
-The current implementation was exercised successfully in [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456). Its [90-day evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211) contains the raw stage outputs, final databases, GDS, extracted SPEF, post-route timing logs, comparison JSON and SHA-256 manifest.
+The earlier [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) ran on PR #6 merge SHA `4686342491aeabc5746fecd36f7e33b2d90c8b5b`, not a standalone main commit. New workflow configuration runs on main pushes and version tags and records the exact checked-out SHA. Its [90-day evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211) contains the raw stage outputs, final databases, GDS, extracted SPEF, post-route timing logs, comparison JSON and SHA-256 manifest.
 
 See [Phase 3 measured results](PHASE3_RESULTS.md) for the post-route timing table, matched pre-layout comparison, and interpretation limits.
