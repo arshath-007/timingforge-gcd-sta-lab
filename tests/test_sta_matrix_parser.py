@@ -59,6 +59,20 @@ TIMINGFORGE_DRV_UNSUPPORTED: max_fanout: command unavailable
         self.assertFalse(result["supported"])
         self.assertIsNone(result["violation_count"])
 
+
+    def test_records_check_setup_warnings(self):
+        sample = SAMPLE.replace(
+            "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===",
+            "=== TIMINGFORGE SETUP CHECK ===\\nWarning: There are 1 unconstrained endpoints.\\n"
+            "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===",
+        )
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "sta_gcd_binary_combined_gcd_baseline.log"
+            path.write_text(sample, encoding="utf-8")
+            row = parse_log(path)
+            self.assertEqual(row["setup_check_warning_count"], 1)
+            self.assertIn("unconstrained endpoints", row["setup_check_warnings"][0])
+
     def test_parses_architecture_metrics_and_path_types(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "sta_gcd_binary_combined_gcd_baseline.log"
