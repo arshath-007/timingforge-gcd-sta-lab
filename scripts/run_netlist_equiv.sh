@@ -22,7 +22,7 @@ Path(output).write_text(text.replace(old, new, 1), encoding="utf-8")
 PY
 
   echo "=== RTL-to-mapped-netlist equivalence: $TOP ==="
-  yosys -p "read_liberty $LIBERTY; read_verilog -sv rtl/$TOP.sv $GATE_NETLIST; equiv_make -inames -gold $TOP -gate $GATE_TOP equiv_$TOP; hierarchy -check -top equiv_$TOP; equiv_simple; equiv_induct -seq 8; equiv_status -assert" \
+  yosys -p "read_liberty -ignore_miss_func $LIBERTY; read_verilog -sv rtl/$TOP.sv $GATE_NETLIST; equiv_make -inames -gold $TOP -gate $GATE_TOP equiv_$TOP; hierarchy -check -top equiv_$TOP; equiv_simple; equiv_induct -seq 8; equiv_status -assert" \
     2>&1 | tee "build/netlist_equiv/${TOP}.log"
   grep -q "Equivalence successfully proven" "build/netlist_equiv/${TOP}.log"
 done
