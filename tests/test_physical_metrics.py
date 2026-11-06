@@ -39,6 +39,9 @@ class PhysicalMetricsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "postroute.log"
             path.write_text(LOG, encoding="utf-8")
+            results = path.parent / "results" / "nangate45" / path.parent.name / "base"
+            results.mkdir(parents=True)
+            (results / "6_final.v").write_text("module top; endmodule\\n", encoding="utf-8")
             result = parse_postroute_log(path)
             self.assertEqual(result["postroute_register_to_register_min_period_ns"], 3.7)
             self.assertEqual(result["postroute_all_path_min_period_ns"], 3.5)
@@ -56,7 +59,7 @@ class PhysicalMetricsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "postroute.log"
             path.write_text(LOG.replace("Found 0 unannotated drivers.", "Found 1 unannotated drivers."), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "incomplete SPEF annotation"):
+            with self.assertRaisesRegex(ValueError, "lists 0 unannotated drivers but summary says 1"):
                 parse_postroute_log(path)
 
     def test_parser_rejects_missing_annotation_report(self):
@@ -73,6 +76,9 @@ class PhysicalMetricsTests(unittest.TestCase):
             for top in ("gcd_binary_combined", "gcd_binary_split"):
                 (physical / top).mkdir(parents=True)
                 (physical / top / "postroute_sta.log").write_text(LOG, encoding="utf-8")
+                results = physical / top / "results" / "nangate45" / top / "base"
+                results.mkdir(parents=True)
+                (results / "6_final.v").write_text("module top; endmodule\\n", encoding="utf-8")
             (root / "constraints").mkdir()
             (root / "constraints" / "gcd_baseline.sdc").write_text("create_clock", encoding="utf-8")
             matrix_path = root / "build" / "reports" / "sta_matrix_summary.json"
