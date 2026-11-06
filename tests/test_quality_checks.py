@@ -27,6 +27,14 @@ class QualityCheckTests(unittest.TestCase):
     def test_clean_golden_row_passes(self):
         self.assertEqual(inspect_golden_row(self.baseline()), [])
 
+
+    def test_check_setup_warnings_fail_golden_quality(self):
+        findings = inspect_golden_row(self.baseline(
+            setup_check_warning_count=1,
+            setup_check_warnings=["Warning: There are 1 unconstrained endpoints."],
+        ))
+        self.assertIn("TFQ005", {item["code"] for item in findings})
+
     def test_negative_hold_and_unconstrained_endpoints_are_flagged(self):
         findings = inspect_golden_row(self.baseline(
             worst_hold_slack_ns=-0.002,
