@@ -17,6 +17,7 @@ on:
       - "scripts/postroute_sta.tcl"
       - "tools/physical_manifest.py"
       - "tools/physical_metrics.py"
+      - "tools/physical_annotation.py"
       - "tools/parse_sta_matrix.py"
       - "tools/quality_checks.py"
       - "tools/qor_history.py"
