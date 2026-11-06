@@ -21,7 +21,7 @@ The physical implementation is performed once per architecture at TC. OpenSTA th
 | ASAP7_TC | TT | 25°C | 0.70 V |
 | ASAP7_WC | SS | 100°C | 0.63 V |
 
-**Minimum slack among the 100 reported setup and 100 reported hold paths per scene:**
+**Minimum slack among emitted setup/hold paths (OpenSTA request: up to 100 paths per path group, scene and design):**
 
 | Architecture | Scene | Setup slack (ps) | Hold slack (ps) |
 |---|---|---:|---:|
