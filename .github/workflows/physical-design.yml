@@ -1,6 +1,9 @@
 name: TimingForge physical design
 
 on:
+  push:
+    branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
     paths:
@@ -8,9 +11,15 @@ on:
       - "constraints/gcd_baseline.sdc"
       - "physical/**"
       - "scripts/run_physical.sh"
+      - "scripts/run_nangate_sta.sh"
+      - "scripts/run_sta.tcl"
+      - "scripts/synth.sh"
       - "scripts/postroute_sta.tcl"
       - "tools/physical_manifest.py"
       - "tools/physical_metrics.py"
+      - "tools/parse_sta_matrix.py"
+      - "tools/quality_checks.py"
+      - "tools/qor_history.py"
       - ".github/workflows/physical-design.yml"
   workflow_dispatch:
 
@@ -25,6 +34,8 @@ jobs:
   nangate45-physical:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    env:
+      ORFS_IMAGE_DIGEST: sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
     container:
       image: openroad/orfs@sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
     steps:
@@ -61,6 +72,19 @@ jobs:
           fi
           tail -n 100 build/physical/physical_flow_console.log
           python3 -m tools.physical_metrics build/reports/sta_matrix_summary.json build/physical --output build/physical/physical_comparison.json
+      - name: Record exact source revision
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## TimingForge physical evidence provenance'
+            echo "- Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- Checked-out SHA: $GITHUB_SHA"
+            echo "- PR head SHA: ${{ github.event.pull_request.head.sha || 'not a pull_request event' }}"
+            echo "- Ref: $GITHUB_REF"
+            echo "- Event: $GITHUB_EVENT_NAME"
+            echo "- Declared ORFS image digest: $ORFS_IMAGE_DIGEST"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload physical design evidence
         if: always()
         uses: actions/upload-artifact@v4
