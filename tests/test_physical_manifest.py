@@ -27,6 +27,8 @@ class PhysicalManifestTests(unittest.TestCase):
                 label = f"Config SHA256 ({relative})"
             elif relative.startswith(".github/"):
                 label = "Workflow SHA256 (.github/workflows/physical-design.yml)"
+            elif relative.startswith("formal/"):
+                label = f"Formal model SHA256 ({relative})"
             else:
                 label = f"Script SHA256 ({relative})"
             lines.append(f"{label}: {sha256(project / relative)}")
