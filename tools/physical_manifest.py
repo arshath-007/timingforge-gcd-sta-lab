@@ -78,6 +78,13 @@ def build_manifest(root: Path, repo_root: Path | None = None) -> dict:
             raise ValueError(f"{top}: SPEF load evidence missing")
         if "=== POST-ROUTE PARASITIC ANNOTATION ===" not in log_text or "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===" not in log_text:
             raise ValueError(f"{top}: native parasitic annotation report missing")
+        annotation = log_text.split("=== POST-ROUTE PARASITIC ANNOTATION ===", 1)[1].split("=== TIMINGFORGE POST-ROUTE SETUP CHECK ===", 1)[0]
+        unannotated = re.search(r"Found\s+(\d+)\s+unannotated\s+drivers?", annotation, re.IGNORECASE)
+        partially = re.search(r"Found\s+(\d+)\s+partially\s+unannotated\s+drivers?", annotation, re.IGNORECASE)
+        if not unannotated or not partially:
+            raise ValueError(f"{top}: SPEF annotation counts missing")
+        if int(unannotated.group(1)) or int(partially.group(1)):
+            raise ValueError(f"{top}: SPEF annotation incomplete (unannotated={unannotated.group(1)}, partially={partially.group(1)})")
         artifacts = []
         for path in sorted(p for p in work.rglob("*") if p.is_file()):
             if path.name.endswith((".odb", ".gds", ".spef", ".sdc", ".def", ".v", ".rpt", ".json", ".log")):
