@@ -80,6 +80,7 @@ GIT_SHA="$(git -C "$ROOT" rev-parse HEAD)"
   echo "Script SHA256 (scripts/run_sta.sh): $(sha256sum scripts/run_sta.sh | awk '{print $1}')"
   echo "Script SHA256 (scripts/run_sta.tcl): $(sha256sum scripts/run_sta.tcl | awk '{print $1}')"
   echo "Script SHA256 (scripts/run_netlist_equiv.sh): $(sha256sum scripts/run_netlist_equiv.sh | awk '{print $1}')"
+  echo "Script SHA256 (scripts/validate_gds.py): $(sha256sum scripts/validate_gds.py | awk '{print $1}')"
   echo "Script SHA256 (tools/physical_manifest.py): $(sha256sum tools/physical_manifest.py | awk '{print $1}')"
   echo "Script SHA256 (tools/physical_metrics.py): $(sha256sum tools/physical_metrics.py | awk '{print $1}')"
   echo "Script SHA256 (tools/physical_annotation.py): $(sha256sum tools/physical_annotation.py | awk '{print $1}')"
@@ -99,6 +100,9 @@ for TOP in gcd_binary_combined gcd_binary_split; do
   make -C "$FLOW_ROOT" DESIGN_CONFIG="$CONFIG" WORK_HOME="$WORK_HOME" gds
 
   RESULTS="$WORK_HOME/results/nangate45/$TOP/base"
+  export GDS_PATH="$RESULTS/6_final.gds" TOP_CELL="$TOP" GDS_REPORT="$ROOT/build/physical/$TOP/gds_validation.json"
+  klayout -b -r "$ROOT/scripts/validate_gds.py" 2>&1 | tee "$ROOT/build/physical/$TOP/gds_validation.log"
+  grep -q "GDS_VALIDATION_PASS" "$ROOT/build/physical/$TOP/gds_validation.log"
   for artifact in 1_2_yosys.v 1_2_yosys.sdc; do
     [[ -s "$RESULTS/$artifact" ]] || {
       echo "ERROR: required ORFS synthesis artifact missing: $RESULTS/$artifact" >&2
