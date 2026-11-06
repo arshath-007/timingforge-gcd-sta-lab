@@ -1,0 +1,67 @@
+name: TimingForge technology breadth
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "constraints/gcd_baseline_asap7.sdc"
+      - "constraints/gcd_baseline_sky130hd.sdc"
+      - "physical/config/*_asap7.mk"
+      - "physical/config/*_sky130hd.mk"
+      - "scripts/asap7_mcmm_postroute.tcl"
+      - "scripts/run_technology_breadth.sh"
+      - "scripts/postroute_sta.tcl"
+      - "tools/technology_breadth.py"
+      - ".github/workflows/technology-breadth.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "constraints/gcd_baseline_asap7.sdc"
+      - "constraints/gcd_baseline_sky130hd.sdc"
+      - "physical/config/*_asap7.mk"
+      - "physical/config/*_sky130hd.mk"
+      - "scripts/asap7_mcmm_postroute.tcl"
+      - "scripts/run_technology_breadth.sh"
+      - "scripts/postroute_sta.tcl"
+      - "tools/technology_breadth.py"
+      - ".github/workflows/technology-breadth.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: technology-breadth-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  physical-mcmm-and-second-library:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    container:
+      image: openroad/orfs@sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
+    steps:
+      - name: Checkout repository source
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Run ASAP7 MCMM and SKY130HD second-library physical experiments
+        shell: bash
+        run: |
+          bash scripts/run_technology_breadth.sh
+      - name: Upload physical and MCMM evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timingforge-technology-breadth
+          path: |
+            build/technology_breadth/tool_versions.txt
+            build/technology_breadth/technology_breadth_manifest.json
+            build/technology_breadth/asap7/**
+            build/technology_breadth/sky130hd/**
+          retention-days: 90

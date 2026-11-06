@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "description": "Fail-closed Nangate45 typical-corner QoR regression limits. Re-baseline only after a reviewed, archived experiment.",
+  "limits": {
+    "cell_area_growth_percent": 8.0,
+    "all_path_min_period_growth_percent": 8.0,
+    "worst_setup_slack_drop_ns": 0.25,
+    "worst_hold_slack_drop_ns": 0.02
+  },
+  "required_metrics": ["cell_area", "all_path_min_period_ns", "worst_setup_slack_ns", "worst_hold_slack_ns"]
+}

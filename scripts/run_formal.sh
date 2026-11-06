@@ -21,14 +21,14 @@ ACTUAL_CVC5="$(cvc5 --version 2>&1 | head -n 1)"
 {
   echo "Yosys: $ACTUAL_YOSYS"
   echo "Solver: cvc5 1.1.2"
-  echo "Proof: WIDTH=3 bounded transaction-result equivalence; independent functional correctness via exhaustive WIDTH=8 simulation"
+  echo "Proof: WIDTH=3 oracle-backed transaction correctness/equivalence; four formal negative controls; exhaustive WIDTH=8 simulation"
   echo "Timeout policy: 180s first attempt; retry once for 300s only after timeout"
 } | tee build/formal/tool_versions.txt
 printf "proof,attempt,timeout_seconds,elapsed_seconds,exit_code\n" > build/formal/solver_timings.csv
 
 build_smt2() {
   local width="$1" combined="$2" split="$3" prefix="$4" depth="$5"
-  yosys -p "read_verilog -formal -sv $combined $split formal/gcd_equiv.sv; chparam -set WIDTH $width gcd_equiv_formal; prep -top gcd_equiv_formal; write_smt2 -wires build/formal/$prefix.smt2" \
+  yosys -p "read_verilog -formal -sv $combined $split formal/gcd_oracle_3bit.sv formal/gcd_equiv.sv; prep -top gcd_equiv_formal; write_smt2 -wires build/formal/$prefix.smt2" \
     > "build/formal/${prefix}_yosys.log" 2>&1
 }
 

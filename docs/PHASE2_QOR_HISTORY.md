@@ -1,12 +1,6 @@
-# Phase 2 QoR history
+# Phase 2 QoR history and regression policy
 
-The CI job emits `build/reports/qor_snapshot.json` for every library-backed STA run. Each snapshot records:
-
-- Source commit SHA.
-- OpenROAD/Yosys tool versions.
-- Nangate45 platform revision, typical corner, and Liberty SHA-256.
-- Each architecture/scenario pair and the exact SDC SHA-256.
-- Cell area, all-path minimum period, register-to-register period when available, and worst setup/hold slack.
+The library-backed Nangate45 CI job emits `build/reports/qor_snapshot.json` for every run. Each snapshot records source commit, OpenROAD/Yosys versions, platform revision, typical corner, Liberty SHA-256, architecture/scenario, exact SDC SHA-256, cell area, minimum periods, and worst setup/hold slack.
 
 Snapshots are retained as GitHub Actions artifacts. To compare two downloaded snapshots:
 
@@ -14,6 +8,18 @@ Snapshots are retained as GitHub Actions artifacts. To compare two downloaded sn
 python3 -m tools.qor_history compare baseline_qor_snapshot.json candidate_qor_snapshot.json --output qor_delta.json
 ```
 
-The comparator allows the source SHA to differ but rejects differences in platform, corner, tool versions, Liberty hash, scenario set, or per-scenario SDC hash. A comparison is therefore a same-environment source change, not a comparison of unlike libraries or constraints.
+The comparator rejects unlike environments, scenario sets, and SDC hashes. This is a same-environment source change, not a comparison of unlike libraries or constraints.
 
-This is artifact-backed QoR history, not a persistent database or automatic trend dashboard. The snapshots must be retained and supplied explicitly for comparison.
+## Fail-closed CI guardrail
+
+The current CI also runs `tools.qor_gate` against the reviewed Nangate45 typical-corner baseline in `baselines/nangate45_qor_baseline.json`, using `config/qor_gate_policy.json`.
+
+- Maximum cell-area growth: 8%.
+- Maximum all-path minimum-period growth: 8%.
+- Maximum setup-slack loss: 0.25 ns.
+- Maximum hold-slack loss: 0.02 ns.
+- Missing/non-finite metrics, a different platform revision/corner/Liberty/tool set, or a different golden SDC hash fail closed.
+
+The reference is anchored to the exact successful CI environment and commit recorded in the baseline file. Refreshing it requires a deliberate reviewed change with retained artifacts; do not automatically bless a new baseline.
+
+This is artifact-backed QoR history plus a static reviewed regression gate, not a persistent database or automatic trend dashboard. It is an educational guardrail, not signoff methodology.

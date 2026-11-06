@@ -8,6 +8,7 @@ foreach name {LIBERTY TECH_LEF SC_LEF ODB SDC SPEF} {
 read_lef $::env(TECH_LEF)
 read_lef $::env(SC_LEF)
 read_liberty $::env(LIBERTY)
+report_units
 read_db $::env(ODB)
 read_sdc $::env(SDC)
 read_spef $::env(SPEF)

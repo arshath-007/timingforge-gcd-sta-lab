@@ -76,6 +76,10 @@ The source baseline SDC hash is `e16af6df47394c8f5ea3b5ad8cd8d1cbcfc8d3c5935b9bc
 - Pre-layout golden STA quality findings remain visible: the combined design has -0.002 ns hold slack, and both architectures have reported transition and capacitance violation records. The post-route metrics are separate measurements and do not erase those baseline findings.
 - WNS/TNS can be zero when worst slack is positive; consult worst slack and detailed path reports rather than treating zero WNS as a zero-margin result.
 
+## Related Phase 3 experiments
+
+This report intentionally contains only Nangate45 typical-corner measurements. Do not combine its absolute area or timing values with ASAP7 or SKY130HD. Separate, platform-specific results are documented in [ASAP7 BC/TC/WC and SKY130HD TT technology-breadth results](PHASE3_TECHNOLOGY_BREADTH_RESULTS.md). Placement/utilization sensitivity and the target-period closure sweep are documented in [physical robustness experiments](PHYSICAL_ROBUSTNESS.md).
+
 ## Reproduction
 
 Use the pinned OpenROAD Flow Scripts environment:

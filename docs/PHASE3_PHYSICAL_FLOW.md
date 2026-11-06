@@ -40,7 +40,7 @@ The runner uses `set -euo pipefail` and invokes the ORFS `make all` target follo
 
 This is an educational Nangate45 typical-corner implementation, not foundry signoff. A successful flow does not establish manufacturing readiness, multi-corner closure, IR-drop/EM closure, DRC/LVS signoff, or silicon quality. The baseline block-level SDC is retained to support a controlled pre-layout/post-layout experiment; it is an illustrative interface budget, not a production timing contract.
 
-No second library or multi-corner result is claimed. Add those only after independently validating distinct Liberty corner models, units, licenses, and platform mappings.
+This document covers only the Nangate45 typical-corner flow. The separately validated ASAP7 BC/TC/WC MCMM and SKY130HD TT experiments are documented in [technology-breadth methodology](PHASE3_TECHNOLOGY_BREADTH.md) and [measured technology-breadth results](PHASE3_TECHNOLOGY_BREADTH_RESULTS.md). The separate [physical robustness study](PHYSICAL_ROBUSTNESS.md) records placement/utilization variation and a target-period closure sweep. These are educational experiments and do not establish foundry signoff.
 
 
 ### Internal ORFS LEC boundary
@@ -51,4 +51,4 @@ The physical CI sets `LEC_CHECK=0` because the container's optional Kepler-based
 
 The earlier [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) ran on PR #6 merge SHA `4686342491aeabc5746fecd36f7e33b2d90c8b5b`, not a standalone main commit. New workflow configuration runs on main pushes and version tags and records the exact checked-out SHA. Its [90-day evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211) contains the raw stage outputs, final databases, GDS, extracted SPEF, post-route timing logs, comparison JSON and SHA-256 manifest.
 
-See [Phase 3 measured results](PHASE3_RESULTS.md) for the post-route timing table, cross-flow pre-layout/post-route observations, and interpretation limits.
+See [Phase 3 measured results](PHASE3_RESULTS.md) for the Nangate45 post-route table and cross-flow comparison caveats; see [technology-breadth methodology](PHASE3_TECHNOLOGY_BREADTH.md), [technology-breadth results](PHASE3_TECHNOLOGY_BREADTH_RESULTS.md), and [physical robustness experiments](PHYSICAL_ROBUSTNESS.md) for the separate multi-platform and variation evidence.
