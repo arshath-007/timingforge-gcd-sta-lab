@@ -6,11 +6,34 @@ import json
 import math
 from pathlib import Path
 
+TOPS = {"gcd_binary_combined", "gcd_binary_split"}
+SUPPORTED_METRICS = {
+    "cell_area", "all_path_min_period_ns",
+    "worst_setup_slack_ns", "worst_hold_slack_ns",
+}
+
 
 def _finite(value, label):
-    if not isinstance(value, (int, float)) or not math.isfinite(value):
+    if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value):
         raise ValueError(f"missing or non-finite required metric: {label}")
     return float(value)
+
+
+def _baseline_rows(snapshot: dict, label: str) -> dict:
+    rows = {}
+    for row in snapshot.get("records", []):
+        if row.get("scenario") != "gcd_baseline":
+            continue
+        key = (row.get("top"), row.get("scenario"))
+        if key in rows:
+            raise ValueError(f"duplicate {label} golden record: {'/'.join(str(x) for x in key)}")
+        rows[key] = row
+    actual_tops = {top for top, _scenario in rows}
+    if actual_tops != TOPS:
+        missing = sorted(TOPS - actual_tops)
+        unexpected = sorted(actual_tops - TOPS)
+        raise ValueError(f"{label} architecture set mismatch: missing={missing}, unexpected={unexpected}")
+    return rows
 
 
 def evaluate(reference: dict, candidate: dict, policy: dict) -> dict:
@@ -21,21 +44,19 @@ def evaluate(reference: dict, candidate: dict, policy: dict) -> dict:
     for field in environment_fields:
         if reference.get(field) != candidate.get(field):
             raise ValueError(f"QoR environment mismatch: {field}")
-    ref_rows = {
-        (row.get("top"), row.get("scenario")): row
-        for row in reference.get("records", [])
-        if row.get("scenario") == "gcd_baseline"
-    }
-    new_rows = {
-        (row.get("top"), row.get("scenario")): row
-        for row in candidate.get("records", [])
-        if row.get("scenario") == "gcd_baseline"
-    }
-    if not ref_rows or set(ref_rows) != set(new_rows):
-        raise ValueError("baseline architecture set differs or is empty")
+
+    ref_rows = _baseline_rows(reference, "baseline")
+    new_rows = _baseline_rows(candidate, "candidate")
 
     limits = policy["limits"]
     required = policy["required_metrics"]
+    if not required or set(required) - SUPPORTED_METRICS:
+        raise ValueError(f"unsupported or empty QoR required_metrics: {required}")
+    for name, value in limits.items():
+        numeric = _finite(value, f"policy limit {name}")
+        if numeric < 0:
+            raise ValueError(f"policy limit must be non-negative: {name}")
+
     checks = []
     failures = []
     for key in sorted(ref_rows):
@@ -52,10 +73,8 @@ def evaluate(reference: dict, candidate: dict, policy: dict) -> dict:
                 limit_keys = {
                     "cell_area": "cell_area_growth_percent",
                     "all_path_min_period_ns": "all_path_min_period_growth_percent",
-                    "worst_setup_slack_ns": "worst_setup_slack_drop_ns",
-                    "worst_hold_slack_ns": "worst_hold_slack_drop_ns",
                 }
-                limit = float(limits[limit_keys[metric]])
+                limit = _finite(limits[limit_keys[metric]], f"policy {limit_keys[metric]}")
                 passed = delta <= limit
                 check = {
                     "top": key[0], "metric": metric, "baseline": before,
@@ -65,7 +84,7 @@ def evaluate(reference: dict, candidate: dict, policy: dict) -> dict:
             else:
                 delta = before - after
                 limit_key = "worst_setup_slack_drop_ns" if metric == "worst_setup_slack_ns" else "worst_hold_slack_drop_ns"
-                limit = float(limits[limit_key])
+                limit = _finite(limits[limit_key], f"policy {limit_key}")
                 passed = delta <= limit
                 check = {
                     "top": key[0], "metric": metric, "baseline": before,
