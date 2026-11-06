@@ -19,7 +19,7 @@ if {[catch {report_parasitic_annotation -report_unannotated} annotation_error]} 
     error "Cannot verify SPEF parasitic annotation with this OpenSTA build"
 }
 puts "=== TIMINGFORGE POST-ROUTE SETUP CHECK ==="
-check_setup -verbose
+check_setup -verbose -no_input_delay -no_output_delay -multiple_clock -no_clock -unconstrained_endpoints -loops -generated_clocks
 puts "=== POST-ROUTE CLOCK PROPERTIES ==="
 report_clock_properties
 puts "=== POST-ROUTE SETUP CLOCK SKEW ==="
