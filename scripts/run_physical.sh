@@ -27,6 +27,8 @@ export OPENSTA_EXE="$(command -v sta || true)"
 export PYTHON_EXE="$(command -v python3)"
 export KLAYOUT_CMD="$(command -v klayout)"
 export NUM_CORES=1
+# Disable the optional Kepler-based ORFS netlist LEC; it has been unstable in this container.
+# The separate Phase 2 proof compares RTL architectures only and is not RTL-to-netlist equivalence.
 export LEC_CHECK=0
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
