@@ -137,6 +137,7 @@ def parse_log(path):
     drv_slew = parse_drv_check(text, "=== DRV MAX SLEW ===", "=== DRV MAX CAPACITANCE ===")
     drv_cap = parse_drv_check(text, "=== DRV MAX CAPACITANCE ===", "=== DRV MAX FANOUT ===")
     drv_fanout = parse_drv_check(text, "=== DRV MAX FANOUT ===", "=== UNCONSTRAINED PATH DETAILS ===")
+    rising_path_limit = 1000 if scenario == "gcd_baseline" else 100
     warning = re.search(r"There are\s+(\d+)\s+unconstrained endpoints", text, re.IGNORECASE)
     input_missing = re.search(r"There are\s+(\d+)\s+input ports missing set_input_delay", text, re.IGNORECASE)
     output_missing = re.search(r"There are\s+(\d+)\s+output ports missing set_output_delay", text, re.IGNORECASE)
@@ -164,7 +165,8 @@ def parse_log(path):
         "critical_path_class": classify_critical_path(start.group(1).strip() if start else None, end.group(1).strip() if end else None),
         "register_to_register_path_found": bool(rr_start and rr_end),
         "register_to_register_rising_paths_reported": len(rising_slacks),
-        "register_to_register_rising_path_inventory_complete": len(rising_slacks) < 1000,
+        "register_to_register_rising_path_limit": rising_path_limit,
+        "register_to_register_rising_path_inventory_complete": len(rising_slacks) < rising_path_limit,
         "register_to_register_rising_worst_slack_ns": min(rising_slacks) if rising_slacks else None,
         "register_to_register_rising_best_slack_ns": max(rising_slacks) if rising_slacks else None,
         "clock_period_ns": clock_period,
@@ -200,7 +202,7 @@ def summarise(report_dir=REPORT_DIR):
             if base and row["worst_setup_slack_ns"] is not None and base["worst_setup_slack_ns"] is not None else None
         )
     output = {
-        "schema_version": "0.3",
+        "schema_version": "0.4",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "analysis_engine": "OpenROAD-integrated OpenSTA",
         "platform": "Nangate45 typical Liberty",
