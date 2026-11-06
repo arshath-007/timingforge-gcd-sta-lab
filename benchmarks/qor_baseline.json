@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "source_sha": "1ff8da7b8f2da3b99c7a3969ce07bd8b294bcc5b",
+  "platform": "Nangate45",
+  "platform_source_revision": "11aa833a11488c3a540a1d8eb4caa23fd22df703",
+  "corner": "typical",
+  "liberty_sha256": "8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1",
+  "tool_versions": {
+    "yosys": "Yosys 0.68+post (git sha1 UNKNOWN, Release, GNU /usr/local/bin/wrapped-cc/g++ 11.4.0)",
+    "openroad": "26Q3-1080-gab6fd26351"
+  },
+  "records": [
+    {
+      "top": "gcd_binary_combined",
+      "scenario": "gcd_baseline",
+      "sdc_sha256": "e16af6df47394c8f5ea3b5ad8cd8d1cbcfc8d3c5935b9bce40165eb25165279f",
+      "cell_area": 1657.18,
+      "all_path_min_period_ns": 2.94,
+      "register_to_register_min_period_ns": null,
+      "worst_setup_slack_ns": 7.065,
+      "worst_hold_slack_ns": -0.002
+    },
+    {
+      "top": "gcd_binary_split",
+      "scenario": "gcd_baseline",
+      "sdc_sha256": "e16af6df47394c8f5ea3b5ad8cd8d1cbcfc8d3c5935b9bce40165eb25165279f",
+      "cell_area": 1681.918,
+      "all_path_min_period_ns": 2.35,
+      "register_to_register_min_period_ns": 0.74,
+      "worst_setup_slack_ns": 7.65,
+      "worst_hold_slack_ns": 0.005
+    }
+  ]
+}
