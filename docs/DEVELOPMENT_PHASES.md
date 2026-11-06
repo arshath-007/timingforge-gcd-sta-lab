@@ -50,7 +50,7 @@ The reviewed baseline and limits apply only to the pinned Nangate45 typical envi
 - [x] Pinned platform provenance, Liberty PVT/unit checks, tool/library/artifact hashes and a SHA-256 manifest.
 - [x] All four physical builds, both ASAP7 three-scene MCMM analyses, both SKY130HD post-route analyses and manifest generation passed in PR #10 [technology-breadth run #42199460181](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181). The [90-day artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181/artifacts/13494468655) contains 412 files and the manifest. Its four design/platform combinations each include final ODB, Verilog, GDS, SPEF and SDC; all 36 manifest-listed implementation-artifact hashes were independently verified after download.
 
-**ASAP7 measured MCMM results (minimum slack among the 100 reported paths per type and scene):**
+**ASAP7 measured MCMM results (minimum slack among emitted paths; report request capped at 100 paths per path group):**
 
 | Architecture | Scene | PVT | Setup slack (ps) | Hold slack (ps) |
 |---|---|---|---:|---:|
