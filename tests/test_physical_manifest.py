@@ -36,6 +36,10 @@ class PhysicalManifestTests(unittest.TestCase):
             results.mkdir(parents=True)
             for name in REQUIRED:
                 (results / name).write_bytes(("fixture-" + name).encode())
+            (work / "presynth_sta.log").write_text(
+                "=== ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD ===\n",
+                encoding="utf-8",
+            )
             (work / "postroute_sta.log").write_text(
                 "=== POST-ROUTE PARASITIC ANNOTATION ===\nFound 0 unannotated drivers.\nFound 0 partially unannotated drivers.\n"
                 "=== TIMINGFORGE POST-ROUTE SETUP CHECK ===\n"
@@ -50,7 +54,7 @@ class PhysicalManifestTests(unittest.TestCase):
             manifest = build_manifest(physical_root)
             self.assertEqual([item["top"] for item in manifest["designs"]], list(TOPS))
             self.assertEqual(manifest["repo_commit_sha"], "fixture-commit")
-            self.assertEqual(manifest["schema_version"], "1.1")
+            self.assertEqual(manifest["schema_version"], "1.2")
             self.assertEqual(set(manifest["source_hashes"]), set(PROVENANCE_FILES))
             self.assertFalse(manifest["signoff_claim"])
 
