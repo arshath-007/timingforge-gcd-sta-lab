@@ -14,6 +14,11 @@ module tb_gcd_compare;
     integer max_combined_cycles = 0;
     integer max_split_cycles = 0;
     integer random_cases = 0;
+    integer uniform_random_cases = 0;
+    integer uniform_combined_cycles = 0;
+    integer uniform_split_cycles = 0;
+    integer uniform_seed = 32'h554e_4946;
+    reg uniform_latency_mode = 1'b0;
     integer zero_input_cases = 0;
     integer equal_operand_cases = 0;
     integer both_even_cases = 0;
@@ -140,6 +145,10 @@ module tb_gcd_compare;
             end
             total_combined_cycles = total_combined_cycles + combined_latency;
             total_split_cycles = total_split_cycles + split_latency;
+            if (uniform_latency_mode) begin
+                uniform_combined_cycles = uniform_combined_cycles + combined_latency;
+                uniform_split_cycles = uniform_split_cycles + split_latency;
+            end
             if (combined_latency > max_combined_cycles) max_combined_cycles = combined_latency;
             if (split_latency > max_split_cycles) max_split_cycles = split_latency;
             if (combined_latency <= 32) combined_le32 = combined_le32 + 1;
@@ -187,7 +196,20 @@ module tb_gcd_compare;
             random_cases = random_cases + 1;
         end
 
-        if (random_cases != 250 || zero_input_cases == 0 || equal_operand_cases == 0 ||
+        // Separate unbiased 32-bit operand sample for latency estimation.
+        // Unlike the coverage corpus above, this segment does not force parity,
+        // high-bit, or equal-operand classes.
+        seed = uniform_seed;
+        uniform_latency_mode = 1'b1;
+        for (i = 0; i < 1000; i = i + 1) begin
+            ra = $random(seed);
+            rb = $random(seed);
+            check_case(ra, rb);
+            uniform_random_cases = uniform_random_cases + 1;
+        end
+        uniform_latency_mode = 1'b0;
+
+        if (random_cases != 250 || uniform_random_cases != 1000 || zero_input_cases == 0 || equal_operand_cases == 0 ||
             both_even_cases == 0 || one_even_cases == 0 || both_odd_cases == 0 ||
             high_bit_cases == 0 || gcd_one_cases == 0 || gcd_nontrivial_cases == 0)
             $fatal(1, "coverage requirement not met");
@@ -199,6 +221,10 @@ module tb_gcd_compare;
         $display("LATENCY_BINS: combined_le32=%0d combined_33_64=%0d combined_gt64=%0d split_le32=%0d split_33_64=%0d split_gt64=%0d",
             combined_le32, combined_33_64, combined_gt64, split_le32, split_33_64, split_gt64);
         $display("LATENCY: combined_avg=%.2f cycles combined_max=%0d cycles split_avg=%.2f cycles split_max=%0d cycles", 1.0*total_combined_cycles/cases, max_combined_cycles, 1.0*total_split_cycles/cases, max_split_cycles);
+        $display("UNIFORM_LATENCY: seed=0x%08x cases=%0d combined_mean_cycles=%.4f split_mean_cycles=%.4f",
+            uniform_seed, uniform_random_cases,
+            1.0*uniform_combined_cycles/uniform_random_cases,
+            1.0*uniform_split_cycles/uniform_random_cases);
         $finish;
     end
 endmodule
