@@ -152,7 +152,7 @@ def main() -> int:
     args = parser.parse_args()
     result = compare(args.prelayout_matrix, args.physical_root, args.repo_root)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, indent=2) + "\\n", encoding="utf-8")
+    args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "status": "PASS",
         "designs": [row["top"] for row in result["designs"]],
