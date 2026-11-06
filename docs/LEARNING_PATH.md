@@ -21,7 +21,7 @@ Learn launch/capture clocks, arrival time, required time, setup slack, hold slac
 
 ## Stage 4 — Compare architectures
 
-The split architecture registers the comparison decision and uses a later subtraction cycle. It may shorten a combinational path but increases operation latency. Measure cell area, logic depth, timing, and cycles rather than assuming a winner.
+The split architecture registers the comparison decision and uses a later subtraction cycle. This was a hypothesis for reducing combinational delay, not an established advantage. The available single post-route run measured 1.02 ns register-to-register minimum period for split versus 0.95 ns for combined, while split used fewer standard-cell area units. Compare timing, area, and operation cycles; do not assume the split architecture wins timing.
 
 ## Stage 5 — Grow toward signoff methodology
 
@@ -37,4 +37,4 @@ Use the OpenROAD Flow Scripts environment with its Yosys and OpenROAD binaries. 
 
 ## Stage 7 — Compare timing with operation latency
 
-A higher reported maximum clock frequency is not automatically higher application throughput. The TimingForge testbench measures cycle count from accepted start to done for both GCD architectures. Compare cycle count with the reported clock limit, and label any cycle-count × period calculation as an illustrative pre-layout proxy rather than silicon latency.
+A higher reported maximum clock frequency is not automatically higher application throughput. The TimingForge testbench measures cycle count from accepted start to done for both GCD architectures. Use an unbiased uniform-random operand sample and multiply its mean cycle count by the post-route register-only minimum period only as an illustrative proxy. It is not measured silicon latency or a proven worst-case bound.
