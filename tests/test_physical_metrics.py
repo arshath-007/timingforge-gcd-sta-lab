@@ -25,8 +25,10 @@ tns min 0.000
 Clock skew report
 === POST-ROUTE HOLD CLOCK SKEW ===
 Clock skew report
-=== POST-ROUTE DRV ===
-DRV report
+=== POST-ROUTE DRV MAX SLEW ===
+PinA 0.1 0.2 -0.1 (VIOLATED)
+=== POST-ROUTE DRV MAX CAPACITANCE ===
+=== POST-ROUTE DRV MAX FANOUT ===
 === POST-ROUTE PARASITICS LOADED ===
 SPEF=final.spef
 """
@@ -44,6 +46,10 @@ class PhysicalMetricsTests(unittest.TestCase):
             self.assertEqual(result["postroute_worst_hold_slack_ns"], 0.02)
             self.assertTrue(result["clock_skew_supported"])
             self.assertIn("Annotated parasitics", result["parasitic_annotation_report"])
+            self.assertEqual(result["postroute_max_slew_violation_count"], 1)
+            self.assertEqual(result["postroute_max_capacitance_violation_count"], 0)
+            self.assertEqual(result["postroute_max_fanout_violation_count"], 0)
+            self.assertTrue(result["postroute_drv_supported"])
 
     def test_parser_rejects_missing_annotation_report(self):
         with tempfile.TemporaryDirectory() as tmp:
