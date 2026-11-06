@@ -17,6 +17,7 @@ on:
       - "scripts/postroute_sta.tcl"
       - "scripts/presynth_sta.tcl"
       - "scripts/run_netlist_equiv.sh"
+      - "scripts/validate_gds.py"
       - "scripts/synth.sh"
       - "tools/physical_manifest.py"
       - "tools/physical_metrics.py"
