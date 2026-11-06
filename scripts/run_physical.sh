@@ -70,6 +70,7 @@ GIT_SHA="$(git -C "$ROOT" rev-parse HEAD)"
   echo "Script SHA256 (scripts/postroute_sta.tcl): $(sha256sum scripts/postroute_sta.tcl | awk '{print $1}')"
   echo "Script SHA256 (tools/physical_manifest.py): $(sha256sum tools/physical_manifest.py | awk '{print $1}')"
   echo "Script SHA256 (tools/physical_metrics.py): $(sha256sum tools/physical_metrics.py | awk '{print $1}')"
+  echo "Script SHA256 (tools/physical_annotation.py): $(sha256sum tools/physical_annotation.py | awk '{print $1}')"
   echo "Source SDC SHA256: $(sha256sum constraints/gcd_baseline.sdc | awk '{print $1}')"
 } | tee build/physical/tool_versions.txt
 
