@@ -191,6 +191,12 @@ def compare(prelayout_path: Path, physical_root: Path, repo_root: Path | None = 
         if baseline is None:
             raise ValueError(f"Pre-layout golden row missing for {top}")
         post = parse_postroute_log(physical_root / top / "postroute_sta.log")
+        synthesis_sta = parse_presynth_log(physical_root / top / "presynth_sta.log")
+        stage_metrics = _stage_metrics(
+            physical_root / top / "logs" / "nangate45" / top / "base", top
+        )
+        prelayout_synthesis = _prelayout_synthesis_metrics(physical_root.parent, top, baseline)
+        orfs_synthesis = stage_metrics["orfs_synthesis"]
         pre_period = baseline.get("all_path_min_period_ns")
         pre_setup = baseline.get("worst_setup_slack_ns")
         pre_hold = baseline.get("worst_hold_slack_ns")
@@ -199,6 +205,36 @@ def compare(prelayout_path: Path, physical_root: Path, repo_root: Path | None = 
             "platform": "Nangate45",
             "corner": "typical",
             "source_sdc_sha256": sdc_hash,
+            "prelayout_synthesis": prelayout_synthesis,
+            "orfs_synthesis": orfs_synthesis,
+            "synthesis_flow_area_delta_orfs_minus_prelayout": round(
+                orfs_synthesis["standard_cell_area"] - prelayout_synthesis["standard_cell_area"], 6
+            ),
+            "synthesis_flow_area_delta_percent_orfs_vs_prelayout": round(
+                100.0 * (orfs_synthesis["standard_cell_area"] / prelayout_synthesis["standard_cell_area"] - 1.0), 3
+            ),
+            "synthesis_flow_instance_count_delta_orfs_minus_prelayout": (
+                orfs_synthesis["standard_cell_instance_count"] - prelayout_synthesis["standard_cell_instance_count"]
+            ),
+            "orfs_stage_metrics": stage_metrics,
+            "orfs_post_synthesis_sta": synthesis_sta,
+            "orfs_synthesis_to_postroute": {
+                "same_orfs_synthesis_lineage": True,
+                "exact_netlist_match": False,
+                "interpretation": "post-synthesis versus final routed implementation in one ORFS flow; placement/CTS/timing repair may resize or buffer the netlist",
+                "register_to_register_min_period_delta_ns": round(
+                    post["postroute_register_to_register_min_period_ns"] - synthesis_sta["register_to_register_min_period_ns"], 6
+                ),
+                "all_path_min_period_delta_ns": round(
+                    post["postroute_all_path_min_period_ns"] - synthesis_sta["all_path_min_period_ns"], 6
+                ),
+                "worst_setup_slack_delta_ns": round(
+                    post["postroute_worst_setup_slack_ns"] - synthesis_sta["worst_setup_slack_ns"], 6
+                ),
+                "worst_hold_slack_delta_ns": round(
+                    post["postroute_worst_hold_slack_ns"] - synthesis_sta["worst_hold_slack_ns"], 6
+                ),
+            },
             "prelayout_all_path_min_period_ns": pre_period,
             "postroute_all_path_min_period_ns": post["postroute_all_path_min_period_ns"],
             "all_path_min_period_delta_ns_observational_only": round(post["postroute_all_path_min_period_ns"] - pre_period, 6) if pre_period is not None else None,
@@ -211,7 +247,7 @@ def compare(prelayout_path: Path, physical_root: Path, repo_root: Path | None = 
             **post,
         })
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "comparison": "cross-flow observation: same Nangate45 typical corner and source SDC, but pre-layout and ORFS synthesis netlists are not matched",
         "netlist_matched": False,
         "delta_interpretation": "observational_only; do not attribute differences to routing parasitics alone",
