@@ -30,6 +30,8 @@ This tracker distinguishes implemented code from completed validation. A feature
 
 The updated oracle-backed miter passed the dedicated PR #10 [formal workflow run #42225754417](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754417); the [formal artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754417/artifacts/13494245840) records the positive proof and negative controls. Yosys 0.33 plus CVC5 1.1.2 completed the positive proof at 26 SMT steps / 12 positive clock edges in 11:08. The intentionally broken subtract mutant was rejected at step 5 for operands a=5, b=3.
 
+The QoR regression gate now requires unique golden records for both GCD architectures, the complete four-metric set, and the complete four-limit policy; missing/duplicate architecture records, unsupported or duplicate metrics, incomplete limits, non-finite values and environment/SDC mismatches fail closed.
+
 The proof checks both architectures against the independent 64-entry WIDTH=3 GCD oracle, checks mutual result equivalence, and verifies one accepted transaction, completion, done/busy behavior and the 12-edge bound. It is exhaustive for all 64 WIDTH=3 operand pairs only. It is not a proof of all 32-bit operands, arbitrary back-to-back transactions, or an unbounded sequential invariant. The 32-bit and WIDTH=8/16/32 tests remain simulation evidence; Verilator concurrent-SVA protocol checks are dynamic assertion evidence, not part of the Yosys/CVC5 proof.
 
 
@@ -96,9 +98,10 @@ The latest PR #10 physical robustness workflow [run #42225754303](https://github
 Do not publish v0.4.0 until all of the following are true:
 1. [x] The updated oracle-backed formal workflow passes positive proof and negative controls on PR #10 (run #42225754417).
 2. [x] The technology-breadth workflow completes all four physical builds, both ASAP7 three-scene MCMM analyses, both SKY130HD post-route analyses, and actual-Liberty PVT manifest validation on PR #10 (run #42225754263).
-3. [ ] The PR is merged; fresh workflows on the resulting main commit pass regression, formal, Nangate45 physical, technology breadth and physical robustness.
-4. [ ] README, phase tracker, measured-results page and release notes are confirmed against the final main-branch run IDs.
-5. [ ] A release tag is created at the validated main commit and its evidence artifacts are attached or linked.
+3. [ ] Independent technical review of the final PR head, source changes, artifacts and scope claims is completed; material findings are resolved.
+4. [ ] The PR is merged; fresh workflows on the resulting main commit pass regression, formal, Nangate45 physical, technology breadth and physical robustness.
+5. [ ] README, phase tracker, measured-results page and release notes are confirmed against the final main-branch run IDs.
+6. [ ] A release tag is created at the validated main commit and its evidence artifacts are attached or linked.
 
 PR #10 commit `8dc274761fad6d315c5c349b129f63d94c9a6f89` has passed the five current PR workflows: [regression #42225754505](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754505), [formal #42225754417](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754417), [Nangate45 physical #42225754311](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754311), [technology breadth #42225754263](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754263), and [physical robustness #42225754303](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754303). The PR still requires independent technical review, merge and fresh main-branch validation before v0.4.0 can be tagged or published.
 
