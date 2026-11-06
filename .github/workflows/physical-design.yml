@@ -99,4 +99,5 @@ jobs:
             build/reports/sta_matrix_summary.md
             build/reports/sta_*.log
             build/yosys_*.log
+            build/gcd_binary_*.v
           retention-days: 90
