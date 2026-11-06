@@ -4,7 +4,7 @@
 
 Both 32-bit GCD RTL architectures were implemented with the pinned OpenROAD Flow Scripts container and Nangate45 typical Liberty/LEF platform. The flow ran floorplanning, placement, clock-tree synthesis, global/detail routing, final database generation, OpenRCX parasitic extraction, KLayout GDS generation, and post-route STA.
 
-Post-route analysis loaded each design's final ODB, final SDC and extracted SPEF, then propagated the clocks. The pre-layout and post-route comparison uses the same Nangate45 typical corner and the same source baseline SDC hash:
+Post-route analysis loaded each design's final ODB, final SDC and extracted SPEF, then propagated the clocks. The pre-layout and post-route runs use the same Nangate45 typical corner and source baseline SDC hash, but are **not netlist-matched**: `scripts/synth.sh` and ORFS synthesis use different synthesis settings (`ABC_AREA=1` in ORFS). This is a cross-flow comparison, not an isolated measurement of routing impact. Placement/CTS resizing, buffering, clock skew and parasitics can all contribute; the available evidence does not isolate the cause of the period difference. Source baseline SDC hash:
 
 `e16af6df47394c8f5ea3b5ad8cd8d1cbcfc8d3c5935b9bce40165eb25165279f`
 
@@ -41,7 +41,7 @@ The clock-skew numbers above are the values emitted by OpenROAD's `report_clock_
 | Pre-layout worst hold slack | -0.002 ns | +0.005 ns |
 | Post-route worst hold slack | +0.031 ns | +0.018 ns |
 
-These changes are observations from this one matched flow and constraint set. They are not a general claim that routing improves timing; placement, buffering, CTS, parasitic extraction and timing repair all influence the final result.
+These changes are observations from this one cross-flow comparison and constraint set, not a matched-netlist experiment. They are not a general claim that routing improves timing; synthesis differences, placement, buffering, CTS, parasitic extraction and timing repair can all influence the final result. The available data does not isolate the contribution of each factor.
 
 ## Physical evidence
 
@@ -53,7 +53,7 @@ For each architecture the archive contains:
 - Post-route STA log showing SPEF loading, propagated clocks, setup/hold reports and clock-skew reports.
 - SHA-256 manifest entries for the archived physical artifacts.
 
-The manifest reports 84 files per design. Tool provenance includes OpenROAD 26Q3-1080-gab6fd26351, Yosys 0.68+post, the pinned ORFS container digest, Nangate45 typical Liberty SHA-256, LEF hashes and baseline SDC hash.
+The original manifest reports 84 files per design. The updated manifest also records the source Git commit, hashes of both RTL files and the key flow/parser scripts, and requires the native parasitic annotation report to be present. The workflow-supplied ORFS image digest is labelled as declared provenance; the running container does not independently attest its own registry digest.
 
 ### Source SDC versus final exported SDC
 
