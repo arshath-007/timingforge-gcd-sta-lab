@@ -55,7 +55,7 @@ class PhysicalMetricsTests(unittest.TestCase):
     def test_parser_rejects_nonzero_unannotated_driver_count(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "postroute.log"
-            path.write_text(LOG.replace("Found 0 unannotated drivers.\n", "").replace("Found 0 partially unannotated drivers.\n", ""), encoding="utf-8")
+            path.write_text(LOG.replace("Found 0 unannotated drivers.", "Found 1 unannotated drivers."), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "incomplete SPEF annotation"):
                 parse_postroute_log(path)
 
