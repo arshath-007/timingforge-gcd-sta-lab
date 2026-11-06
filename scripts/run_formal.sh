@@ -29,7 +29,7 @@ printf "proof,attempt,timeout_seconds,elapsed_seconds,exit_code\n" > build/forma
 build_smt2() {
   local width="$1" combined="$2" split="$3" prefix="$4" depth="$5"
   yosys -p "read_verilog -formal -sv $combined $split formal/gcd_equiv.sv; chparam -set WIDTH $width gcd_equiv_formal; prep -top gcd_equiv_formal; write_smt2 -wires build/formal/$prefix.smt2" \
-    > "build/formal/\${prefix}_yosys.log" 2>&1
+    > "build/formal/${prefix}_yosys.log" 2>&1
 }
 
 run_solver() {
@@ -38,38 +38,38 @@ run_solver() {
   for attempt in 1 2; do
     start="$(date +%s)"
     set +e
-    timeout --signal=TERM --kill-after=10s "\${timeout_seconds}s" \
+    timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" \
       yosys-smtbmc -s cvc5 -t "$depth" \
-      --dump-vcd "build/formal/\${prefix}_attempt\${attempt}.vcd" \
-      "build/formal/\${prefix}.smt2" \
-      > "build/formal/\${prefix}_attempt\${attempt}.log" 2>&1
+      --dump-vcd "build/formal/${prefix}_attempt${attempt}.vcd" \
+      "build/formal/${prefix}.smt2" \
+      > "build/formal/${prefix}_attempt${attempt}.log" 2>&1
     status=$?
     set -e
     end="$(date +%s)"
     elapsed=$((end - start))
     echo "$prefix,$attempt,$timeout_seconds,$elapsed,$status" >> build/formal/solver_timings.csv
-    cat "build/formal/\${prefix}_attempt\${attempt}.log"
+    cat "build/formal/${prefix}_attempt${attempt}.log"
 
     if [[ "$status" -eq 124 || "$status" -eq 137 ]]; then
       if [[ "$attempt" -eq 1 ]]; then
         timeout_seconds=300
-        echo "WARN: $prefix timed out; retrying once with \${timeout_seconds}s"
+        echo "WARN: $prefix timed out; retrying once with ${timeout_seconds}s"
         continue
       fi
       echo "ERROR: $prefix timed out after retry" >&2
       return 1
     fi
     if [[ "$expected" == "pass" ]]; then
-      if [[ "$status" -eq 0 ]] && grep -q "Status: PASSED" "build/formal/\${prefix}_attempt\${attempt}.log"; then
-        cp "build/formal/\${prefix}_attempt\${attempt}.log" "build/formal/\${prefix}.log"
+      if [[ "$status" -eq 0 ]] && grep -q "Status: PASSED" "build/formal/${prefix}_attempt${attempt}.log"; then
+        cp "build/formal/${prefix}_attempt${attempt}.log" "build/formal/${prefix}.log"
         echo "PASS: $prefix"
         return 0
       fi
       echo "ERROR: expected $prefix to pass" >&2
       return 1
     fi
-    if [[ "$status" -ne 0 ]] && grep -q "Status: FAILED" "build/formal/\${prefix}_attempt\${attempt}.log"; then
-      cp "build/formal/\${prefix}_attempt\${attempt}.log" "build/formal/\${prefix}.log"
+    if [[ "$status" -ne 0 ]] && grep -q "Status: FAILED" "build/formal/${prefix}_attempt${attempt}.log"; then
+      cp "build/formal/${prefix}_attempt${attempt}.log" "build/formal/${prefix}.log"
       echo "PASS: negative control $prefix was rejected"
       return 0
     fi
