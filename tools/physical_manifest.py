@@ -18,7 +18,7 @@ PROVENANCE_FILES = (
     "rtl/gcd_binary_combined.sv", "rtl/gcd_binary_split.sv",
     "constraints/gcd_baseline.sdc", "scripts/run_physical.sh",
     "scripts/postroute_sta.tcl", "tools/physical_manifest.py",
-    "tools/physical_metrics.py",
+    "tools/physical_metrics.py", "tools/physical_annotation.py",
 )
 
 
