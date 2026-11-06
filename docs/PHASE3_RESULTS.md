@@ -84,7 +84,7 @@ This is a target-specific Nangate45 typical-corner experiment, not a statement t
 
 ## Related Phase 3 experiments
 
-This report intentionally contains only Nangate45 typical-corner measurements. Do not combine its absolute area or timing values with ASAP7 or SKY130HD. Separate, platform-specific results are documented in [ASAP7 BC/TC/WC and SKY130HD TT technology-breadth results](PHASE3_TECHNOLOGY_BREADTH_RESULTS.md). Placement/utilization sensitivity and the target-period closure sweep are documented in [physical robustness experiments](PHYSICAL_ROBUSTNESS.md).
+This report intentionally contains only Nangate45 typical-corner measurements. Do not combine its absolute area or timing values with ASAP7 or SKY130HD. The separate ASAP7 experiment has a combined-GCD WC hold warning of -3.225 ps among the emitted hold paths; its 100-path-per-path-group report cap and shared-TC-SPEF limitation are documented in [ASAP7 BC/TC/WC and SKY130HD TT technology-breadth results](PHASE3_TECHNOLOGY_BREADTH_RESULTS.md). That negative slack is not a Nangate45 result and must not be merged into the Nangate45 metrics above. Placement/utilization sensitivity and the target-period closure sweep are documented in [physical robustness experiments](PHYSICAL_ROBUSTNESS.md).
 
 ## Reproduction
 
