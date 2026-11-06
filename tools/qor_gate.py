@@ -50,8 +50,14 @@ def evaluate(reference: dict, candidate: dict, policy: dict) -> dict:
 
     limits = policy["limits"]
     required = policy["required_metrics"]
-    if not required or set(required) - SUPPORTED_METRICS:
-        raise ValueError(f"unsupported or empty QoR required_metrics: {required}")
+    if len(required) != len(SUPPORTED_METRICS) or set(required) != SUPPORTED_METRICS:
+        raise ValueError(f"QoR policy must require each supported metric exactly once: {required}")
+    expected_limits = {
+        "cell_area_growth_percent", "all_path_min_period_growth_percent",
+        "worst_setup_slack_drop_ns", "worst_hold_slack_drop_ns",
+    }
+    if set(limits) != expected_limits:
+        raise ValueError(f"QoR policy limit set mismatch: expected={sorted(expected_limits)}, actual={sorted(limits)}")
     for name, value in limits.items():
         numeric = _finite(value, f"policy limit {name}")
         if numeric < 0:
