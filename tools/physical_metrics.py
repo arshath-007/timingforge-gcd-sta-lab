@@ -48,7 +48,13 @@ def parse_postroute_log(path: Path) -> dict:
                           "=== POST-ROUTE HOLD CLOCK SKEW ===")
     hold_skew = _section(text, "=== POST-ROUTE HOLD CLOCK SKEW ===",
                          "=== POST-ROUTE REGISTER-TO-REGISTER CLOCK PERIOD ===")
-    drv = _section(text, "=== POST-ROUTE DRV ===", "=== POST-ROUTE PARASITICS LOADED ===")
+    drv_slew = _section(text, "=== POST-ROUTE DRV MAX SLEW ===", "=== POST-ROUTE DRV MAX CAPACITANCE ===")
+    drv_cap = _section(text, "=== POST-ROUTE DRV MAX CAPACITANCE ===", "=== POST-ROUTE DRV MAX FANOUT ===")
+    drv_fanout = _section(text, "=== POST-ROUTE DRV MAX FANOUT ===", "=== POST-ROUTE PARASITICS LOADED ===")
+    def drv_count(section: str) -> int | None:
+        if not section.strip() or "TIMINGFORGE_DRV_UNSUPPORTED" in section:
+            return None
+        return len(re.findall(r"\\(VIOLATED\\)", section, re.IGNORECASE))
     if all_period is None or all_period <= 0 or setup is None or hold is None:
         raise ValueError(f"{path}: required all-path period/setup/hold metric missing")
     return {
@@ -66,7 +72,11 @@ def parse_postroute_log(path: Path) -> dict:
         "hold_clock_skew_report": hold_skew.strip(),
         "clock_skew_supported": bool(setup_skew.strip() and hold_skew.strip()) and "TIMINGFORGE_CLOCK_SKEW_UNSUPPORTED" not in setup_skew + hold_skew,
         "parasitic_annotation_report": annotation.strip(),
-        "drv_report": drv.strip(),
+        "postroute_max_slew_violation_count": drv_count(drv_slew),
+        "postroute_max_capacitance_violation_count": drv_count(drv_cap),
+        "postroute_max_fanout_violation_count": drv_count(drv_fanout),
+        "postroute_drv_supported": all(drv_count(section) is not None for section in (drv_slew, drv_cap, drv_fanout)),
+        "drv_report": (drv_slew + drv_cap + drv_fanout).strip(),
         "postroute_log": str(path),
     }
 
