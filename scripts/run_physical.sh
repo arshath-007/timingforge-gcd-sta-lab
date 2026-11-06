@@ -103,5 +103,5 @@ for TOP in gcd_binary_combined gcd_binary_split; do
   grep -q "POST-ROUTE PARASITICS LOADED" "$ROOT/build/physical/$TOP/postroute_sta.log"
 done
 
-python3 -m tools.physical_manifest build/physical --output build/physical/physical_manifest.json
+python3 -m tools.physical_manifest build/physical --output build/physical/physical_manifest.json --repo-root "$ROOT"
 echo "Physical implementation and extracted-parasitic STA completed for both architectures."
