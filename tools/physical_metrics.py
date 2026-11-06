@@ -97,11 +97,11 @@ def parse_postroute_log(path: Path) -> dict:
     }
 
 
-def compare(prelayout_path: Path, physical_root: Path) -> dict:
+def compare(prelayout_path: Path, physical_root: Path, repo_root: Path | None = None) -> dict:
     matrix = json.loads(prelayout_path.read_text(encoding="utf-8"))
     if matrix.get("platform") != "Nangate45 typical Liberty":
         raise ValueError("Pre-layout platform/corner does not match Nangate45 typical")
-    repo_root = prelayout_path.resolve().parents[2]
+    repo_root = (repo_root or Path.cwd()).resolve()
     source_sdc = repo_root / "constraints" / "gcd_baseline.sdc"
     if not source_sdc.is_file():
         raise FileNotFoundError(f"Missing baseline SDC: {source_sdc}")
@@ -147,8 +147,10 @@ def main() -> int:
     parser.add_argument("prelayout_matrix", type=Path)
     parser.add_argument("physical_root", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd(),
+                        help="Repository root containing constraints/gcd_baseline.sdc")
     args = parser.parse_args()
-    result = compare(args.prelayout_matrix, args.physical_root)
+    result = compare(args.prelayout_matrix, args.physical_root, args.repo_root)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\\n", encoding="utf-8")
     print(json.dumps({
