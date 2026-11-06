@@ -1,7 +1,7 @@
 // Bounded sequential equivalence miter for all 3-bit input pairs.
 // The proof compares transaction results, not cycle-by-cycle latency.
-module gcd_equiv_formal;
-    localparam integer WIDTH = 3;
+module gcd_equiv_formal #(parameter integer WIDTH = 3);
+    localparam integer MAX_CYCLES = (WIDTH <= 3) ? 12 : 20;
 
     (* gclk *) reg clk = 0;
     (* anyconst *) reg [WIDTH-1:0] a_in;
@@ -31,10 +31,24 @@ module gcd_equiv_formal;
         .gcd_out(gcd_split), .busy(busy_split), .done(done_split)
     );
 
+    function automatic [WIDTH-1:0] gcd_spec(input [WIDTH-1:0] a, input [WIDTH-1:0] b);
+        reg [WIDTH-1:0] x, y, temp;
+        begin
+            x = a;
+            y = b;
+            while (y != 0) begin
+                temp = x % y;
+                x = y;
+                y = temp;
+            end
+            gcd_spec = x;
+        end
+    endfunction
+
     initial cycle = 0;
 
     always @(posedge clk) begin
-        if (cycle < 7'd12)
+        if (cycle < MAX_CYCLES)
             cycle <= cycle + 1'b1;
     end
 
@@ -50,16 +64,18 @@ module gcd_equiv_formal;
                 assert(!busy_combined);
                 combined_seen <= 1;
                 combined_result <= gcd_combined;
+                assert(gcd_combined == gcd_spec(a_in, b_in));
             end
             if (done_split) begin
                 assert(!split_seen);
                 assert(!busy_split);
                 split_seen <= 1;
                 split_result <= gcd_split;
+                assert(gcd_split == gcd_spec(a_in, b_in));
             end
             if (combined_seen && split_seen)
                 assert(combined_result == split_result);
-            if (cycle == 7'd12) begin
+            if (cycle == MAX_CYCLES) begin
                 assert(combined_seen);
                 assert(split_seen);
             end
