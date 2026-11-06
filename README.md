@@ -177,11 +177,11 @@ The Phase 1 implementation is merged to `main`. The final feature-branch validat
 - Golden quality findings: REVIEW, with five warnings and three informational findings. The combined design retains -0.002 ns hold slack, and its native register-only minimum-period metric remains unavailable.
 - These are pre-layout Nangate45 typical-corner results with ideal clocks and no SPEF. No physical-design or signoff claim is made.
 
-See [Phase 1 diagnostics and measured sensitivity](docs/PHASE1_DIAGNOSTICS.md) and the [updated interview guide](docs/INTERVIEW_GUIDE.md).
+See [Phase 1 diagnostics and measured sensitivity](docs/PHASE1_DIAGNOSTICS.md).
 
 The current main-branch extension and diagnostic changes passed both CI jobs in [run #196](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42029353553) at commit `30b7a7bcf862762627935813a31330efa85a1eff`. Its [latest STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42029353553/artifacts/13415850763) contains the 16 raw logs, parsed report, and explicit register-path inventory. The original v0.2.0 baseline values remain traceable to [release validation run #160](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42015328699); reproducibility is documented in [initial results](docs/INITIAL_RESULTS.md).
 
-See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report walkthrough](docs/ARCHITECTURE_AND_STA_WALKTHROUGH.md), the [portfolio and interview guide](docs/PORTFOLIO_AND_INTERVIEW.md), and [advanced SDC exercises](docs/ADVANCED_SDC_EXERCISES.md).
+See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report walkthrough](docs/ARCHITECTURE_AND_STA_WALKTHROUGH.md), the [portfolio summary and project demonstration](docs/PORTFOLIO_AND_INTERVIEW.md), and [advanced SDC exercises](docs/ADVANCED_SDC_EXERCISES.md).
 
 
 ## Phase 2 verification evidence — bounded formal + reproducible simulation
@@ -279,7 +279,7 @@ The intended project contribution is a **reproducible fault-injection benchmark 
 
 ## Contributing and citation
 
-See [development phases and acceptance criteria](docs/DEVELOPMENT_PHASES.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CITATION.cff](CITATION.cff), [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), [docs/FAULT_CATALOG.md](docs/FAULT_CATALOG.md), and the [technical interview walkthrough](docs/INTERVIEW_GUIDE.md).
+See [development phases and acceptance criteria](docs/DEVELOPMENT_PHASES.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CITATION.cff](CITATION.cff), [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), [docs/FAULT_CATALOG.md](docs/FAULT_CATALOG.md), .
 
 ## Author
 
