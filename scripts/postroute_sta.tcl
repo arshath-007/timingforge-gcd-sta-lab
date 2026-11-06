@@ -46,11 +46,17 @@ report_wns -min -digits 3
 report_tns -min -digits 3
 puts "=== POST-ROUTE HOLD PATHS ==="
 report_checks -path_delay min -format full_clock_expanded -group_path_count 20 -digits 3
-puts "=== POST-ROUTE DRV ==="
-foreach check {max_slew max_capacitance max_fanout} {
-    if {[catch {report_check_types -$check -violators -verbose -digits 3} err]} {
-        puts "TIMINGFORGE_DRV_UNSUPPORTED: $check: $err"
-    }
+puts "=== POST-ROUTE DRV MAX SLEW ==="
+if {[catch {report_check_types -max_slew -violators -verbose -max_count 100000 -digits 3} err]} {
+    puts "TIMINGFORGE_DRV_UNSUPPORTED: max_slew: $err"
+}
+puts "=== POST-ROUTE DRV MAX CAPACITANCE ==="
+if {[catch {report_check_types -max_capacitance -violators -verbose -max_count 100000 -digits 3} err]} {
+    puts "TIMINGFORGE_DRV_UNSUPPORTED: max_capacitance: $err"
+}
+puts "=== POST-ROUTE DRV MAX FANOUT ==="
+if {[catch {report_check_types -max_fanout -violators -verbose -max_count 100000 -digits 3} err]} {
+    puts "TIMINGFORGE_DRV_UNSUPPORTED: max_fanout: $err"
 }
 puts "=== POST-ROUTE PARASITICS LOADED ==="
 puts "SPEF=$::env(SPEF)"
