@@ -16,7 +16,7 @@ class PhysicalAnnotationTests(unittest.TestCase):
         )
         netlist.write_text(
             "module top(input a, output y);\n"
-            "wire dangling_net;\n"
+            "wire dangling_net, loaded_net;\n"
             "BUF_X1 dangling (.A(a));\n"
             "BUF_X1 no_load (.A(a), .Z(dangling_net));\n"
             "BUF_X1 connected (.A(a), .Z(loaded_net));\n"
