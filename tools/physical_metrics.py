@@ -149,6 +149,10 @@ def _prelayout_synthesis_metrics(build_root: Path, top: str, matrix_row: dict) -
 
 def parse_presynth_log(path: Path) -> dict:
     text = path.read_text(encoding="utf-8", errors="replace")
+    setup_check = _section(text, "=== ORFS POST-SYNTHESIS SETUP CHECK ===", "=== ORFS POST-SYNTHESIS CLOCK PROPERTIES ===")
+    setup_warnings = [line.strip() for line in setup_check.splitlines() if line.strip().startswith("Warning:")]
+    if setup_warnings:
+        raise ValueError(f"{path}: post-synthesis check_setup reported warnings: {setup_warnings[:10]}")
     if "ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD" not in text:
         raise ValueError(f"{path}: ORFS post-synthesis STA heading missing")
     reg = _section(text, "=== ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD ===",
