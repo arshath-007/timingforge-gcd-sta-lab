@@ -14,6 +14,13 @@ The latest main-branch validation is [GitHub Actions run #196](https://github.co
 
 The regenerated golden rows reproduce the v0.2.0 baseline measurements: combined area 1657.180, all-path period 2.940 ns, worst setup slack +7.065 ns, worst hold slack -0.002 ns; split area 1681.918, all-path period 2.350 ns, worst setup slack +7.650 ns, worst hold slack +0.005 ns. The explicit same-clock rising-edge path inventory reports 104 combined paths and 106 split paths. The native register-to-register minimum-period query remains unavailable for combined and 0.740 ns for split. These latest results confirm reproducibility of the existing baseline; they do not change the scope or limitations described below.
 
+### Native register-only minimum-period diagnostic
+
+The raw OpenSTA baseline logs show that the default `report_clock_min_period` result is the register-to-register metric; the separate `-include_port_paths` invocation produces the all-path value. The split baseline prints `period_min = 0.74 ns`, while the combined baseline prints `period_min = 0.00` and `fmax = inf`, which the parser correctly records as unavailable. The explicit rising-edge register-to-register path inventory nevertheless contains 106 split paths and 104 combined paths.
+
+The explicit path-report arithmetic does **not** validate the native 0.74 ns split value. For split, the worst reported rising-edge register-to-register slack is 8.771 ns at a 10.000 ns clock period. `T - slack` is 1.229 ns; removing the 0.150 ns setup uncertainty gives 1.079 ns, and also removing the 0.035 ns library setup time gives 1.044 ns. None matches 0.740 ns within the 0.01 ns native print precision. For combined, the corresponding worst reported slack is 8.414 ns; the same arithmetic does not yield a native value because OpenSTA reports 0.00/inf. The cause of this discrepancy is not established from the available reports. Therefore no derived register-only period or Fmax is substituted for either native result.
+
+
 ## Corrected-load baseline architecture comparison
 
 The golden SDC now uses output loads of 20 fF on scalar control outputs and 30 fF on the GCD bus, consistent with the capacitance unit declared by the pinned Nangate45 Liberty. The earlier run used 0.02/0.03 fF and is superseded; its values are retained only as historical evidence.

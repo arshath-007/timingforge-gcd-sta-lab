@@ -41,10 +41,10 @@ This separation matters. A pattern checker can flag an obvious defect, but only 
 
 ## How to explain the two GCD architectures
 
-- **Combined:** The odd/odd compare and subtract decision/update occur in one processing state. This keeps the operation cycle count lower in the tested input corpus, but its combinational path can be longer.
-- **Split:** The compare result is registered and subtraction occurs in a later state. This can shorten the combinational timing path but costs an extra processing cycle for odd/odd iterations.
+- **Combined:** The odd/odd compare and subtract decision/update occur in one processing state. It uses fewer cycles in the measured input corpus. In the single post-route physical run, it also has the shorter register-to-register minimum period (0.95 ns versus 1.02 ns).
+- **Split:** The compare result is registered and subtraction occurs in a later state. This adds processing cycles for odd/odd iterations. The hypothesized shorter combinational path was not supported by the measured post-route register-to-register result in this one physical run.
 
-The combined architecture reports an all-path Fmax of 340.67 MHz, while the split architecture reports 425.57 MHz. These figures include I/O port paths and depend on the external timing constraints. They must not be interpreted as a direct comparison of internal register-to-register operating speed. The combined architecture's register-to-register minimum-period query returned no usable measurement, so its internal Fmax is unavailable.
+The pre-layout all-path Fmax favours split (425.57 MHz versus 340.67 MHz), but those figures include I/O paths and depend on external timing constraints. They are not an internal register-to-register comparison. In the single post-route run, combined has the shorter register-only period (0.95 ns versus 1.02 ns) and split has lower standard-cell area (2502.00 versus 2654.95 area units). Treat this as a single-configuration observation, not a robust ranking; placement variation and uniform-random time-per-GCD studies are still needed.
 
 ## Questions a reviewer may ask
 

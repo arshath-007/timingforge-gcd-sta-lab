@@ -112,6 +112,8 @@ def parse_log(path):
     if top is None:
         raise ValueError(f"Unrecognised STA log: {path.name}")
     scenario = path.stem[len("sta_" + top + "_"):]
+    setup_check = section(text, "=== TIMINGFORGE SETUP CHECK ===", "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===")
+    setup_check_warnings = [line.strip() for line in setup_check.splitlines() if line.strip().startswith("Warning:")]
     setup = section(text, "=== SETUP / MAX PATH DETAILS ===", "=== REGISTER-TO-REGISTER SETUP PATHS ===")
     if "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===" in text:
         reg2reg = section(text, "=== REGISTER-TO-REGISTER SETUP PATHS ===", "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===")
@@ -121,7 +123,12 @@ def parse_log(path):
     rising_slacks = [
         float(value) for value in re.findall(r"([-+]?(?:\d+\.?\d*|\.\d+))\s+slack\s+\((?:MET|VIOLATED)\)", rising_reg2reg)
     ]
+    clock_properties_section_present = "=== CLOCK PROPERTIES ===" in text
     clock_section = section(text, "=== CLOCK PROPERTIES ===", "=== HOLD / MIN PATH DETAILS ===")
+    clock_properties_section_valid = bool(
+        re.search(r"^\s*Clock\s+Period\s+Waveform\s*$", clock_section, re.MULTILINE)
+        and re.search(r"^\s*-{5,}\s*$", clock_section, re.MULTILINE)
+    )
     clock_period_match = re.search(r"^\s*core_clk\s+([-+]?(?:\d+\.?\d*|\.\d+))\s+", clock_section, re.MULTILINE)
     clock_period = float(clock_period_match.group(1)) if clock_period_match else None
     unconstrained = section(text, "=== UNCONSTRAINED PATH DETAILS ===")
@@ -132,6 +139,7 @@ def parse_log(path):
     drv_slew = parse_drv_check(text, "=== DRV MAX SLEW ===", "=== DRV MAX CAPACITANCE ===")
     drv_cap = parse_drv_check(text, "=== DRV MAX CAPACITANCE ===", "=== DRV MAX FANOUT ===")
     drv_fanout = parse_drv_check(text, "=== DRV MAX FANOUT ===", "=== UNCONSTRAINED PATH DETAILS ===")
+    rising_path_limit = 1000 if scenario == "gcd_baseline" else 100
     warning = re.search(r"There are\s+(\d+)\s+unconstrained endpoints", text, re.IGNORECASE)
     input_missing = re.search(r"There are\s+(\d+)\s+input ports missing set_input_delay", text, re.IGNORECASE)
     output_missing = re.search(r"There are\s+(\d+)\s+output ports missing set_output_delay", text, re.IGNORECASE)
@@ -143,6 +151,8 @@ def parse_log(path):
         log_path = str(path)
     return {
         "top": top, "scenario": scenario, "log_file": log_path,
+        "setup_check_warning_count": len(setup_check_warnings),
+        "setup_check_warnings": setup_check_warnings,
         "yosys_cell_area": cell_area(top, path),
         "register_to_register_min_period_ns": rr_period,
         "register_to_register_fmax_mhz": rr_fmax,
@@ -159,10 +169,13 @@ def parse_log(path):
         "critical_path_class": classify_critical_path(start.group(1).strip() if start else None, end.group(1).strip() if end else None),
         "register_to_register_path_found": bool(rr_start and rr_end),
         "register_to_register_rising_paths_reported": len(rising_slacks),
-        "register_to_register_rising_path_inventory_complete": len(rising_slacks) < 1000,
+        "register_to_register_rising_path_limit": rising_path_limit,
+        "register_to_register_rising_path_inventory_complete": len(rising_slacks) < rising_path_limit,
         "register_to_register_rising_worst_slack_ns": min(rising_slacks) if rising_slacks else None,
         "register_to_register_rising_best_slack_ns": max(rising_slacks) if rising_slacks else None,
         "clock_period_ns": clock_period,
+        "clock_properties_section_present": clock_properties_section_present,
+        "clock_properties_section_valid": clock_properties_section_valid,
         "register_to_register_startpoint": rr_start.group(1).strip() if rr_start else None,
         "register_to_register_endpoint": rr_end.group(1).strip() if rr_end else None,
         "unconstrained_endpoints_reported": int(warning.group(1)) if warning else (0 if "=== TIMINGFORGE SETUP CHECK ===" in text else None),
@@ -193,7 +206,7 @@ def summarise(report_dir=REPORT_DIR):
             if base and row["worst_setup_slack_ns"] is not None and base["worst_setup_slack_ns"] is not None else None
         )
     output = {
-        "schema_version": "0.3",
+        "schema_version": "0.5",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "analysis_engine": "OpenROAD-integrated OpenSTA",
         "platform": "Nangate45 typical Liberty",

@@ -5,7 +5,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.4.0 candidate · **Latest published release:** v0.2.0 · **License:** MIT
+**Status:** Research prototype · **Version:** 0.4.0 candidate · **Latest published release:** v0.2.1 · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -76,7 +76,7 @@ tools/           fault injector, SDC linter, STA/QoR and physical-evidence parse
 tests/           Python unit tests for STA, QoR, and physical evidence
 scripts/         synthesis, formal, OpenSTA and OpenROAD entry points
 formal/          bounded transaction-equivalence miter and SymbiYosys config
-physical/        matched Nangate45 ORFS design configurations
+physical/        paired Nangate45 ORFS design configurations
 docs/            scope, fault catalog, verification and physical results
 reports/         generated reports (not committed by default)
 .github/         automated RTL/Python and library-backed STA workflows
@@ -180,10 +180,10 @@ See [initial results](docs/INITIAL_RESULTS.md), the [architecture and STA report
 
 ## Phase 2 verification evidence — bounded formal + reproducible simulation
 
-The current [formal workflow run #49](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430) passed the positive CVC5 proof and the deliberate subtract-mutant negative control; download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430/artifacts/13439043462). The [regression and library-backed STA run #336](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502) passed the 32-bit RTL regression, FIFO/MAC tests, Python checks, SDC lint, fault-injection benchmark and library-backed STA matrix. Its [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502/artifacts/13439247462) records 7/7 controlled static fault patterns detected; this is not a general SDC correctness score.
+The [formal workflow run #49](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430) passed on PR #6 merge commit `4686342491aeabc5746fecd36f7e33b2d90c8b5b` the positive CVC5 proof and the deliberate subtract-mutant negative control; download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957430/artifacts/13439043462). The [regression and library-backed STA run #336](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502) passed on PR #6 merge commit `4686342491aeabc5746fecd36f7e33b2d90c8b5b` the 32-bit RTL regression, FIFO/MAC tests, Python checks, SDC lint, fault-injection benchmark and library-backed STA matrix. Its [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957502/artifacts/13439247462) records 7/7 controlled static fault patterns detected; this is not a general SDC correctness score.
 
 - Bounded transaction-level equivalence checks all symbolic 3-bit input pairs, including zero/equal operands, with independent completion timing; CVC5 1.1.2 and Yosys 0.33, 26 SMT steps / 12 positive clock edges.
-- The formal miter checks mutual result equivalence between the two architectures; it does not compare either against an independent mathematical GCD specification. The 32-bit simulation testbench supplies a separate Euclidean-reference check over its finite directed/seeded corpus. See [formal proof scope and rationale](docs/PHASE2_FORMAL_SCOPE.md).
+- The bounded formal miter now checks both architectures against an independent modulo-based Euclidean GCD specification at WIDTH=3 and WIDTH=4. A separate Icarus job exhaustively checks all 65,536 WIDTH=8 input pairs and rejects shared width-dependent faults. This is not a formal proof for the 32-bit input domain; see [formal proof scope and rationale](docs/PHASE2_FORMAL_SCOPE.md).
 - The negative control deliberately corrupts the combined subtract operation and is rejected by the same property set.
 - The 32-bit simulation includes directed cases and 250 deterministic constrained-random cases using seed `0x54462026`; 259 cases were checked on each architecture, with parity, zero/equal, high-bit, GCD-class and latency-bin coverage.
 - QoR snapshots record source SHA, tool versions, platform/corner, Liberty hash, scenario and SDC hashes. The comparator rejects environment or scenario mismatches. Snapshots are artifact-backed, not a persistent database/dashboard.
@@ -192,7 +192,7 @@ The current [formal workflow run #49](https://github.com/arshath-007/timingforge
 
 ## Phase 3 physical-design evidence — Nangate45 typical
 
-The current [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) passed for both architectures. Download the [complete physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211), which includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA logs, comparison JSON and SHA-256 manifest. Detailed interpretation is in [Phase 3 measured results](docs/PHASE3_RESULTS.md).
+The [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) passed for both architectures on PR #6 merge commit `4686342491aeabc5746fecd36f7e33b2d90c8b5b` (PR head `5498a7868f72fa3460d3d99f9d4ab18da129992f`), not a standalone main-branch commit. Download the [complete physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211), which includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA logs, comparison JSON and SHA-256 manifest. Detailed interpretation is in [Phase 3 measured results](docs/PHASE3_RESULTS.md).
 
 | Post-route metric | Combined GCD | Split GCD |
 |---|---:|---:|
@@ -205,7 +205,9 @@ The current [physical-design workflow run #23](https://github.com/arshath-007/ti
 | Reported setup skew (worst reported path) | +0.16 ns | +0.16 ns |
 | Reported hold skew (worst reported path) | -0.06 ns | -0.06 ns |
 
-The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are typical-corner educational results, not signoff. Multi-corner analysis is deferred because a second, independently verified Liberty PVT model is not part of the selected platform. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
+The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged.
+
+**Architecture conclusion (single physical run):** combined is faster on the post-route register-to-register minimum period (0.95 vs 1.02 ns) and all-path minimum period (2.13 vs 2.26 ns), and has slightly higher worst setup/hold slack in this run. Split has lower post-route standard-cell area (2502.00 vs 2654.95 area units). The pre-layout all-path result alone favours split (2.35 vs 2.94 ns), but that metric includes I/O paths and does not establish an internal-speed advantage; the combined pre-layout native register-only period was unavailable. Confidence in the post-route ranking is limited to one Nangate45 typical-corner placement/CTS/routing configuration. No variation study or uniform-random latency result is included yet; do not generalize this ranking as a robust architecture winner. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are typical-corner educational results, not signoff. Multi-corner analysis is deferred because a second, independently verified Liberty PVT model is not part of the selected platform. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
 
 ## Research questions
 
@@ -221,7 +223,7 @@ The register-to-register metric excludes I/O paths; all-path period includes con
 - The Python linter is a first-pass line/pattern-based checker, not a full SDC parser or proof of constraint correctness. It recognises the project's canonical option ordering and simple `get_ports` forms; alternative but valid Tcl/SDC command orderings may be rejected. It checks presence and positivity of uncertainty, not whether an I/O delay is realistic for a product. False paths, multicycle paths, clock groups, disabled timing arcs and case analysis are flagged for human review.
 - A false-path statement is flagged for review; a broad false-path test is only a controlled negative experiment. The tool does not decide whether a real exception is valid without design intent.
 - The first SDC is an illustrative block-level budget, not a product specification. Output loads are expressed in the Liberty capacitance unit (fF); the current SDC uses 20 fF for scalar control outputs and 30 fF for the GCD bus. Changing these loads requires regenerating the baseline timing evidence.
-- The pre-layout matrix uses one Nangate45 typical corner, ideal clocks, and no SPEF. A separate reproducible ORFS flow now produces placed, CTS, routed and extracted-SPEF post-route results for both GCD architectures at that same typical corner.
+- The pre-layout matrix uses one Nangate45 typical corner, ideal clocks, and no SPEF. A separate reproducible ORFS flow now produces placed, CTS, routed and extracted-SPEF post-route results for both GCD architectures at that same typical corner. The pre-layout `scripts/synth.sh` and ORFS synthesis configurations differ, so these results are not netlist-matched; numerical deltas are observational and cannot be attributed to routing parasitics alone.
 - No multi-corner/MMMC, OCV/AOCV/POCV, crosstalk/SI, timing ECO closure, or netlist-to-netlist LEC across ORFS optimization stages is claimed. The optional ORFS Kepler LEC subprocess is disabled in this container; Phase 2 supplies a separate bounded RTL transaction-equivalence proof.
 - The physical run is an educational flow, not foundry signoff. DRC/LVS signoff, IR-drop/EM qualification, and manufacturing readiness are not claimed.
 - The educational Nangate45 platform is not a modern production process or signoff reference.
@@ -259,10 +261,17 @@ The intended project contribution is a **reproducible fault-injection benchmark 
 
 ## Contributing and citation
 
-See [development phases and acceptance criteria](docs/DEVELOPMENT_PHASES.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CITATION.cff](CITATION.cff), [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), [docs/FAULT_CATALOG.md](docs/FAULT_CATALOG.md), and the [technical interview walkthrough](docs/INTERVIEW_GUIDE.md).
+See [development phases and acceptance criteria](docs/DEVELOPMENT_PHASES.md), [QoR regression baseline](docs/QOR_REGRESSION.md), [physical robustness experiments](docs/PHYSICAL_ROBUSTNESS.md), [CONTRIBUTING.md](CONTRIBUTING.md), [CITATION.cff](CITATION.cff), [docs/PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md), [docs/FAULT_CATALOG.md](docs/FAULT_CATALOG.md), and the [technical interview walkthrough](docs/INTERVIEW_GUIDE.md).
 
 ## Author
 
 Maintained by [arshath-007](https://github.com/arshath-007).
 
 **Recruiter-facing note:** The goal is to demonstrate engineering method—clear assumptions, functional verification, SDC reasoning, tool use, reproducibility, and honest interpretation—not to claim production signoff experience.
+
+
+### Audit clarification — CI provenance and physical comparison
+
+The earlier Phase 3 run #23, formal run #49, and regression run #336 all checked out PR #6 merge commit `4686342491aeabc5746fecd36f7e33b2d90c8b5b`. They are valid evidence for that merge ref, not three independent validations of the main branch. Future physical workflow runs also execute on pushes to main and version tags and record the exact source revision in the workflow summary.
+
+The pre-layout and physical flows use the same Nangate45 typical platform and source baseline SDC, but their synthesis configurations differ. The comparison JSON explicitly marks `netlist_matched: false` and labels timing deltas observational only. The post-route report now captures the native parasitic-annotation report and both register-to-register and all-path minimum-period measurements. The physical manifest verifies source hashes and records the source commit. These controls improve evidence traceability; they do not constitute foundry signoff or prove every SPEF coupling/annotation condition.

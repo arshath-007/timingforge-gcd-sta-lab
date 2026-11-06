@@ -3,6 +3,7 @@ import unittest
 from tools.lint_sdc import lint_sdc
 from tools.make_mutants import MUTATIONS, mutate
 
+
 GOLDEN = """
 create_clock -name core_clk -period 10.000 [get_ports clk]
 set_clock_uncertainty -setup 0.150 [get_clocks core_clk]
@@ -27,6 +28,18 @@ set_output_delay -clock core_clk -min 0.100 [get_ports gcd_out*]
 class SdcLintTests(unittest.TestCase):
     def test_golden_patterns_pass(self):
         self.assertTrue(any("TF000 PASS" in x for x in lint_sdc(GOLDEN)))
+
+    def test_valid_positional_delay_and_uncertainty_variants_pass(self):
+        text = GOLDEN.replace(
+            "set_input_delay -clock core_clk -max 1.200 [get_ports start]",
+            "set_input_delay 1.200 -clock core_clk -max [get_ports start]",
+        ).replace(
+            "set_clock_uncertainty -setup 0.150 [get_clocks core_clk]",
+            "set_clock_uncertainty 0.150 -setup [get_clocks core_clk]",
+        )
+        findings = lint_sdc(text)
+        self.assertTrue(any("TF000 PASS" in x for x in findings))
+        self.assertFalse(any("ERROR" in x for x in findings))
 
     def test_missing_clock_is_detected(self):
         text = mutate(GOLDEN, MUTATIONS["M01_missing_clock"])
@@ -58,10 +71,13 @@ class SdcLintTests(unittest.TestCase):
         text = mutate(GOLDEN, MUTATIONS["M07_nonpositive_clock_period"])
         self.assertTrue(any("TF002 ERROR" in x for x in lint_sdc(text)))
 
+    def test_unreasonably_large_clock_period_is_detected(self):
+        text = GOLDEN.replace("-period 10.000", "-period 1000.000")
+        self.assertTrue(any("TF003 ERROR" in x for x in lint_sdc(text)))
+
     def test_both_minimum_and_maximum_delays_are_required(self):
         text = GOLDEN.replace("set_input_delay -clock core_clk -min 0.100 [get_ports a_in*]\n", "")
         self.assertTrue(any("TF101 ERROR: missing min input delay for port 'a_in'" == x for x in lint_sdc(text)))
-
 
     def test_comment_does_not_satisfy_missing_input_delay(self):
         text = GOLDEN.replace(
@@ -82,13 +98,38 @@ class SdcLintTests(unittest.TestCase):
         text = GOLDEN.replace("[get_ports a_in*]", "[get_ports {a_in* b_in*}]")
         self.assertFalse(any("TF101 ERROR" in x for x in lint_sdc(text)))
 
-
     def test_negative_hold_uncertainty_is_rejected(self):
         text = GOLDEN.replace(
             "set_clock_uncertainty -hold 0.050",
             "set_clock_uncertainty -hold -5.000",
         )
         self.assertTrue(any("TF402 ERROR" in x for x in lint_sdc(text)))
+
+    def test_zero_max_input_delay_is_rejected(self):
+        text = GOLDEN.replace("-max 1.500 [get_ports a_in*]", "-max 0.000 [get_ports a_in*]")
+        self.assertTrue(any("TF103 ERROR" in x and "a_in" in x for x in lint_sdc(text)))
+
+    def test_zero_max_output_delay_is_rejected(self):
+        text = GOLDEN.replace("-max 1.500 [get_ports gcd_out*]", "-max 0.000 [get_ports gcd_out*]")
+        self.assertTrue(any("TF203 ERROR" in x and "gcd_out" in x for x in lint_sdc(text)))
+
+    def test_io_delay_must_be_less_than_period(self):
+        text = GOLDEN.replace("-max 1.500 [get_ports a_in*]", "-max 99.000 [get_ports a_in*]")
+        self.assertTrue(any("TF104 ERROR" in x and "a_in" in x for x in lint_sdc(text)))
+
+    def test_later_zero_delay_override_is_detected(self):
+        text = GOLDEN + "set_input_delay -clock core_clk -max 0.000 [get_ports a_in*]\n"
+        findings = lint_sdc(text)
+        self.assertTrue(any("TF103 ERROR" in x and "a_in" in x for x in findings))
+        self.assertTrue(any("TF106 REVIEW" in x and "a_in" in x for x in findings))
+
+    def test_max_delay_and_min_delay_require_review(self):
+        for command, rule in (
+            ("set_max_delay 100 -from [all_inputs] -to [all_outputs]", "TF306 REVIEW"),
+            ("set_min_delay 0.1 -from [all_inputs] -to [all_outputs]", "TF307 REVIEW"),
+        ):
+            with self.subTest(command=command):
+                self.assertTrue(any(rule in item for item in lint_sdc(GOLDEN + command + "\n")))
 
     def test_other_timing_exceptions_require_review(self):
         for command, rule in (

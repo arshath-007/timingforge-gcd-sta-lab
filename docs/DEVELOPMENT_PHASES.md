@@ -18,7 +18,7 @@ This document is the execution tracker for the proposed expansion roadmap. A che
 
 **Phase 1 exit criteria:** all new checks have unit tests; the full workflow produces machine-readable findings; baseline and mutation behavior is explained; no derived internal Fmax is published without an independently validated method.
 
-**Evidence:** [run #257](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42046659049) and [post-merge run #258](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600), including the [run #258 STA artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600/artifacts/13425391627).
+**Evidence:** [run #257](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42046659049) and [run #258](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600), both at commit `30b7a7bcf862762627935813a31330efa85a1eff`; [run #258 STA artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42047005600/artifacts/13425391627).
 
 ## Phase 2 — Verification depth and QoR analytics
 
@@ -47,7 +47,7 @@ This document is the execution tracker for the proposed expansion roadmap. A che
 - [x] Establish a reproducible floorplan and placement flow for both GCD designs.
 - [x] Add CTS, propagated-clock timing reports, and clock-skew reports.
 - [x] Add global/detail routing and extracted parasitics, then run post-route STA.
-- [x] Compare pre-layout and post-layout results without mixing corners, constraints, or tool versions.
+- [ ] Establish a netlist-matched pre-layout/post-route comparison; current synthesis flows differ, so published deltas are cross-flow observations only.
 - [x] Archive raw logs, tool versions, platform/constraint hashes, parasitics, reports, final databases, GDS and SHA-256 manifests.
 
 ### Remaining technology-breadth work
@@ -55,13 +55,13 @@ This document is the execution tracker for the proposed expansion roadmap. A che
 - [ ] Add a second technology library only when its source, license, units, corner identity, and mapping compatibility are documented.
 - [ ] Add variation-aware experiments (OCV/AOCV/POCV) only with appropriate validated models and methodology.
 
-**Phase 3 evidence:** [OpenROAD physical-design run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) passed for both architectures. The [90-day physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211) includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA, comparison JSON and SHA-256 manifest. See [measured Phase 3 results](PHASE3_RESULTS.md).
+**Historical Phase 3 evidence:** [OpenROAD physical-design run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) passed on PR #6 merge SHA `4686342491aeabc5746fecd36f7e33b2d90c8b5b`, not a standalone main-branch commit. The [90-day physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211) includes final ODB/GDS/SPEF/SDC, stage logs/reports, post-route STA, comparison JSON and SHA-256 manifest. See [measured Phase 3 results](PHASE3_RESULTS.md).
 
 **Phase 3 boundary:** one educational Nangate45 typical-corner experiment, not foundry signoff, multi-corner closure, DRC/LVS signoff, IR-drop/EM closure, or manufacturing readiness. The optional ORFS Kepler-based internal netlist LEC is disabled; the separate bounded RTL proof does not replace netlist-to-netlist LEC across physical optimization stages.
 
 ## Current release boundary
 
-The v0.4.0 candidate includes completed Phase 1 diagnostics, the bounded Phase 2 verification/QoR implementation, and the experimentally validated single-corner Phase 3 physical implementation. Multi-corner analysis, a second library, reviewed fail-closed QoR thresholds, parameter sweeps, and stronger formal coverage remain future work. FIFO and MAC are functional-only extensions and are not part of the GCD STA/physical matrix. No signoff claim is made.
+The v0.4.0 candidate currently includes Phase 1 diagnostics, bounded Phase 2 verification/QoR implementation, and an experimentally validated single-corner Phase 3 physical flow. Phase 3 evidence provenance, netlist matching, netlist-level equivalence, timing-closure sweeps and variance studies remain under audit. Multi-corner analysis, a second library, reviewed fail-closed QoR thresholds, parameter sweeps, and stronger formal coverage remain future work. FIFO and MAC are functional-only extensions and are not part of the GCD STA/physical matrix. No signoff claim is made.
 
 ## Execution policy
 

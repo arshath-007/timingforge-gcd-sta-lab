@@ -1,10 +1,11 @@
 export DESIGN_NAME = gcd_binary_combined
 export PLATFORM = nangate45
-export VERILOG_FILES = $(GITHUB_WORKSPACE)/rtl/gcd_binary_combined.sv
-export SDC_FILE = $(GITHUB_WORKSPACE)/constraints/gcd_baseline.sdc
+export VERILOG_FILES = $(DESIGN_REPO_ROOT)/rtl/gcd_binary_combined.sv
+export SDC_FILE = $(DESIGN_REPO_ROOT)/constraints/gcd_baseline.sdc
 
-# Small educational block floorplan; keep the same interface timing model as
-# the pre-layout STA matrix so the two stages remain directly comparable.
+# Same interface timing model and floorplan policy as the split architecture.
+# ORFS synthesis policy differs from the pre-layout synthesis script, so this
+# physical run is not a netlist-matched pre-layout/post-route experiment.
 export CORE_UTILIZATION = 35
 export CORE_ASPECT_RATIO = 1
 export CORE_MARGIN = 5

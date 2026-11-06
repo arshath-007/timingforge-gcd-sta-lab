@@ -4,7 +4,7 @@
 
 Both 32-bit GCD RTL architectures were implemented with the pinned OpenROAD Flow Scripts container and Nangate45 typical Liberty/LEF platform. The flow ran floorplanning, placement, clock-tree synthesis, global/detail routing, final database generation, OpenRCX parasitic extraction, KLayout GDS generation, and post-route STA.
 
-Post-route analysis loaded each design's final ODB, final SDC and extracted SPEF, then propagated the clocks. The pre-layout and post-route comparison uses the same Nangate45 typical corner and the same source baseline SDC hash:
+Post-route analysis loaded each design's final ODB, final SDC and extracted SPEF, then propagated the clocks. The pre-layout and post-route runs use the same Nangate45 typical corner and source baseline SDC hash, but are **not netlist-matched**: `scripts/synth.sh` and ORFS synthesis use different synthesis settings (`ABC_AREA=1` in ORFS). This is a cross-flow comparison, not an isolated measurement of routing impact. Placement/CTS resizing, buffering, clock skew and parasitics can all contribute; the available evidence does not isolate the cause of the period difference. Source baseline SDC hash:
 
 `e16af6df47394c8f5ea3b5ad8cd8d1cbcfc8d3c5935b9bce40165eb25165279f`
 
@@ -27,6 +27,14 @@ This is an educational single-corner experiment, not foundry signoff or a multi-
 
 The register-to-register minimum period and all-path minimum period are different metrics. The all-path metric includes constrained I/O-to-register and register-to-I/O paths; it is not an internal-only clock-frequency result. Fmax values are the reciprocal of the corresponding reported minimum period.
 
+## Architecture conclusion
+
+For this single post-route Nangate45 typical-corner run, the combined architecture ranks ahead on both timing-period measures: 0.95 ns versus 1.02 ns register-to-register, and 2.13 ns versus 2.26 ns all-path. It also has slightly better worst setup and hold slack in this run. The split architecture ranks ahead on post-route standard-cell area: 2502.00 versus 2654.95 area units (about 5.8% lower).
+
+The pre-layout all-path result favours split (2.35 ns versus 2.94 ns), but this includes I/O paths and is sensitive to the interface timing budget. It does not establish that split has a faster internal clock path. The combined pre-layout native register-to-register minimum-period query was unavailable, so no pre-layout register-only ranking can be made.
+
+**Confidence is limited.** These rankings come from one floorplan/placement configuration and one Nangate45 typical corner. They do not establish a robust architecture winner across placement seeds or utilization/density choices. A uniform-random time-per-GCD measure and a placement-variation study are separate experiments; do not infer application throughput from Fmax alone.
+
 The clock-skew numbers above are the values emitted by OpenROAD's `report_clock_skew` for its reported paths, rounded to 0.01 ns. The two designs display the same rounded values, but the archived reports identify different startpoint/endpoint pairs. The ORFS final-stage metrics retain more precision: setup skew is 0.155729 ns for combined and 0.157116 ns for split; the corresponding hold-skew magnitudes are 0.055729 ns and 0.056917 ns. The displayed equality is therefore a rounding coincidence, not evidence that the clock trees or selected paths are identical. These are path-specific reports, not a worst-skew guarantee for every clock sink.
 
 ## Pre-layout versus post-route
@@ -41,7 +49,7 @@ The clock-skew numbers above are the values emitted by OpenROAD's `report_clock_
 | Pre-layout worst hold slack | -0.002 ns | +0.005 ns |
 | Post-route worst hold slack | +0.031 ns | +0.018 ns |
 
-These changes are observations from this one matched flow and constraint set. They are not a general claim that routing improves timing; placement, buffering, CTS, parasitic extraction and timing repair all influence the final result.
+These changes are observations from this one cross-flow comparison and constraint set, not a matched-netlist experiment. They are not a general claim that routing improves timing; synthesis differences, placement, buffering, CTS, parasitic extraction and timing repair can all influence the final result. The available data does not isolate the contribution of each factor.
 
 ## Physical evidence
 
@@ -53,7 +61,7 @@ For each architecture the archive contains:
 - Post-route STA log showing SPEF loading, propagated clocks, setup/hold reports and clock-skew reports.
 - SHA-256 manifest entries for the archived physical artifacts.
 
-The manifest reports 84 files per design. Tool provenance includes OpenROAD 26Q3-1080-gab6fd26351, Yosys 0.68+post, the pinned ORFS container digest, Nangate45 typical Liberty SHA-256, LEF hashes and baseline SDC hash.
+The original manifest reports 84 files per design. The updated manifest also records the source Git commit, hashes of both RTL files and the key flow/parser scripts, and classifies OpenSTA's unannotated-driver list against the final routed netlist. The archived report's unannotated drivers were classified as dangling cell outputs with no sinks; partially unannotated drivers and any unannotated connected driver cause the evidence gate to fail. This is distinct from claiming that OpenSTA reported zero unannotated driver pins. The workflow-supplied ORFS image digest is labelled as declared provenance; the running container does not independently attest its own registry digest.
 
 ### Source SDC versus final exported SDC
 
@@ -74,6 +82,7 @@ Use the pinned OpenROAD Flow Scripts environment:
 
 ```bash
 source /OpenROAD-flow-scripts/env.sh
+export ORFS_IMAGE_DIGEST=sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
 bash scripts/run_physical.sh
 ```
 

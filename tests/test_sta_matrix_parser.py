@@ -59,6 +59,20 @@ TIMINGFORGE_DRV_UNSUPPORTED: max_fanout: command unavailable
         self.assertFalse(result["supported"])
         self.assertIsNone(result["violation_count"])
 
+
+    def test_records_check_setup_warnings(self):
+        sample = SAMPLE.replace(
+            "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===",
+            "=== TIMINGFORGE SETUP CHECK ===\nWarning: There are 1 unconstrained endpoints.\n"
+            "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ===",
+        )
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "sta_gcd_binary_combined_gcd_baseline.log"
+            path.write_text(sample, encoding="utf-8")
+            row = parse_log(path)
+            self.assertEqual(row["setup_check_warning_count"], 1)
+            self.assertIn("unconstrained endpoints", row["setup_check_warnings"][0])
+
     def test_parses_architecture_metrics_and_path_types(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "sta_gcd_binary_combined_gcd_baseline.log"
@@ -140,6 +154,47 @@ core_clk                 10.00        0.00      5.00
             self.assertTrue((directory / "sta_matrix_summary.md").is_file())
             self.assertTrue((directory / "sta_matrix_summary.json").is_file())
 
+
+
+    def test_m01_clock_properties_section_is_valid_when_empty(self):
+        sample = SAMPLE.replace(
+            "=== HOLD / MIN PATH DETAILS ===",
+            "=== CLOCK PROPERTIES ===\nClock                   Period          Waveform\n----------------------------------------------------\n=== HOLD / MIN PATH DETAILS ===",
+        )
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "sta_gcd_binary_combined_M01_missing_clock.log"
+            path.write_text(sample, encoding="utf-8")
+            row = parse_log(path)
+            self.assertIsNone(row["clock_period_ns"])
+            self.assertTrue(row["clock_properties_section_present"])
+            self.assertTrue(row["clock_properties_section_valid"])
+
+    def test_m01_malformed_clock_properties_section_is_invalid(self):
+        sample = SAMPLE.replace(
+            "=== HOLD / MIN PATH DETAILS ===",
+            "=== CLOCK PROPERTIES ===\nthis is not a clock report\n=== HOLD / MIN PATH DETAILS ===",
+        )
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "sta_gcd_binary_combined_M01_missing_clock.log"
+            path.write_text(sample, encoding="utf-8")
+            row = parse_log(path)
+            self.assertIsNone(row["clock_period_ns"])
+            self.assertTrue(row["clock_properties_section_present"])
+            self.assertFalse(row["clock_properties_section_valid"])
+
+    def test_mutant_path_inventory_uses_100_path_cap(self):
+        paths = "\n".join("0.100 slack (MET)" for _ in range(100))
+        sample = SAMPLE.replace(
+            "=== HOLD / MIN PATH DETAILS ===",
+            "=== RISING-EDGE REGISTER-TO-REGISTER SETUP PATHS ===\n" + paths + "\n=== HOLD / MIN PATH DETAILS ===",
+        )
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "sta_gcd_binary_combined_M04_unjustified_false_path.log"
+            path.write_text(sample, encoding="utf-8")
+            row = parse_log(path)
+            self.assertEqual(row["register_to_register_rising_paths_reported"], 100)
+            self.assertEqual(row["register_to_register_rising_path_limit"], 100)
+            self.assertFalse(row["register_to_register_rising_path_inventory_complete"])
 
     def test_no_register_path_clock_period_is_not_infinite_fmax(self):
         no_path = SAMPLE.replace("core_clk period_min = 2.250 fmax = 444.44", "core_clk period_min = 0.00 fmax = inf")

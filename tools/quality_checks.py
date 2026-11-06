@@ -49,6 +49,10 @@ def inspect_golden_row(row: dict) -> list[dict]:
     if fmax is not None and fmax <= 0:
         add("ERROR", "TFQ004", f"Non-positive all-path Fmax: {fmax}")
 
+    setup_warnings = row.get("setup_check_warning_count", 0)
+    if setup_warnings:
+        add("ERROR", "TFQ005", f"Golden check_setup reports {setup_warnings} warnings: {row.get('setup_check_warnings', [])[:5]}")
+
     unconstrained = row.get("unconstrained_endpoints_reported")
     if unconstrained is not None and unconstrained > 0:
         add("WARNING", "TFQ101", f"Golden SDC reports {unconstrained} unconstrained endpoints")

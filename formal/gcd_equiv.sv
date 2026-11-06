@@ -1,7 +1,7 @@
 // Bounded sequential equivalence miter for all 3-bit input pairs.
 // The proof compares transaction results, not cycle-by-cycle latency.
-module gcd_equiv_formal;
-    localparam integer WIDTH = 3;
+module gcd_equiv_formal #(parameter integer WIDTH = 3);
+    localparam integer MAX_CYCLES = (WIDTH <= 3) ? 12 : 20;
 
     (* gclk *) reg clk = 0;
     (* anyconst *) reg [WIDTH-1:0] a_in;
@@ -31,10 +31,12 @@ module gcd_equiv_formal;
         .gcd_out(gcd_split), .busy(busy_split), .done(done_split)
     );
 
+
+
     initial cycle = 0;
 
     always @(posedge clk) begin
-        if (cycle < 7'd12)
+        if (cycle < MAX_CYCLES)
             cycle <= cycle + 1'b1;
     end
 
@@ -59,7 +61,7 @@ module gcd_equiv_formal;
             end
             if (combined_seen && split_seen)
                 assert(combined_result == split_result);
-            if (cycle == 7'd12) begin
+            if (cycle == MAX_CYCLES) begin
                 assert(combined_seen);
                 assert(split_seen);
             end

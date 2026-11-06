@@ -42,6 +42,18 @@ jobs:
         run: make lint-sdc
       - name: Run static fault-injection benchmark
         run: make benchmark
+      - name: Record exact source revision
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## TimingForge regression evidence provenance'
+            echo "- Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- Checked-out SHA: $GITHUB_SHA"
+            echo "- PR head SHA: ${{ github.event.pull_request.head.sha || 'not a pull_request event' }}"
+            echo "- Ref: $GITHUB_REF"
+            echo "- Event: $GITHUB_EVENT_NAME"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload benchmark scorecard
         if: always()
         uses: actions/upload-artifact@v4
@@ -75,9 +87,22 @@ jobs:
           { echo "Yosys: $(yosys -V)"; echo "OpenROAD: $(openroad -version)"; } | tee build/tool_versions.txt
           make sta-matrix
           python3 -m tools.qor_history snapshot build/reports/sta_matrix_summary.json --output build/reports/qor_snapshot.json
+          python3 -m tools.qor_history compare benchmarks/qor_baseline.json build/reports/qor_snapshot.json --output build/reports/qor_comparison.json --area-tolerance-percent 0.5 --timing-tolerance-ns 0.005
           python3 -m tools.quality_checks build/reports/sta_matrix_summary.json --output build/reports/sta_quality_findings.json
           python3 -m tools.mutation_impact build/reports/sta_matrix_summary.json --output build/reports/sta_mutation_impact.json
           python3 -m tools.run_sensitivity
+      - name: Record exact source revision for library-backed STA
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## TimingForge library-backed STA provenance'
+            echo "- Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- Checked-out SHA: $GITHUB_SHA"
+            echo "- PR head SHA: ${{ github.event.pull_request.head.sha || 'not a pull_request event' }}"
+            echo "- Ref: $GITHUB_REF"
+            echo "- Event: $GITHUB_EVENT_NAME"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload library-backed STA evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -87,10 +112,13 @@ jobs:
             build/reports/sta_matrix_summary.md
             build/reports/sta_matrix_summary.json
             build/reports/qor_snapshot.json
+            build/reports/qor_comparison.json
             build/reports/sta_quality_findings.json
             build/reports/sta_mutation_impact.json
             build/sensitivity/**
             build/reports/sta_*.log
             build/yosys_*.log
+            build/gcd_binary_*.v
+            build/netlist_equiv/**
             build/tool_versions.txt
           retention-days: 90

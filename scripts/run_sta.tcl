@@ -20,7 +20,7 @@ link_design $top
 read_sdc $::env(SDC)
 
 puts "=== TIMINGFORGE SETUP CHECK ==="
-check_setup -verbose -no_input_delay -no_output_delay -unconstrained_endpoints
+check_setup -verbose -no_input_delay -no_output_delay -multiple_clock -no_clock -unconstrained_endpoints -loops -generated_clocks
 puts "=== REGISTER-TO-REGISTER CLOCK PERIOD / FREQUENCY ==="
 report_clock_min_period
 puts "=== ALL-PATH CLOCK PERIOD / FREQUENCY (INCLUDING PORT PATHS) ==="

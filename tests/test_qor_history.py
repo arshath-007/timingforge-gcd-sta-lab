@@ -22,6 +22,30 @@ class QorHistoryTests(unittest.TestCase):
         self.assertEqual(result["reference_source_sha"], "old")
         self.assertEqual(result["candidate_source_sha"], "new")
         self.assertEqual(result["deltas"][0]["cell_area_delta"], 0.0)
+        self.assertTrue(result["within_tolerance"])
+        self.assertEqual(result["violations"], [])
+
+
+    def test_area_regression_outside_tolerance_fails_comparison(self):
+        candidate = snapshot("new")
+        candidate["records"][0]["cell_area"] = 101.0
+        result = compare_snapshots(snapshot("old"), candidate, area_tolerance_percent=0.5)
+        self.assertFalse(result["within_tolerance"])
+        self.assertEqual(result["violations"][0]["metric"], "cell_area")
+
+    def test_timing_regression_outside_tolerance_fails_comparison(self):
+        candidate = snapshot("new")
+        candidate["records"][0]["all_path_min_period_ns"] = 2.51
+        result = compare_snapshots(snapshot("old"), candidate, timing_tolerance_ns=0.005)
+        self.assertFalse(result["within_tolerance"])
+        self.assertEqual(result["violations"][0]["metric"], "all_path_min_period_ns")
+
+    def test_metric_availability_change_fails_comparison(self):
+        candidate = snapshot("new")
+        candidate["records"][0]["register_to_register_min_period_ns"] = 0.8
+        result = compare_snapshots(snapshot("old"), candidate)
+        self.assertFalse(result["within_tolerance"])
+        self.assertEqual(result["violations"][0]["reason"], "metric availability changed")
 
     def test_rejects_library_mismatch(self):
         with self.assertRaisesRegex(ValueError, "liberty_sha256"):

@@ -64,6 +64,7 @@ for TOP in gcd_binary_combined gcd_binary_split; do
   done
 done
 
+bash scripts/run_netlist_equiv.sh
 python3 -m tools.parse_sta_matrix
 cat build/reports/sta_matrix_summary.md
 echo "Completed synthesis for both architectures and STA for ${#SDCS[@]} SDC scenarios."

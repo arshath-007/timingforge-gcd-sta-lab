@@ -13,8 +13,13 @@ read_sdc $::env(SDC)
 read_spef $::env(SPEF)
 set_propagated_clock [all_clocks]
 
+puts "=== POST-ROUTE PARASITIC ANNOTATION ==="
+if {[catch {report_parasitic_annotation -report_unannotated} annotation_error]} {
+    puts "TIMINGFORGE_PARASITIC_ANNOTATION_UNSUPPORTED: $annotation_error"
+    error "Cannot verify SPEF parasitic annotation with this OpenSTA build"
+}
 puts "=== TIMINGFORGE POST-ROUTE SETUP CHECK ==="
-check_setup -verbose
+check_setup -verbose -no_input_delay -no_output_delay -multiple_clock -no_clock -unconstrained_endpoints -loops -generated_clocks
 puts "=== POST-ROUTE CLOCK PROPERTIES ==="
 report_clock_properties
 puts "=== POST-ROUTE SETUP CLOCK SKEW ==="
@@ -41,11 +46,17 @@ report_wns -min -digits 3
 report_tns -min -digits 3
 puts "=== POST-ROUTE HOLD PATHS ==="
 report_checks -path_delay min -format full_clock_expanded -group_path_count 20 -digits 3
-puts "=== POST-ROUTE DRV ==="
-foreach check {max_slew max_capacitance max_fanout} {
-    if {[catch {report_check_types -$check -violators -verbose -digits 3} err]} {
-        puts "TIMINGFORGE_DRV_UNSUPPORTED: $check: $err"
-    }
+puts "=== POST-ROUTE DRV MAX SLEW ==="
+if {[catch {report_check_types -max_slew -violators -verbose -max_count 100000 -digits 3} err]} {
+    puts "TIMINGFORGE_DRV_UNSUPPORTED: max_slew: $err"
+}
+puts "=== POST-ROUTE DRV MAX CAPACITANCE ==="
+if {[catch {report_check_types -max_capacitance -violators -verbose -max_count 100000 -digits 3} err]} {
+    puts "TIMINGFORGE_DRV_UNSUPPORTED: max_capacitance: $err"
+}
+puts "=== POST-ROUTE DRV MAX FANOUT ==="
+if {[catch {report_check_types -max_fanout -violators -verbose -max_count 100000 -digits 3} err]} {
+    puts "TIMINGFORGE_DRV_UNSUPPORTED: max_fanout: $err"
 }
 puts "=== POST-ROUTE PARASITICS LOADED ==="
 puts "SPEF=$::env(SPEF)"
