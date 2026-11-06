@@ -59,6 +59,9 @@ class PhysicalMetricsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "postroute.log"
             path.write_text(LOG.replace("Found 0 unannotated drivers.", "Found 1 unannotated drivers."), encoding="utf-8")
+            results = path.parent / "results" / "nangate45" / path.parent.name / "base"
+            results.mkdir(parents=True)
+            (results / "6_final.v").write_text("module top; endmodule\\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "lists 0 unannotated drivers but summary says 1"):
                 parse_postroute_log(path)
 
