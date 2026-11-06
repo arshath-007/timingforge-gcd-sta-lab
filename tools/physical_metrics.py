@@ -139,10 +139,10 @@ def _prelayout_synthesis_metrics(build_root: Path, top: str, matrix_row: dict) -
     # (for example, "1193 1.68E+03 cells"). Accept that representation, but
     # cross-check it against the explicit Chip area summary to avoid silently
     # reporting a malformed or mismatched row.
-    number = r"[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?"
-    areas = re.findall(r"Chip area for module .*?:\\s*(" + number + r")", text)
+    number = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
+    areas = re.findall(r"Chip area for module .*?:\s*(" + number + r")", text)
     rows = re.findall(
-        r"^\\s*(\\d+)\\s+(" + number + r")\\s+cells\\s*$",
+        r"^\s*(\d+)\s+(" + number + r")\s+cells\s*$",
         text,
         re.MULTILINE,
     )
