@@ -12,12 +12,13 @@ from tools.physical_annotation import classify_annotation
 TOPS = ("gcd_binary_combined", "gcd_binary_split")
 REQUIRED = (
     "2_floorplan.odb", "3_place.odb", "4_cts.odb", "5_route.odb",
+    "1_2_yosys.v", "1_2_yosys.sdc", "1_synth.json", "3_3_place_gp.json", "4_1_cts.json", "5_1_grt.json", "6_report.json",
     "6_final.odb", "6_final.gds", "6_final.v", "6_final.spef", "6_final.sdc",
 )
 PROVENANCE_FILES = (
     "rtl/gcd_binary_combined.sv", "rtl/gcd_binary_split.sv",
     "constraints/gcd_baseline.sdc", "scripts/run_physical.sh",
-    "scripts/postroute_sta.tcl", "tools/physical_manifest.py",
+    "scripts/postroute_sta.tcl", "scripts/presynth_sta.tcl", "tools/physical_manifest.py",
     "tools/physical_metrics.py", "tools/physical_annotation.py",
     "physical/config/gcd_binary_combined.mk", "physical/config/gcd_binary_split.mk",
     ".github/workflows/physical-design.yml",
@@ -78,6 +79,11 @@ def build_manifest(root: Path, repo_root: Path | None = None) -> dict:
         missing = [name for name in REQUIRED if not (results / name).is_file() or (results / name).stat().st_size == 0]
         if missing:
             raise FileNotFoundError(f"{top}: missing required physical artifacts: {missing}")
+        presynth = work / "presynth_sta.log"
+        if not presynth.is_file():
+            raise FileNotFoundError(f"{top}: ORFS post-synthesis STA log missing")
+        if "ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD" not in presynth.read_text(encoding="utf-8", errors="replace"):
+            raise ValueError(f"{top}: ORFS post-synthesis STA evidence incomplete")
         postroute = work / "postroute_sta.log"
         if not postroute.is_file():
             raise FileNotFoundError(f"{top}: post-route STA log missing")
@@ -105,13 +111,15 @@ def build_manifest(root: Path, repo_root: Path | None = None) -> dict:
             "final_gds": str((results / "6_final.gds").relative_to(root)),
             "final_spef": str((results / "6_final.spef").relative_to(root)),
             "final_sdc_sha256": sha256(results / "6_final.sdc"),
+            "orfs_synthesis_netlist": str((results / "1_2_yosys.v").relative_to(root)),
+            "presynth_sta_log": str(presynth.relative_to(root)),
             "postroute_sta_log": str(postroute.relative_to(root)),
             "parasitic_annotation": annotation_metrics,
             "artifact_count": len(artifacts),
             "artifacts": artifacts,
         })
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "flow": "OpenROAD Flow Scripts",
         "platform": "Nangate45",
         "corner": "typical",
