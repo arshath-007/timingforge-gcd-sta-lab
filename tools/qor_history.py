@@ -32,6 +32,8 @@ def build_snapshot(matrix_path: Path, root: Path = ROOT) -> dict:
     records = []
     for row in matrix.get("records", []):
         scenario = row["scenario"]
+        if scenario != "gcd_baseline":
+            continue
         sdc = (root / "constraints/gcd_baseline.sdc") if scenario == "gcd_baseline" else (
             root / "build/mutants" / (scenario + ".sdc")
         )
@@ -58,7 +60,12 @@ def build_snapshot(matrix_path: Path, root: Path = ROOT) -> dict:
         "records": records,
     }
 
-def compare_snapshots(reference: dict, candidate: dict) -> dict:
+def compare_snapshots(
+    reference: dict,
+    candidate: dict,
+    area_tolerance_percent: float = 0.5,
+    timing_tolerance_ns: float = 0.005,
+) -> dict:
     for field in ("platform", "platform_source_revision", "corner", "liberty_sha256", "tool_versions"):
         if reference.get(field) != candidate.get(field):
             raise ValueError("QoR environments differ for " + field)
@@ -67,6 +74,7 @@ def compare_snapshots(reference: dict, candidate: dict) -> dict:
     if set(ref_rows) != set(new_rows):
         raise ValueError("QoR scenario sets differ")
     deltas = []
+    violations = []
     metrics = ("cell_area", "all_path_min_period_ns", "register_to_register_min_period_ns",
                "worst_setup_slack_ns", "worst_hold_slack_ns")
     for key in sorted(ref_rows):
@@ -79,14 +87,37 @@ def compare_snapshots(reference: dict, candidate: dict) -> dict:
             delta[metric + "_delta"] = (
                 round(after - before, 6) if before is not None and after is not None else None
             )
+            if (before is None) != (after is None):
+                violations.append({
+                    "top": key[0], "scenario": key[1], "metric": metric,
+                    "reason": "metric availability changed",
+                    "reference": before, "candidate": after,
+                })
+            elif before is not None and after is not None:
+                tolerance = area_tolerance_percent if metric == "cell_area" else timing_tolerance_ns
+                change = abs(after - before)
+                if metric == "cell_area":
+                    change = 100.0 * change / abs(before) if before else float("inf")
+                if change > tolerance:
+                    violations.append({
+                        "top": key[0], "scenario": key[1], "metric": metric,
+                        "absolute_change": round(change, 6),
+                        "tolerance": tolerance,
+                        "tolerance_unit": "percent" if metric == "cell_area" else "ns",
+                        "reference": before, "candidate": after,
+                    })
         deltas.append(delta)
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "reference_source_sha": reference.get("source_sha"),
         "candidate_source_sha": candidate.get("source_sha"),
         "environment_match": True,
+        "tolerances": {"cell_area_percent": area_tolerance_percent, "timing_ns": timing_tolerance_ns},
+        "within_tolerance": not violations,
+        "violations": violations,
         "deltas": deltas,
     }
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -98,6 +129,8 @@ def main() -> int:
     compare.add_argument("reference", type=Path)
     compare.add_argument("candidate", type=Path)
     compare.add_argument("--output", type=Path)
+    compare.add_argument("--area-tolerance-percent", type=float, default=0.5)
+    compare.add_argument("--timing-tolerance-ns", type=float, default=0.005)
     args = parser.parse_args()
     if args.command == "snapshot":
         result = build_snapshot(args.matrix)
@@ -107,13 +140,15 @@ def main() -> int:
         result = compare_snapshots(
             json.loads(args.reference.read_text(encoding="utf-8")),
             json.loads(args.candidate.read_text(encoding="utf-8")),
+            area_tolerance_percent=args.area_tolerance_percent,
+            timing_tolerance_ns=args.timing_tolerance_ns,
         )
         rendered = json.dumps(result, indent=2) + "\n"
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(rendered, encoding="utf-8")
         print(rendered, end="")
-    return 0
+    return 0 if args.command == "snapshot" or result["within_tolerance"] else 1
 
 if __name__ == "__main__":
     raise SystemExit(main())
