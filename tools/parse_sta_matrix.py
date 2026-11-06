@@ -124,8 +124,8 @@ def parse_log(path):
     clock_properties_section_present = "=== CLOCK PROPERTIES ===" in text
     clock_section = section(text, "=== CLOCK PROPERTIES ===", "=== HOLD / MIN PATH DETAILS ===")
     clock_properties_section_valid = bool(
-        re.search(r"^\\s*Clock\\s+Period\\s+Waveform\\s*$", clock_section, re.MULTILINE)
-        and re.search(r"^\\s*-{5,}\\s*$", clock_section, re.MULTILINE)
+        re.search(r"^\s*Clock\s+Period\s+Waveform\s*$", clock_section, re.MULTILINE)
+        and re.search(r"^\s*-{5,}\s*$", clock_section, re.MULTILINE)
     )
     clock_period_match = re.search(r"^\s*core_clk\s+([-+]?(?:\d+\.?\d*|\.\d+))\s+", clock_section, re.MULTILINE)
     clock_period = float(clock_period_match.group(1)) if clock_period_match else None
