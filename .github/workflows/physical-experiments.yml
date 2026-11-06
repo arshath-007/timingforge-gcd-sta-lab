@@ -1,0 +1,84 @@
+name: TimingForge physical robustness experiments
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+    paths:
+      - "rtl/gcd_binary_*.sv"
+      - "constraints/gcd_baseline.sdc"
+      - "physical/config/**"
+      - "scripts/run_physical_experiments.sh"
+      - "scripts/postroute_sta.tcl"
+      - "tools/physical_experiments.py"
+      - "tools/physical_metrics.py"
+      - "tools/physical_annotation.py"
+      - ".github/workflows/physical-experiments.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  robustness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      ORFS_IMAGE_DIGEST: sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
+    container:
+      image: openroad/orfs@sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e
+    steps:
+      - name: Checkout exact source revision
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Run repository Python regression
+        run: python3 -m unittest discover -s tests -v
+      - name: Run five placement variations and six clock-period sweeps
+        shell: bash
+        run: |
+          mkdir -p build/physical_experiments
+          if ! bash scripts/run_physical_experiments.sh > build/physical_experiments/console.log 2>&1; then
+            echo "Physical robustness experiment failed. Last 250 lines:"
+            tail -n 250 build/physical_experiments/console.log
+            exit 1
+          fi
+          tail -n 120 build/physical_experiments/console.log
+          python3 - <<'PY'
+import json
+from pathlib import Path
+p = Path("build/physical_experiments/physical_experiments_summary.json")
+d = json.loads(p.read_text())
+print("variance pairs:", d["variance_pairwise_register_period_wins"])
+print("clock sweep:", json.dumps(d["clock_period_sweep"], indent=2))
+PY
+      - name: Record exact source revision
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## TimingForge physical robustness experiment'
+            echo "- Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- Checked-out SHA: $GITHUB_SHA"
+            echo "- PR head SHA: ${{ github.event.pull_request.head.sha || 'not a pull_request event' }}"
+            echo "- Declared ORFS image digest: $ORFS_IMAGE_DIGEST"
+            echo "- Experiments: 5 paired utilization/density/seed variations and 6 clock periods for both architectures"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload experiment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timingforge-physical-robustness
+          path: build/physical_experiments/**
+          retention-days: 90
