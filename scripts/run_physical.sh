@@ -68,6 +68,7 @@ GIT_SHA="$(git -C "$ROOT" rev-parse HEAD)"
   echo "RTL SHA256 (rtl/gcd_binary_split.sv): $(sha256sum rtl/gcd_binary_split.sv | awk '{print $1}')"
   echo "Script SHA256 (scripts/run_physical.sh): $(sha256sum scripts/run_physical.sh | awk '{print $1}')"
   echo "Script SHA256 (scripts/postroute_sta.tcl): $(sha256sum scripts/postroute_sta.tcl | awk '{print $1}')"
+  echo "Script SHA256 (scripts/presynth_sta.tcl): $(sha256sum scripts/presynth_sta.tcl | awk '{print $1}')"
   echo "Script SHA256 (tools/physical_manifest.py): $(sha256sum tools/physical_manifest.py | awk '{print $1}')"
   echo "Script SHA256 (tools/physical_metrics.py): $(sha256sum tools/physical_metrics.py | awk '{print $1}')"
   echo "Script SHA256 (tools/physical_annotation.py): $(sha256sum tools/physical_annotation.py | awk '{print $1}')"
@@ -87,6 +88,16 @@ for TOP in gcd_binary_combined gcd_binary_split; do
   make -C "$FLOW_ROOT" DESIGN_CONFIG="$CONFIG" WORK_HOME="$WORK_HOME" gds
 
   RESULTS="$WORK_HOME/results/nangate45/$TOP/base"
+  for artifact in 1_2_yosys.v 1_2_yosys.sdc; do
+    [[ -s "$RESULTS/$artifact" ]] || {
+      echo "ERROR: required ORFS synthesis artifact missing: $RESULTS/$artifact" >&2
+      exit 1
+    }
+  done
+  echo "=== ORFS post-synthesis STA: $TOP ==="
+  export TOP NETLIST="$RESULTS/1_2_yosys.v" SDC="$RESULTS/1_2_yosys.sdc"
+  openroad -exit "$ROOT/scripts/presynth_sta.tcl" 2>&1 | tee "$ROOT/build/physical/$TOP/presynth_sta.log"
+  grep -q "ORFS POST-SYNTHESIS REGISTER-TO-REGISTER CLOCK PERIOD" "$ROOT/build/physical/$TOP/presynth_sta.log"
   for artifact in 2_floorplan.odb 3_place.odb 4_cts.odb 5_route.odb 6_final.odb 6_final.gds 6_final.spef 6_final.sdc; do
     [[ -s "$RESULTS/$artifact" ]] || {
       echo "ERROR: required physical-flow artifact missing: $RESULTS/$artifact" >&2
