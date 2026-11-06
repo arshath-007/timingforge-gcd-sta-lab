@@ -119,19 +119,21 @@ class PhysicalMetricsTests(unittest.TestCase):
                 encoding="utf-8",
             )
             result = _prelayout_synthesis_metrics(
-                root, "gcd_binary_split", {"yosys_cell_area": 1681.918}
+                root, "gcd_binary_split", {"yosys_cell_area": 0.0}
             )
             self.assertEqual(result["standard_cell_instance_count"], 1193)
+            # The statistics table rounds to three significant digits;
+            # the explicit Chip area summary is the precise value.
             self.assertAlmostEqual(result["standard_cell_area"], 1681.918, places=3)
 
             log.write_text(
                 "\n".join([
-                    "  1193 1.70E+03 cells",
+                    "  0 1.68E+03 cells",
                     "Chip area for module 'gcd_binary_split': 1681.918000",
                 ]) + "\n",
                 encoding="utf-8",
             )
-            with self.assertRaisesRegex(ValueError, "does not match Chip area"):
+            with self.assertRaisesRegex(ValueError, "metrics must be positive"):
                 _prelayout_synthesis_metrics(
                     root, "gcd_binary_split", {"yosys_cell_area": 1681.918}
                 )
