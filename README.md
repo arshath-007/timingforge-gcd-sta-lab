@@ -7,7 +7,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.4.0 candidate (latest PR #10 head `8dc2747` passed all five CI workflows; awaiting independent review, merge and main-branch validation) · **Latest published release:** [v0.2.1](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.1) · **License:** MIT
+**Status:** Research prototype · **Version:** 0.4.0 candidate (PR #10 release-gate hardening in progress; awaiting final CI, independent review, merge and main-branch validation) · **Latest published release:** [v0.2.1](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.1) · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
