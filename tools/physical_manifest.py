@@ -21,7 +21,7 @@ PROVENANCE_FILES = (
     "constraints/gcd_baseline.sdc", "scripts/run_physical.sh",
     "scripts/postroute_sta.tcl", "scripts/presynth_sta.tcl",
     "scripts/run_nangate_sta.sh", "scripts/synth.sh", "scripts/run_sta.sh",
-    "scripts/run_sta.tcl", "scripts/run_netlist_equiv.sh", "scripts/validate_gds.py", "tools/physical_manifest.py",
+    "scripts/run_sta.tcl", "scripts/run_netlist_equiv.sh", "formal/nangate45_dff_models.v", "scripts/validate_gds.py", "tools/physical_manifest.py",
     "tools/physical_metrics.py", "tools/physical_annotation.py",
     "physical/config/gcd_binary_combined.mk", "physical/config/gcd_binary_split.mk",
     ".github/workflows/physical-design.yml",
@@ -67,6 +67,8 @@ def build_manifest(root: Path, repo_root: Path | None = None) -> dict:
             label = f"Config SHA256 ({relative})"
         elif relative.startswith(".github/"):
             label = "Workflow SHA256 (.github/workflows/physical-design.yml)"
+        elif relative.startswith("formal/"):
+            label = f"Formal model SHA256 ({relative})"
         else:
             label = f"Script SHA256 ({relative})"
         recorded = _value(versions, label)
