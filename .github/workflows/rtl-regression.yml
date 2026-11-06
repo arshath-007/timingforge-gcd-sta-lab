@@ -119,5 +119,6 @@ jobs:
             build/reports/sta_*.log
             build/yosys_*.log
             build/gcd_binary_*.v
+            build/netlist_equiv/**
             build/tool_versions.txt
           retention-days: 90
