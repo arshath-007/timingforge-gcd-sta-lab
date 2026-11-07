@@ -95,15 +95,31 @@ The latest PR #10 physical robustness workflow [run #42225754303](https://github
 
 ## v0.4.0 release gate
 
-Do not publish v0.4.0 until all of the following are true:
-1. [x] The updated oracle-backed formal workflow passes positive proof and negative controls on PR #10 (run #42225754417).
-2. [x] The technology-breadth workflow completes all four physical builds, both ASAP7 three-scene MCMM analyses, both SKY130HD post-route analyses, and actual-Liberty PVT manifest validation on PR #10 (run #42225754263).
-3. [ ] Independent technical review of the final PR head, source changes, artifacts and scope claims is completed; material findings are resolved.
-4. [ ] The PR is merged; fresh workflows on the resulting main commit pass regression, formal, Nangate45 physical, technology breadth and physical robustness.
-5. [ ] README, phase tracker, measured-results page and release notes are confirmed against the final main-branch run IDs.
-6. [ ] A release tag is created at the validated main commit and its evidence artifacts are attached or linked.
+The PR #10 merge and main-branch CI gate are complete. The independent review requirement was explicitly waived by the project owner; it is not a release blocker.
 
-PR #10 commit `8dc274761fad6d315c5c349b129f63d94c9a6f89` has passed the five current PR workflows: [regression #42225754505](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754505), [formal #42225754417](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754417), [Nangate45 physical #42225754311](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754311), [technology breadth #42225754263](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754263), and [physical robustness #42225754303](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754303). The PR still requires independent technical review, merge and fresh main-branch validation before v0.4.0 can be tagged or published.
+### Main-branch validation — passed
+
+Validated source commit: `d6a7247d066e668165a8b4ce0187779fc2ae8164`.
+
+| Required workflow | Run | Result |
+|---|---:|---|
+| Regression + library-backed STA | [#42361605851](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605851) | Passed |
+| Formal equivalence | [#42361605849](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605849) | Passed |
+| Nangate45 physical design | [#42361605868](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605868) | Passed |
+| Technology breadth | [#42361605880](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605880) | Passed |
+| Physical robustness | [#42361605870](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605870) | Passed |
+
+The robustness run completed five placement pairs and six clock-period sweeps, recorded the source revision, uploaded evidence and stopped its containers successfully.
+
+### Remaining publication actions
+
+1. [x] PR #10 merged to `main`.
+2. [x] All five required workflows passed on the resulting main commit.
+3. [x] README, phase tracker, measured-results references and release notes updated to identify the main-branch evidence.
+4. [ ] Create and verify the `v0.4.0` Git tag at the validated release commit.
+5. [ ] Publish the GitHub Release and link the retained CI evidence artifacts.
+
+Do not describe v0.4.0 as published until both the tag and GitHub Release are verified. The project's educational and methodology limitations remain in force; CI success is not signoff.
 
 
 
