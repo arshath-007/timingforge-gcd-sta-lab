@@ -7,7 +7,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.4.0 validated release candidate · **Latest published release:** [v0.2.1](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.1) · **License:** MIT
+**Status:** Research prototype · **Version:** 0.4.0 · **Latest published release:** [v0.4.0](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.4.0) · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -28,6 +28,17 @@ TimingForge makes this failure mode testable:
 5. Run the golden and mutated SDC files through the same timing engine and netlist.
 6. Compare setup/hold results, unconstrained endpoints, critical paths, and register-to-register path coverage.
 7. Publish every assumption and result rather than inventing PPA numbers.
+
+## Public architecture diagrams
+
+The following high-level diagrams provide a visual overview of the benchmark and its educational physical-design flow. They are portfolio illustrations; the critical-path graphic is conceptual, not a measured timing report.
+
+- [RTL-to-STA benchmark architecture](docs/diagrams/rtl-to-sta-architecture.svg)
+- [Physical implementation flow](docs/diagrams/physical-design-flow.svg)
+- [Conceptual STA critical path](docs/diagrams/sta-critical-path.svg)
+- [All diagrams with inline previews](docs/diagrams/README.md)
+
+![TimingForge RTL-to-STA architecture](docs/diagrams/rtl-to-sta-architecture.svg)
 
 ## Architecture
 
@@ -311,4 +322,4 @@ The benchmark implementation was integrated by PR #10 at `d6a7247d066e668165a8b4
 
 The main-branch runs uploaded the regression/STA, formal, Nangate45 physical, technology-breadth and physical-robustness evidence artifacts. The [physical robustness artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605870/artifacts/13571333561) includes the five placement pairs and six clock-period sweeps. The project remains an educational benchmark with the scope boundaries documented above; a green workflow is not foundry signoff.
 
-Release publication is tracked separately from CI validation. Until a Git tag and GitHub Release are visible, v0.4.0 must be described as a validated release candidate, not a published release. The current `main` branch includes follow-up documentation reconciliation; the v0.4.0 release tag is intended to identify the validated implementation commit above.
+**Release status:** v0.4.0 was published on 7 November 2026. See the [official GitHub Release](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.4.0). The release notes preserve the distinction between the validated implementation source commit and subsequent documentation-only reconciliation commits.
