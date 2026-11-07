@@ -24,11 +24,11 @@ This tracker distinguishes implemented code from completed validation. A feature
 - [x] Parameterized WIDTH=8/16/32 simulation sweep.
 - [x] 32-bit directed and 250 seeded constrained-random tests (seed 0x54462026; 259 cases per architecture).
 - [x] Environment-keyed QoR snapshots and a fail-closed Nangate45 typical-corner regression gate.
-- [x] Latest PR #10 regression and library-backed STA/QoR workflow passed on commit `8dc274761fad6d315c5c349b129f63d94c9a6f89`: [run #42225754505](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754505). Artifacts: [Nangate45 STA matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754505/artifacts/13506026425) and [static benchmark](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754505/artifacts/13506240639).
+- [x] Latest PR #10 regression and library-backed STA/QoR workflow passed on commit `8dc274761fad6d315c5c349b129f63d94c9a6f89`: [run #42361605851](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605851). Artifacts: [Nangate45 STA matrix](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605851/artifacts/13569358610) and [static benchmark](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605851/artifacts/13570052103).
 
 ### Formal proof validation and scope
 
-The updated oracle-backed miter passed the dedicated PR #10 [formal workflow run #42225754417](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754417); the [formal artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754417/artifacts/13494245840) records the positive proof and negative controls. Yosys 0.33 plus CVC5 1.1.2 completed the positive proof at 26 SMT steps / 12 positive clock edges in 11:08. The intentionally broken subtract mutant was rejected at step 5 for operands a=5, b=3.
+The updated oracle-backed miter passed the dedicated PR #10 [formal workflow run #42361605849](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605849); the [formal artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605849/artifacts/13570052527) records the positive proof and negative controls. Yosys 0.33 plus CVC5 1.1.2 completed the positive proof at 26 SMT steps / 12 positive clock edges in 11:08. The intentionally broken subtract mutant was rejected at step 5 for operands a=5, b=3.
 
 The QoR regression gate now requires unique golden records for both GCD architectures, the complete four-metric set, and the complete four-limit policy; missing/duplicate architecture records, unsupported or duplicate metrics, incomplete limits, non-finite values and environment/SDC mismatches fail closed.
 
@@ -43,14 +43,14 @@ The reviewed baseline and limits apply only to the pinned Nangate45 typical envi
 
 ### Validated baseline
 - [x] Nangate45 typical physical implementation for both architectures through floorplan, placement, CTS, routing, extraction and post-route OpenSTA.
-- [x] ODB/GDS/SPEF/SDC, logs, reports and SHA-256 evidence archived in the latest PR #10 [physical run #42225754311](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754311), artifact [13505672933](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754311/artifacts/13505672933).
+- [x] ODB/GDS/SPEF/SDC, logs, reports and SHA-256 evidence archived in the latest PR #10 [physical run #42361605868](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605868), artifact [13570500287](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605868/artifacts/13570500287).
 
 ### Implemented and validated technology-breadth experiment
 
 - [x] ASAP7 BC/TC/WC Liberty scene setup and post-route OpenSTA MCMM analysis for both architectures.
 - [x] Separate SKY130HD TT physical implementation and extracted-parasitic post-route STA for both architectures.
 - [x] Pinned platform provenance, Liberty PVT/unit checks, tool/library/artifact hashes and a SHA-256 manifest.
-- [x] All four physical builds, both ASAP7 three-scene MCMM analyses, both SKY130HD post-route analyses and manifest generation passed in PR #10 [technology-breadth run #42225754263](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754263). The [90-day artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754263/artifacts/13505838538) contains 412 files and the manifest. Its four design/platform combinations each include final ODB, Verilog, GDS, SPEF and SDC; all 36 manifest-listed implementation-artifact hashes were independently verified after download.
+- [x] All four physical builds, both ASAP7 three-scene MCMM analyses, both SKY130HD post-route analyses and manifest generation passed in PR #10 [technology-breadth run #42361605880](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605880). The [90-day artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605880/artifacts/13570383217) contains 412 files and the manifest. Its four design/platform combinations each include final ODB, Verilog, GDS, SPEF and SDC; all 36 manifest-listed implementation-artifact hashes were independently verified after download.
 
 **ASAP7 measured MCMM results (minimum slack among emitted paths; report request capped at 100 paths per path group):**
 
@@ -84,7 +84,7 @@ The SKY130HD experiment uses the pinned platform's verified TT, 25°C, 1.80 V mo
 
 Five paired Nangate45 typical-corner placement variants produced a combined-GCD mean register-only period of 0.922 ns (0.89–0.96 ns) and split-GCD mean of 1.050 ns (1.01–1.18 ns). Combined had the shorter register-only period in 5/5 pairs. Mean standard-cell area was 2657.66 for combined and 2500.88 for split (about 5.9% lower for split). These five controlled variants do not establish a universal architecture winner.
 
-The latest PR #10 physical robustness workflow [run #42225754303](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754303), [artifact #13512635145](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42225754303/artifacts/13512635145), completed five placement pairs and six target-period points for both architectures. The clock sweep classified both architectures as not closed at 1.0, 1.2 and 1.5 ns; both closed at 2.0 and 3.0 ns; at 2.5 ns, split closed but combined did not because a max-capacitance violation remained (54.633 vs 53.406, slack -1.227). Positive setup/hold slack alone is insufficient for closure.
+The main-branch physical robustness workflow [run #42361605870](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605870), [artifact #13571333561](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605870/artifacts/13571333561), completed five placement pairs and six target-period points for both architectures. The clock sweep classified both architectures as not closed at 1.0, 1.2 and 1.5 ns; both closed at 2.0 and 3.0 ns; at 2.5 ns, split closed but combined did not because a max-capacitance violation remained (54.633 vs 53.406, slack -1.227). Positive setup/hold slack alone is insufficient for closure.
 
 **Methodology boundary:** pre-layout and ORFS physical netlists use different synthesis settings. Their period deltas are cross-flow observations, not matched-netlist routing deltas. The physical LEC subprocess is disabled. The ASAP7 MCMM experiment reuses one TC-extracted SPEF across BC/TC/WC, has a 100-path cap, and shows -3.225 ps combined-GCD WC hold slack. No full PVT/RC or signoff claim is made.
 
@@ -95,11 +95,11 @@ The latest PR #10 physical robustness workflow [run #42225754303](https://github
 
 ## v0.4.0 release gate
 
-The PR #10 merge and main-branch CI gate are complete. The independent review requirement was explicitly waived by the project owner; it is not a release blocker.
+The implementation integration and main-branch CI gate are complete. The independent review requirement was explicitly waived by the project owner; it is not a release blocker.
 
 ### Main-branch validation — passed
 
-Validated source commit: `d6a7247d066e668165a8b4ce0187779fc2ae8164`.
+Validated implementation commit: `d6a7247d066e668165a8b4ce0187779fc2ae8164`. Follow-up documentation-only commits updated the README, phase tracker and release notes; the implementation evidence remains tied to this tested source commit.
 
 | Required workflow | Run | Result |
 |---|---:|---|
@@ -115,7 +115,7 @@ The robustness run completed five placement pairs and six clock-period sweeps, r
 
 1. [x] PR #10 merged to `main`.
 2. [x] All five required workflows passed on the resulting main commit.
-3. [x] README, phase tracker, measured-results references and release notes updated to identify the main-branch evidence.
+3. [x] README, phase tracker, measured-results references and release notes reconciled with the main-branch evidence; follow-up documentation commits are explicitly distinguished from the tested implementation commit.
 4. [ ] Create and verify the `v0.4.0` Git tag at the validated release commit.
 5. [ ] Publish the GitHub Release and link the retained CI evidence artifacts.
 

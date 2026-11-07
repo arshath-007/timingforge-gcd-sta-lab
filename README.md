@@ -7,7 +7,7 @@
 # TimingForge
 ## An Open Benchmark for Trustworthy Static Timing Analysis
 
-**Status:** Research prototype · **Version:** 0.4.0 release candidate (all five required workflows passed on `main`; documentation and release publication in progress) · **Latest published release:** [v0.2.1](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.1) · **License:** MIT
+**Status:** Research prototype · **Version:** 0.4.0 validated release candidate · **Latest published release:** [v0.2.1](https://github.com/arshath-007/timingforge-gcd-sta-lab/releases/tag/v0.2.1) · **License:** MIT
 
 > A timing report can look clean even when the constraints are incomplete. TimingForge studies whether an STA flow can identify deliberately introduced constraint defects before engineers trust its results.
 
@@ -81,7 +81,7 @@ constraints/     golden SDC
 tools/           fault injector, SDC linter, STA/QoR and physical-evidence parsers
 tests/           Python unit tests for STA, QoR, and physical evidence
 scripts/         synthesis, formal, OpenSTA and OpenROAD entry points
-formal/          bounded transaction-equivalence miter and SymbiYosys config
+formal/          bounded transaction-equivalence miter and proof runner
 physical/        matched Nangate45 ORFS design configurations
 docs/            scope, fault catalog, verification and physical results
 reports/         generated reports (not committed by default)
@@ -212,9 +212,9 @@ The main-branch [physical-design workflow run #42361605868](https://github.com/a
 | Reported setup skew (worst reported path) | +0.16 ns | +0.16 ns |
 | Reported hold skew (worst reported path) | -0.06 ns | -0.06 ns |
 
-The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are Nangate45 typical-corner educational results, not signoff. The separate ASAP7/SKY130HD technology-breadth experiment is documented below and remains subject to its own CI validation; it does not retroactively change these Nangate45 measurements. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
+The register-to-register metric excludes I/O paths; all-path period includes constrained port paths. The two metrics must not be interchanged. Both flows produced final GDS, ODB, SDC and extracted SPEF; post-route STA loaded SPEF and used propagated clocks. These are Nangate45 typical-corner educational results, not signoff. The separate ASAP7/SKY130HD technology-breadth experiment is documented below; it does not retroactively change these Nangate45 measurements. The optional ORFS Kepler-based internal LEC subprocess is disabled and no netlist-to-netlist LEC claim is made.
 
-## Phase 3 technology breadth — PR validation passed
+## Phase 3 technology breadth — main-branch validation passed
 
 The dedicated [main-branch technology-breadth workflow run #42361605880](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605880) passed for both architectures on ASAP7 and SKY130HD. The [90-day artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605880/artifacts/13570383217) contains 412 files, final ODB/GDS/SPEF/SDC for all four platform/design combinations, per-scene reports, tool/library provenance and a SHA-256 manifest. All 36 manifest-listed per-design implementation artifacts were independently hash-checked after download.
 
@@ -297,9 +297,9 @@ The [physical robustness experiment](docs/PHYSICAL_ROBUSTNESS.md) includes five 
 The separate [ASAP7 and SKY130HD technology-breadth results](docs/PHASE3_TECHNOLOGY_BREADTH_RESULTS.md) are not mixed with the Nangate45 measurements. ASAP7 WC combined-GCD hold slack is -3.225 ps among the emitted hold paths (100-path-per-group reporting cap), and the same TC-extracted SPEF is reused across its three Liberty scenes; this is not full PVT/RC signoff.
 
 
-## v0.4.0 release-candidate validation on main
+## v0.4.0 validation and release status
 
-PR #10 was merged to `main` at commit `d6a7247d066e668165a8b4ce0187779fc2ae8164`. All five required GitHub Actions workflows passed on that exact commit:
+The benchmark implementation was integrated by PR #10 at `d6a7247d066e668165a8b4ce0187779fc2ae8164`. All five required GitHub Actions workflows passed on that exact implementation commit. Subsequent documentation-only commits reconciled the evidence and release notes; they do not change the validated RTL or flow sources:
 
 | Workflow | Run | Result |
 |---|---:|---|
@@ -311,4 +311,4 @@ PR #10 was merged to `main` at commit `d6a7247d066e668165a8b4ce0187779fc2ae8164`
 
 The main-branch runs uploaded the regression/STA, formal, Nangate45 physical, technology-breadth and physical-robustness evidence artifacts. The [physical robustness artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605870/artifacts/13571333561) includes the five placement pairs and six clock-period sweeps. The project remains an educational benchmark with the scope boundaries documented above; a green workflow is not foundry signoff.
 
-Release publication is tracked separately from CI validation. Until a Git tag and GitHub Release are visible, v0.4.0 must be described as a validated release candidate, not a published release.
+Release publication is tracked separately from CI validation. Until a Git tag and GitHub Release are visible, v0.4.0 must be described as a validated release candidate, not a published release. The current `main` branch includes follow-up documentation reconciliation; the v0.4.0 release tag is intended to identify the validated implementation commit above.
