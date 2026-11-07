@@ -53,7 +53,7 @@ These changes are observations from this one cross-flow comparison and constrain
 
 ## Physical evidence
 
-The successful [physical-design workflow run #23](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456) uploaded the [90-day physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42077957456/artifacts/13439243211).
+The main-branch [physical-design workflow run #42361605868](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605868) passed on release-candidate commit `d6a7247d066e668165a8b4ce0187779fc2ae8164` and uploaded the [90-day physical evidence artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605868/artifacts/13570500287). The measured values below are the previously audited Phase 3 Nangate45 typical-corner results; the fresh main run confirms reproducibility of the physical workflow on the release-candidate source.
 
 For each architecture the archive contains:
 - Final ODB, GDS, SPEF and SDC.
