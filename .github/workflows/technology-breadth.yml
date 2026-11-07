@@ -14,9 +14,11 @@ on:
       - "scripts/run_technology_breadth.sh"
       - "scripts/postroute_sta.tcl"
       - "tools/technology_breadth.py"
+      - "tools/filter_asap7_libs.py"
+      - "tests/test_technology_breadth.py"
       - ".github/workflows/technology-breadth.yml"
   pull_request:
-    branches: [main]
+    branches: [main, integration/v0.4.0-phase2-phase3]
     paths:
       - "rtl/gcd_binary_*.sv"
       - "constraints/gcd_baseline_asap7.sdc"
@@ -27,6 +29,8 @@ on:
       - "scripts/run_technology_breadth.sh"
       - "scripts/postroute_sta.tcl"
       - "tools/technology_breadth.py"
+      - "tools/filter_asap7_libs.py"
+      - "tests/test_technology_breadth.py"
       - ".github/workflows/technology-breadth.yml"
 
 permissions:
