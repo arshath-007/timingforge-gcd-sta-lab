@@ -14,6 +14,8 @@ on:
       - "scripts/run_technology_breadth.sh"
       - "scripts/postroute_sta.tcl"
       - "tools/technology_breadth.py"
+      - "tools/filter_asap7_libs.py"
+      - "tests/test_technology_breadth.py"
       - ".github/workflows/technology-breadth.yml"
   pull_request:
     branches: [main]
@@ -27,6 +29,8 @@ on:
       - "scripts/run_technology_breadth.sh"
       - "scripts/postroute_sta.tcl"
       - "tools/technology_breadth.py"
+      - "tools/filter_asap7_libs.py"
+      - "tests/test_technology_breadth.py"
       - ".github/workflows/technology-breadth.yml"
 
 permissions:
