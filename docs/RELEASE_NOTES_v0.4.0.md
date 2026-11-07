@@ -12,7 +12,7 @@
 
 ## Verification and evidence
 
-The v0.4.0 release-candidate source commit is `d6a7247d066e668165a8b4ce0187779fc2ae8164`. PR #10 was merged to `main`, and all five required workflows passed on that exact commit:
+The v0.4.0 implementation commit is `d6a7247d066e668165a8b4ce0187779fc2ae8164` (PR #10). All five required workflows passed on that exact implementation commit. Subsequent documentation-only commits reconciled the public evidence; they are not represented as fresh RTL/physical implementation runs:
 
 - Regression and library-backed Nangate45 STA/QoR: [main run #42361605851](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605851); [STA matrix artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605851/artifacts/13569358610), [static benchmark artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605851/artifacts/13570052103).
 - Updated WIDTH=3 oracle-backed formal proof and deliberate mutant rejection: [main run #42361605849](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605849); [formal artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605849/artifacts/13570052527).
