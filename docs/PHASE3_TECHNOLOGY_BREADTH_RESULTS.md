@@ -1,11 +1,12 @@
-# Phase 3 technology-breadth results — PR #10 validation
+# Phase 3 technology-breadth results — main-branch validation
 
 ## Latest validated run
 
-- Workflow: [TimingForge technology breadth, run #58](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181)
-- Source commit: `6140483a93dec20f0dff4c014ff9a9f852802a75`
-- Artifact: [timingforge-technology-breadth.zip](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42199460181/artifacts/13494468655) (55,751,174 bytes; 90-day retention)
-- Artifact SHA-256: `bed410bfef04cbd23211c1f13f24653e16301823431448c10f6ae521f5a75112`
+- Workflow: [TimingForge technology breadth, main-branch run #42361605880](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605880)
+- Source commit: `d6a7247d066e668165a8b4ce0187779fc2ae8164`
+- Artifact: [timingforge-technology-breadth.zip](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605880/artifacts/13570383217) (90-day retention)
+
+The earlier PR validation artifact remains useful historical evidence; the run above is the fresh release-candidate main-branch validation.
 - Manifest: `technology_breadth_manifest.json` (schema 1.0; produced by the PR #10 run)
 - Tool provenance: OpenROAD/Yosys versions and ORFS source revision are recorded in the artifact's `tool_versions.txt`; pinned container digest `sha256:f05cee3219a02f26289f02f00e11a3fc986ab51a482a0000a2da810cda219a6e`.
 
