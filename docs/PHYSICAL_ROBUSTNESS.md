@@ -63,3 +63,8 @@ The combined architecture had the shorter register-to-register period in all fiv
 At the 2.500 ns combined-GCD point, timing slack was non-negative, but the final max-capacitance report still showed a violation at pin `_3726_/ZN` (reported capacitance 54.633 against a limit of 53.406; slack -1.227). The closure gate correctly retained that point as not closed. A successful ORFS flow exit is not itself a timing-closure pass.
 
 These results demonstrate why timing closure must include setup, hold, design-rule checks and parasitic-annotation review, rather than treating the target clock period or WNS alone as sufficient. The entire experiment remains a Nangate45 typical-corner educational study, not signoff.
+
+
+## Release-candidate main-branch rerun
+
+The release-candidate source commit `d6a7247d066e668165a8b4ce0187779fc2ae8164` passed the complete main-branch [physical robustness workflow run #42361605870](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605870). The run completed the five placement pairs and six clock-period sweeps, recorded the exact source revision, uploaded the evidence, and stopped containers successfully. The [90-day artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42361605870/artifacts/13571333561) is the release-candidate evidence package. The measured interpretation above remains bounded to the stated Nangate45 typical-corner configurations.
