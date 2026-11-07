@@ -28,26 +28,30 @@ jobs:
           command -v iverilog
           test "$(yosys -V)" = "Yosys 0.33 (git sha1 2584903a060)"
           test "$(cvc5 --version 2>&1 | head -n 1)" = "This is cvc5 version 1.1.2"
-      - name: Run bounded GCD transaction-equivalence proof
+      - name: Run bounded GCD transaction-correctness proof
         shell: bash
         run: bash scripts/run_formal.sh
+      - name: Run directed protocol regression
+        shell: bash
+        run: bash scripts/run_protocol_regression.sh
       - name: Record exact source revision
         if: always()
         shell: bash
         run: |
           {
-            echo '## TimingForge formal evidence provenance'
+            echo '## TimingForge formal and protocol evidence provenance'
             echo "- Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
             echo "- Checked-out SHA: $GITHUB_SHA"
             echo "- PR head SHA: ${{ github.event.pull_request.head.sha || 'not a pull_request event' }}"
             echo "- Ref: $GITHUB_REF"
             echo "- Event: $GITHUB_EVENT_NAME"
           } >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload formal proof evidence
+      - name: Upload formal and protocol evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: timingforge-formal-proof
           path: |
             build/formal/**
+            build/protocol/**
           retention-days: 90
