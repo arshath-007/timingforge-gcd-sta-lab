@@ -1,6 +1,6 @@
 # Phase 2 formal and assertion evidence — scope and interpretation
 
-**Historical PR validation:** the prior oracle-backed miter passed in [formal workflow run #42098727465](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465); its [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465/artifacts/13449462598) records the earlier source revision. New validation for this review-fix branch must be taken from its own Actions run; historical run IDs are not evidence for the changed files.
+The current release-candidate proof evidence is linked from the [v0.4.0 release notes](RELEASE_NOTES_v0.4.0.md). Historical feature-branch run IDs are intentionally omitted here so this scope document does not imply that an earlier PR run validates the current source.
 
 The bounded formal miter checks each GCD architecture against an independent WIDTH=3 mathematical truth-table oracle, checks mutual architecture-result matching, verifies one completion per implementation, checks `done` with `busy` low, and requires completion within 12 positive clock edges. The 64-entry oracle is independently cross-checked against Python's Euclidean `math.gcd` and an Icarus simulation. The two `done` pulses are not required to occur on the same cycle because the split architecture intentionally has additional processing latency.
 
@@ -12,6 +12,29 @@ The bounded formal miter checks each GCD architecture against an independent WID
 - Engine: Yosys SMT2 export plus `yosys-smtbmc` and CVC5, invoked directly by `scripts/run_formal.sh`. There is no SymbiYosys `.sby` configuration in this flow.
 - Bound: 26 SMT steps (12 positive clock edges), as recorded by the formal runner's bounded configuration.
 - Negative controls: four deliberately faulty WIDTH=3 RTL variants must produce an assertion failure.
+
+## Reproduce the bounded proof
+
+From the repository root, use a Linux environment with Bash, GNU coreutils (including `timeout`), Python 3, Icarus Verilog (`iverilog` and `vvp`), Yosys 0.33 with `yosys-smtbmc`, and CVC5 1.1.2. The runner checks the exact Yosys and CVC5 version strings and exits if they differ.
+
+```bash
+# Install the distribution packages where available; pin/verify versions below.
+sudo apt-get update
+sudo apt-get install -y yosys cvc5 iverilog python3
+yosys -V
+cvc5 --version
+command -v yosys-smtbmc
+command -v timeout
+
+# Run the complete formal suite: positive proof, four formal negative controls,
+# and the WIDTH=8 exhaustive-simulation negative control.
+bash scripts/run_formal.sh
+
+# Run the separate directed protocol simulation (busy-start and reset-abort).
+bash scripts/run_protocol_regression.sh
+```
+
+The checked-in GitHub Actions workflow `.github/workflows/formal-equivalence.yml` is the reference CI environment and installs the expected Yosys/CVC5 versions on `ubuntu-24.04`. The script records tool versions and solver timings under `build/formal/`; CI uploads those files together with protocol evidence as the `timingforge-formal-proof` artifact. For a locally reproduced result, retain the complete `build/formal/` directory and record `git rev-parse HEAD` alongside it. A successful local run is evidence only for that exact checked-out source revision.
 
 ## What the proof does and does not establish
 
