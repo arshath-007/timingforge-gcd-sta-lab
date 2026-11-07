@@ -61,7 +61,10 @@ module tb_gcd_protocol;
             end
             if (!seen_combined || !seen_split)
                 $fatal(1, "timeout waiting for both architectures");
-            @(negedge clk);
+            // The DUT clears registered done on the next rising edge.
+            // Sample after that edge, not at the intervening falling edge.
+            @(posedge clk);
+            #1;
             if (done_combined || done_split)
                 $fatal(1, "done did not return low after completion");
         end
