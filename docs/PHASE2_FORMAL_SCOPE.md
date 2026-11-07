@@ -1,38 +1,52 @@
 # Phase 2 formal and assertion evidence — scope and interpretation
 
-**Latest PR validation:** the updated oracle-backed miter passed in [formal workflow run #42098727465](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465); download the [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465/artifacts/13449462598). The positive CVC5 proof passed at 26 SMT steps / 12 positive clock edges (11:08 solver time). The intentionally broken subtract mutant was rejected at step 5 for operands a=5, b=3. Main-branch validation remains part of the v0.4.0 release gate.
+**Historical PR validation:** the prior oracle-backed miter passed in [formal workflow run #42098727465](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465); its [formal proof artifact](https://github.com/arshath-007/timingforge-gcd-sta-lab/actions/runs/42098727465/artifacts/13449462598) records the earlier source revision. New validation for this review-fix branch must be taken from its own Actions run; historical run IDs are not evidence for the changed files.
 
-The bounded formal miter now checks each GCD architecture against an independent WIDTH=3 mathematical truth-table oracle, checks mutual architecture-result equivalence, verifies one completion per implementation, checks `done` with `busy` low, and requires completion within 12 positive clock edges. The 64-entry oracle is independently cross-checked against Python's Euclidean `math.gcd` and an Icarus simulation. The two `done` pulses are not required to occur on the same cycle because the split architecture intentionally has additional processing latency.
+The bounded formal miter checks each GCD architecture against an independent WIDTH=3 mathematical truth-table oracle, checks mutual architecture-result matching, verifies one completion per implementation, checks `done` with `busy` low, and requires completion within 12 positive clock edges. The 64-entry oracle is independently cross-checked against Python's Euclidean `math.gcd` and an Icarus simulation. The two `done` pulses are not required to occur on the same cycle because the split architecture intentionally has additional processing latency.
 
 - Formal width: 3 bits; all 64 symbolic operand pairs are considered.
-- Stimulus: one reset followed by one accepted start request.
+- Formal stimulus: one reset followed by one accepted start request.
 - Correctness assertions: both architectures' completed results equal the independent WIDTH=3 oracle.
-- Protocol assertions: each implementation completes once, reports `done` with `busy` low, and completes within the 12-cycle bound.
-- Equivalence assertion: captured transaction results from both architectures match.
-- Engine: Yosys SMT2 export plus `yosys-smtbmc` and CVC5.
-- Bound: 26 SMT steps (12 positive clock edges).
-- Negative control: a deliberately broken subtract operation must fail the same oracle-backed miter.
+- Protocol assertions inside the bounded miter: each implementation completes once, reports `done` with `busy` low, and completes within the 12-cycle bound.
+- Result matching: captured transaction results from both architectures match. This is oracle-mediated result matching, not a direct cycle-by-cycle state-equivalence proof.
+- Engine: Yosys SMT2 export plus `yosys-smtbmc` and CVC5, invoked directly by `scripts/run_formal.sh`. There is no SymbiYosys `.sby` configuration in this flow.
+- Bound: 26 SMT steps (12 positive clock edges), as recorded by the formal runner's bounded configuration.
+- Negative controls: four deliberately faulty WIDTH=3 RTL variants must produce an assertion failure.
 
 ## What the proof does and does not establish
 
 The WIDTH=3 symbolic input space is exhaustive for all 64 operand pairs. Unlike a pure mutual-equivalence miter, this proof checks both implementations against a separate mathematical oracle, so a shared arithmetic defect cannot pass merely because the architectures agree. The oracle table itself is checked against `math.gcd` by a Python unit test and against an independently coded Euclidean reference in Icarus simulation.
 
-This still does **not** prove 32-bit arithmetic correctness, establish an unbounded sequential invariant, or cover arbitrary back-to-back transactions. The 32-bit GCD RTL is separately checked against an independent Euclidean reference in directed and seeded constrained-random simulation. Parameterized regression also runs both architectures at WIDTH=8, WIDTH=16, and WIDTH=32, with zero/equal/high-bit/stress cases and deterministic random operands. These are simulation checks, not proofs of the full 32-bit input space.
+This does **not** prove 32-bit arithmetic correctness, establish an unbounded sequential invariant, or cover arbitrary transaction sequences. The 32-bit GCD RTL is separately checked against an independent Euclidean reference in directed and seeded constrained-random simulation. Parameterized regression also runs both architectures at WIDTH=8, WIDTH=16, and WIDTH=32, with zero/equal/high-bit/stress cases and deterministic random operands. These are simulation checks, not proofs of the full 32-bit input space.
 
-## Concurrent SVA protocol checks
+## Protocol coverage: formal versus simulation
 
-A separate Verilator assertion regression exercises concurrent SystemVerilog Assertions on both architectures:
+The bounded formal miter stimulates exactly one accepted transaction. It does not formally cover a start pulse while busy, reset asserted during an iterative operation, or a subsequent transaction after completion/reset.
 
+A new directed Icarus regression, `scripts/run_protocol_regression.sh`, exercises both architectures for:
+- a second start pulse while both implementations are busy (the request must be ignored);
+- reset during an iterative operation (the operation must abort and both engines return to idle);
+- a fresh request after completion and after reset-abort.
+
+These are directed simulation checks, not formal proofs. The existing Verilator concurrent SVA regression checks only:
 - `done |=> !done`: `done` is a one-cycle pulse.
 - `done |-> !busy`: `busy` is low when completion is sampled.
-- Stimulus includes zero operands, high-bit operands, adjacent high-valued operands, and a nontrivial common divisor.
 
-These properties are dynamically assertion-checked by Verilator. They are **not** part of the Yosys/CVC5 bounded proof and do not establish unbounded formal properties. The formal miter uses the immediate-assertion subset supported by the selected Yosys frontend.
+The SVA properties are dynamically assertion-checked by Verilator. They are **not** part of the Yosys/CVC5 bounded proof and do not establish unbounded formal properties.
 
+## Negative-control inventory and N5 distinction
 
-## Additional negative-control and exhaustive simulation evidence
+The formal mutant generator `tools/make_formal_mutants.py` defines exactly four formal mutants:
+- N1: single-architecture subtraction fault;
+- N3: shared zero-input fault;
+- N4: shared common-shift fault;
+- N6: truncated comparator.
 
-The repository's full formal script retains four additional, deliberately broken WIDTH=3 RTL negative controls: a single-architecture subtraction fault, a shared zero-input fault, a shared common-shift fault, and a truncated comparator. Each must be rejected by the same oracle-backed miter. Separately, `scripts/run_exhaustive_gcd.sh` exhaustively simulates all 65,536 WIDTH=8 operand pairs against an independent Euclidean reference for both architectures. That WIDTH=8 result is exhaustive simulation, not an SMT proof or a 32-bit formal proof. The WIDTH=8/16/32 regression sweep and Verilator SVA checks remain dynamic evidence.
+N2 and N5 are not defined by that formal mutant generator. N2 has no implementation or validation evidence in this revision; it is not counted among the four formal controls. N5 is separately generated and tested by `scripts/run_exhaustive_gcd.sh`: the script forces `SHIFT_WIDTH = 2` in both WIDTH=8 designs and requires the exhaustive reference simulation to reject the mutant. N5 is therefore an exhaustive-simulation negative control, not a fifth formal negative control. The formal runner now distinguishes an actual solver-reported assertion failure from solver/tool execution errors and from a mutant that incorrectly passes.
+
+## Parameter contract
+
+Both RTL modules are intended for positive integer widths (WIDTH >= 1). The supported regression points are WIDTH=3 for bounded formal and WIDTH=8/16/32 for simulation. A WIDTH=0 instantiation is outside the documented interface contract and is not currently protected by a portable elaboration-time assertion; add one only with toolchain-compatible elaboration tests.
 
 ## QoR regression gate
 
