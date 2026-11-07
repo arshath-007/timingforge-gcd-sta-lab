@@ -21,7 +21,8 @@ ACTUAL_CVC5="$(cvc5 --version 2>&1 | head -n 1)"
 {
   echo "Yosys: $ACTUAL_YOSYS"
   echo "Solver: cvc5 1.1.2"
-  echo "Proof: WIDTH=3 oracle-backed transaction correctness/equivalence; four formal negative controls; exhaustive WIDTH=8 simulation"
+  echo "Proof: bounded WIDTH=3 oracle-backed transaction correctness; four formal negative controls; exhaustive WIDTH=8 simulation"
+  echo "Protocol: busy-start rejection and mid-operation reset are covered by scripts/run_protocol_regression.sh (simulation, not formal)"
   echo "Timeout policy: 180s first attempt; retry once for 300s only after timeout"
 } | tee build/formal/tool_versions.txt
 printf "proof,attempt,timeout_seconds,elapsed_seconds,exit_code\n" > build/formal/solver_timings.csv
@@ -34,7 +35,7 @@ build_smt2() {
 
 run_solver() {
   local prefix="$1" depth="$2" expected="$3"
-  local timeout_seconds=180 attempt status start end elapsed
+  local timeout_seconds=180 attempt status start end elapsed log
   for attempt in 1 2; do
     start="$(date +%s)"
     set +e
@@ -47,8 +48,9 @@ run_solver() {
     set -e
     end="$(date +%s)"
     elapsed=$((end - start))
+    log="build/formal/${prefix}_attempt${attempt}.log"
     echo "$prefix,$attempt,$timeout_seconds,$elapsed,$status" >> build/formal/solver_timings.csv
-    cat "build/formal/${prefix}_attempt${attempt}.log"
+    cat "$log"
 
     if [[ "$status" -eq 124 || "$status" -eq 137 ]]; then
       if [[ "$attempt" -eq 1 ]]; then
@@ -56,24 +58,34 @@ run_solver() {
         echo "WARN: $prefix timed out; retrying once with ${timeout_seconds}s"
         continue
       fi
-      echo "ERROR: $prefix timed out after retry" >&2
+      echo "ERROR: solver timed out for $prefix after retry (exit=$status)" >&2
       return 1
     fi
+
     if [[ "$expected" == "pass" ]]; then
-      if [[ "$status" -eq 0 ]] && grep -q "Status: PASSED" "build/formal/${prefix}_attempt${attempt}.log"; then
-        cp "build/formal/${prefix}_attempt${attempt}.log" "build/formal/${prefix}.log"
+      if [[ "$status" -eq 0 ]] && grep -q "Status: PASSED" "$log"; then
+        cp "$log" "build/formal/${prefix}.log"
         echo "PASS: $prefix"
         return 0
       fi
-      echo "ERROR: expected $prefix to pass" >&2
+      if [[ "$status" -ne 0 ]] && ! grep -q "Status: FAILED" "$log"; then
+        echo "ERROR: solver/tool execution failed for positive proof $prefix (exit=$status); inspect $log" >&2
+      else
+        echo "ERROR: expected positive proof $prefix to pass (exit=$status)" >&2
+      fi
       return 1
     fi
-    if [[ "$status" -ne 0 ]] && grep -q "Status: FAILED" "build/formal/${prefix}_attempt${attempt}.log"; then
-      cp "build/formal/${prefix}_attempt${attempt}.log" "build/formal/${prefix}.log"
-      echo "PASS: negative control $prefix was rejected"
+
+    if [[ "$status" -ne 0 ]] && grep -q "Status: FAILED" "$log"; then
+      cp "$log" "build/formal/${prefix}.log"
+      echo "PASS: negative control $prefix was rejected by an assertion"
       return 0
     fi
-    echo "ERROR: expected negative control $prefix to fail an assertion" >&2
+    if [[ "$status" -eq 0 ]] && grep -q "Status: PASSED" "$log"; then
+      echo "ERROR: negative control $prefix incorrectly passed; mutant was not detected" >&2
+    else
+      echo "ERROR: solver/tool execution failed for negative control $prefix (exit=$status); this is not a valid mutant rejection. Inspect $log" >&2
+    fi
     return 1
   done
 }
